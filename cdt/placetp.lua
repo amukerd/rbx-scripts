@@ -7,13 +7,13 @@ local ID2 = 135202704953082
 
 if game.PlaceId == ID2 then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/amukerd/rbx-scripts/refs/heads/main/cdt/autobuystands.lua"))()
+    return
 end
 
-while game.PlaceId == ID1 do
+if game.PlaceId == ID1 then
     pcall(function()
         TeleportService:Teleport(ID2, u)
     end)
-    task.wait(5)
 end
 
 local BlockedUsers = {
@@ -24,14 +24,12 @@ local BlockedUsers = {
 }
 
 task.spawn(function()
-    while true do
+    while task.wait(5) do
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= u and BlockedUsers[player.UserId] then
                 TeleportService:Teleport(ID1, u)
-                break
+                return
             end
         end
-
-        task.wait(5)
     end
 end)
