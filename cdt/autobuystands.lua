@@ -3,6 +3,21 @@ local LocalPlayer = Players.LocalPlayer
 local VirtualUser = game:GetService("VirtualUser")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+
+-- rejoin if you are in the same lobby as another account
+local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[8083664487]=true}
+
+task.spawn(function()
+    while task.wait(5) do
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= u and BlockedUsers[player.UserId] then
+                TeleportService:Teleport(1554960397, LocalPlayer)
+                return
+            end
+        end
+    end
+end)
 
 -- reduce cpu usage
 setfpscap(30)
