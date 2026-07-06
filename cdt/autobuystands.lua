@@ -10,6 +10,12 @@ local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[80836
 
 task.spawn(function()
     while task.wait(5) do
+        -- leave if server is too empty
+        if #Players:GetPlayers() < 5 then
+            TeleportService:Teleport(1554960397, LocalPlayer)
+            return
+        end
+        -- leave if blocked is present
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and BlockedUsers[player.UserId] then
                 TeleportService:Teleport(1554960397, LocalPlayer)
@@ -43,9 +49,9 @@ local GetOffersRemote = ReplicatedStorage:FindFirstChild("GetOffers", true)
 local GetRapRemote = ReplicatedStorage:FindFirstChild("GetRap", true)
 
 -- constants
-local WebhookURL = "YOUR_DISCORD_WEBHOOK_URL_HERE"
+local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
 local MIN_RAP = 10000
-local DISCOUNT_THRESHOLD = 0.35 -- percent below rap
+local DISCOUNT_THRESHOLD = 0.20 -- percent below rap
 local SCAN_INTERVAL = 0.5 -- seconds between stand scans
 
 if not GetOffersRemote or not GetRapRemote then
@@ -73,8 +79,8 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
     
     -- formatting
     local message = string.format(
+        "🚨 **Deal Found!** 🚨\n**Player:** %s\n**Item:** %s\n**Price:** %s\n**RAP:** %s\n**Seller:** %s",
         Players.LocalPlayer.Name,
-        "🚨 **Deal Found!** 🚨\n**Item:** %s\n**Price:** %s\n**RAP:** %s\n**Seller:** %s",
         itemName,
         formatNumber(price),
         formatNumber(rapValue),
@@ -102,47 +108,68 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
     end
 end
 
--- scan a players stand
+-- scan players stand for cars
 local function scanPlayerStand(targetPlayer)
-    if targetPlayer == Players.LocalPlayer then return end
-    
+    if targetPlayer == Players.LocalPlayer then
+        return
+    end
+
     local success, offersTable = pcall(function()
         return GetOffersRemote:InvokeServer(targetPlayer)
     end)
-    
+
     if not success or not offersTable then
-        return -- no active stand, skip
+        return -- No active stand
     end
-    
+
     local actualOffers = offersTable[1] or offersTable
-    if type(actualOffers) ~= "table" then return end
-    
+    if type(actualOffers) ~= "table" then
+        return
+    end
+
     for _, offer in ipairs(actualOffers) do
-        if offer.Item and offer.Item.Name then
-            local itemType = offer.Item.Type or "Unknown"
+        if offer.Item and offer.Item.Type == "Car" then
+            local itemType = offer.Item.Type
             local itemName = offer.Item.Name
-            local price = offer.PriceInTokens
-            
+            local price = tonumber(offer.PriceInTokens)
+
             local rapSuccess, rapResult = pcall(function()
                 return GetRapRemote:InvokeServer(itemName)
             end)
-            
-            if rapSuccess and rapResult then
-                local rapValue = type(rapResult) == "table" and rapResult[1] or rapResult
-                rapValue = tonumber(rapValue) or 0
-                
+
+            if rapSuccess then
+                local rapValue = rapResult
+
                 if rapValue > MIN_RAP then
                     local targetPrice = rapValue * (1 - DISCOUNT_THRESHOLD)
+
                     if price <= targetPrice then
-                        print(string.format("[!!!] DEAL FOUND: %s's %s (%s) is listed for %d (RAP: %d, needed <= %d)",
-                            targetPlayer.Name, itemName, itemType, price, rapValue, targetPrice))
-                        
-                        -- trigger webhook
+                        print(string.format(
+                            "[BUYING] %s's %s (%s) for %d (RAP: %d)",
+                            targetPlayer.Name,
+                            itemName,
+                            itemType,
+                            price,
+                            rapValue
+                        ))
+
                         sendWebhook(itemName, price, rapValue, targetPlayer.Name)
+
+                        -- Attempt purchase
+                        local purchaseSuccess, purchaseResult = pcall(function()
+                            return OfferPurchaseRemote:InvokeServer(targetPlayer, offer)
+                        end)
+
+                        if purchaseSuccess then
+                            print("Purchase successful:", itemName)
+                        else
+                            warn("Purchase failed:", purchaseResult)
+                        end
                     end
                 end
             end
-            task.wait(0.05) -- delay between stand item comparisons
+
+            task.wait(0.05)
         end
     end
 end
