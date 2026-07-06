@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
 
--- remtoes
+-- remotes
 local GetOffersRemote = ReplicatedStorage:FindFirstChild("GetOffers", true)
 local GetRapRemote = ReplicatedStorage:FindFirstChild("GetRap", true)
 
