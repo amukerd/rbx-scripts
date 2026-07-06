@@ -8,7 +8,7 @@ local GetRapRemote = ReplicatedStorage:FindFirstChild("GetRap", true)
 -- Configuration Constants
 local MIN_RAP = 10000
 local DISCOUNT_THRESHOLD = 0.35 -- 35% below RAP
-local SCAN_INTERVAL = 5 -- seconds between rescans of the same player
+local SCAN_INTERVAL = 0.6 -- seconds between rescans of the same player
 
 if not GetOffersRemote or not GetRapRemote then
     warn("Required remote services could not be found. Please check your paths.")
@@ -58,7 +58,7 @@ local function scanPlayerStand(targetPlayer)
                 end
             end
 
-            task.wait(0.2) -- small delay between item checks
+            task.wait(0.05) -- small delay between item checks
         end
     end
 end
