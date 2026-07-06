@@ -1,5 +1,6 @@
 local TeleportService = game:GetService("TeleportService")
-local u = game:GetService("Players").LocalPlayer
+local Players = game:GetService("Players")
+local u = Players.LocalPlayer
 
 local ID1 = 1554960397
 local ID2 = 135202704953082
@@ -10,7 +11,7 @@ end
 
 while game.PlaceId == ID1 do
     pcall(function()
-        TeleportService:Teleport(ID2, player)
+        TeleportService:Teleport(ID2, u)
     end)
     task.wait(5)
 end
