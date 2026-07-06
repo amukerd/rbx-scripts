@@ -37,6 +37,7 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
     
     -- formatting
     local message = string.format(
+        Players.LocalPlayer.Name,
         "🚨 **Deal Found!** 🚨\n**Item:** %s\n**Price:** %s\n**RAP:** %s\n**Seller:** %s",
         itemName,
         formatNumber(price),
