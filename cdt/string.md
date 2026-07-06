@@ -2,6 +2,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/amukerd/rbx-scripts/r
 
 ```python
 print("This code block has a copy button")
+```
 
 
 ### Alternative: Plain Text Copyable Blocks
@@ -10,3 +11,4 @@ If you need plain text (not code) to be easily selectable or have a copy button,
 ```markdown
 ## 
 	Your copyable text here   
+```
