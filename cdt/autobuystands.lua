@@ -1,6 +1,27 @@
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local VirtualUser = game:GetService("VirtualUser")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
+
+-- reduce cpu usage
+setfpscap(30)
+
+-- antiafk
+if getconnections then
+    for _, connection in ipairs(getconnections(LocalPlayer.Idled)) do
+        if connection.Disable then
+            connection:Disable()
+        elseif connection.Disconnect then
+            connection:Disconnect()
+        end
+    end
+else
+    LocalPlayer.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end)
+end
 
 -- remotes
 local GetOffersRemote = ReplicatedStorage:FindFirstChild("GetOffers", true)
