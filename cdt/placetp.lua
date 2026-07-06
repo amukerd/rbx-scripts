@@ -1,5 +1,5 @@
 local TeleportService = game:GetService("TeleportService")
-local Players = game:GetService("Players")
+local Players = game.Players
 local u = Players.LocalPlayer
 
 local ID1 = 1554960397
