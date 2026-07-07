@@ -100,7 +100,7 @@ local function scanPlayerStand(targetPlayer)
                 )
 
                 if rapSuccess and rapValue then
-                    if price <= (rapValue * RAP_PERCENT) then
+                    if rapValue >= 10000 and price <= (rapValue * RAP_PERCENT) then
                         boughtItems[offerId] = true
 
                         local buySuccess, result =
