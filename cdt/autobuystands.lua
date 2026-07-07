@@ -1,143 +1,153 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/amukerd/rbx-scripts/refs/heads/main/cdt/extra.lua"))()
+
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local VirtualUser = game:GetService("VirtualUser")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
-local TeleportService = game:GetService("TeleportService")
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/amukerd/rbx-scripts/refs/heads/main/cdt/extra.lua"))()
+local LocalPlayer = Players.LocalPlayer
 
 local GetOffersRemote = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.GetOffers
 local GetRapRemote = ReplicatedStorage.Remotes.Services.RapRemotes.GetRap
 local OfferPurchaseRemote = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.OfferPurchase
 
 local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
-local MIN_RAP = 10000
-local DISCOUNT_THRESHOLD = 0.10
+
+local RAP_PERCENT = 0.90
 local SCAN_INTERVAL = 0.5
 
 local activeThreads = {}
+local boughtItems = {}
 
 local function formatNumber(value)
     local formatted = tostring(value)
-    while true do  
+
+    while true do
         local k
-        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
-        if k == 0 then break end
+        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", "%1,%2")
+
+        if k == 0 then
+            break
+        end
     end
+
     return formatted
 end
 
 local function sendWebhook(itemName, price, rapValue, sellerName)
-    local headers = {["Content-Type"] = "application/json"}
-    
-    local message = string.format(
-        "🚨 **Deal Found!** 🚨\n**Player:** %s\n**Item:** %s\n**Price:** %s\n**RAP:** %s\n**Seller:** %s",
-        Players.LocalPlayer.Name,
+    local message =
+        string.format(
+        "🚨 **Deal Bought!** 🚨\n\nPlayer: %s\nItem: %s\nPrice: %s\nRAP: %s\nSeller: %s",
+        LocalPlayer.Name,
         itemName,
         formatNumber(price),
         formatNumber(rapValue),
         sellerName
     )
-    
-    local data = {["content"] = message}
-    
+
     local requestFunc = http_request or request or HttpPost
+
     if requestFunc then
-        local success, err = pcall(function()
-            requestFunc({
-                Url = WebhookURL,
-                Method = "POST",
-                Headers = headers,
-                Body = HttpService:JSONEncode(data)
-            })
-        end)
-        if not success then
-            warn("[Webhook Error] Failed to send notification: " .. tostring(err))
-        end
+        pcall(
+            function()
+                requestFunc(
+                    {
+                        Url = WebhookURL,
+                        Method = "POST",
+                        Headers = {
+                            ["Content-Type"] = "application/json"
+                        },
+                        Body = HttpService:JSONEncode(
+                            {
+                                content = message
+                            }
+                        )
+                    }
+                )
+            end
+        )
     end
 end
 
 local function scanPlayerStand(targetPlayer)
-    if targetPlayer == Players.LocalPlayer then
+    local success, offers =
+        pcall(
+        function()
+            return GetOffersRemote:InvokeServer(targetPlayer)
+        end
+    )
+
+    if not success or typeof(offers) ~= "table" then
         return
     end
 
-    local success, offersTable = pcall(function()
-        return GetOffersRemote:InvokeServer(targetPlayer)
-    end)
-
-    if not success or not offersTable then
-        return
-    end
-
-    if type(offersTable) ~= "table" then
-        return
-    end
-    
-    for _, offer in ipairs(offersTable) do
-        if offer.Item and offer.Item.Type == "Car" then
-            local itemType = offer.Item.Type
+    for _, offer in ipairs(offers) do
+        if offer.Item then
             local itemName = offer.Item.Name
-            local price = tonumber(offer.PriceInTokens)
+            local price = offer.Price or offer.Amount
 
-            local rapSuccess, rapResult = pcall(function()
-                return GetRapRemote:InvokeServer(itemName)
-            end)
+            if price and not boughtItems[itemName] then
+                local rapSuccess, rapValue =
+                    pcall(
+                    function()
+                        return GetRapRemote:InvokeServer(itemName)
+                    end
+                )
 
-            if rapSuccess then
-                local rapValue = rapResult
+                if rapSuccess and rapValue then
+                    if price <= (rapValue * RAP_PERCENT) then
+                        boughtItems[itemName] = true
 
-                if rapValue > MIN_RAP then
-                    local targetPrice = rapValue * (1 - DISCOUNT_THRESHOLD)
+                        local buySuccess, result =
+                            pcall(
+                            function()
+                                return OfferPurchaseRemote:InvokeServer(targetPlayer, offer)
+                            end
+                        )
 
-                    if price <= targetPrice then
-                        print(string.format(
-                            "[BUYING] %s's %s (%s) for %d (RAP: %d)",
-                            targetPlayer.Name,
-                            itemName,
-                            itemType,
-                            price,
-                            rapValue
-                        ))
-
-                        sendWebhook(itemName, price, rapValue, targetPlayer.Name)
-
-                        local purchaseSuccess, purchaseResult = pcall(function()
-                            return OfferPurchaseRemote:InvokeServer(targetPlayer, offer)
-                        end)
-
-                        if purchaseSuccess then
-                            print("Purchase successful:", itemName)
+                        if buySuccess then
+                            sendWebhook(itemName, price, rapValue, targetPlayer.Name)
                         else
-                            warn("Purchase failed:", purchaseResult)
+                            boughtItems[itemName] = nil
                         end
                     end
                 end
             end
-
-            task.wait(0.05)
         end
     end
 end
 
 local function watchPlayer(targetPlayer)
-    while true do
-        local ok, err = pcall(scanPlayerStand, targetPlayer)
+    while targetPlayer.Parent do
+        pcall(
+            function()
+                scanPlayerStand(targetPlayer)
+            end
+        )
+
         task.wait(SCAN_INTERVAL)
     end
 end
 
 local function startWatching(player)
-    if player == Players.LocalPlayer then return end
-    if activeThreads[player] then return end
-    
-    local thread = task.spawn(watchPlayer, player)
-    activeThreads[player] = thread
+    if player == LocalPlayer then
+        return
+    end
+
+    if activeThreads[player] then
+        return
+    end
+
+    activeThreads[player] =
+        task.spawn(
+        function()
+            watchPlayer(player)
+        end
+    )
 end
 
 local function stopWatching(player)
     local thread = activeThreads[player]
+
     if thread then
         task.cancel(thread)
         activeThreads[player] = nil
@@ -145,6 +155,7 @@ local function stopWatching(player)
 end
 
 Players.PlayerAdded:Connect(startWatching)
+
 Players.PlayerRemoving:Connect(stopWatching)
 
 for _, player in ipairs(Players:GetPlayers()) do
@@ -152,54 +163,3 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 print("--- Lobby Monitor Started ---")
-
-
-
-
-
-
-
-
-
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local HttpService = game:GetService("HttpService")
-
-local GetOffersRemote = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.GetOffers
-local GetRapRemote = ReplicatedStorage.Remotes.Services.RapRemotes.GetRap
-local OfferPurchaseRemote = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.OfferPurchase
-
-local targetPlayer = Players:FindFirstChild(targetName)
-
-if not targetPlayer then
-    warn("Player not found:", targetName)
-    return
-end
-
-local success, offers = pcall(function()
-    return GetOffersRemote:InvokeServer(targetPlayer)
-end)
-
-if not success then
-    warn(offers)
-    return
-end
-
-if typeof(offers) == "table" then
-
-    for i, offer in ipairs(offers) do
-
-        if offer.Item then
-
-            local itemName = offer.Item.Name
-
-            local rapSuccess, rapResult = pcall(function()
-                return GetRapRemote:InvokeServer(itemName)
-            end)
-
-            local purchaseSuccess, purchaseResult = pcall(function()
-                return OfferPurchaseRemote:InvokeServer(targetPlayer, offer)
-            end)
-        end
-    end
-end
