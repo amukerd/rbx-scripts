@@ -13,7 +13,7 @@ local OfferPurchaseRemote = ReplicatedStorage.Remotes.Services.TradingHubService
 local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
 
 local RAP_PERCENT = 0.90
-local SCAN_INTERVAL = 0.5
+local SCAN_INTERVAL = 1
 
 local activeThreads = {}
 local boughtItems = {}
@@ -81,11 +81,17 @@ local function scanPlayerStand(targetPlayer)
     end
 
     for _, offer in ipairs(offers) do
-        if offer.Item then
+        
+        if offer.Item and offer.Item.Type == "Car" then
+            
+            local offerId = offer.OfferId
             local itemName = offer.Item.Name
             local price = offer.PriceInTokens
 
-            if price and not boughtItems[itemName] then
+            if price and not boughtItems[offerId] then
+
+                task.wait(0.1)
+
                 local rapSuccess, rapValue =
                     pcall(
                     function()
@@ -95,7 +101,7 @@ local function scanPlayerStand(targetPlayer)
 
                 if rapSuccess and rapValue then
                     if price <= (rapValue * RAP_PERCENT) then
-                        boughtItems[itemName] = true
+                        boughtItems[offerId] = true
 
                         local buySuccess, result =
                             pcall(
@@ -107,7 +113,7 @@ local function scanPlayerStand(targetPlayer)
                         if buySuccess then
                             sendWebhook(itemName, price, rapValue, targetPlayer.Name)
                         else
-                            boughtItems[itemName] = nil
+                            boughtItems[offerId] = nil
                         end
                     end
                 end
