@@ -11,7 +11,7 @@ local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[80836
 task.spawn(function()
     while task.wait(5) do
         -- leave if server is too empty
-        if #Players:GetPlayers() < 5 then
+        if #Players:GetPlayers() < 10 then
             TeleportService:Teleport(1554960397, LocalPlayer)
             return
         end
