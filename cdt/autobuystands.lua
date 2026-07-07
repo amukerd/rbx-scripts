@@ -83,7 +83,7 @@ local function scanPlayerStand(targetPlayer)
     for _, offer in ipairs(offers) do
         if offer.Item then
             local itemName = offer.Item.Name
-            local price = offer.Price or offer.Amount
+            local price = offer.PriceInTokens
 
             if price and not boughtItems[itemName] then
                 local rapSuccess, rapValue =
