@@ -51,7 +51,7 @@ local GetRapRemote = ReplicatedStorage:FindFirstChild("GetRap", true)
 -- constants
 local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
 local MIN_RAP = 10000
-local DISCOUNT_THRESHOLD = 0.20 -- percent below rap
+local DISCOUNT_THRESHOLD = 0.10 -- percent below rap
 local SCAN_INTERVAL = 0.5 -- seconds between stand scans
 
 if not GetOffersRemote or not GetRapRemote then
