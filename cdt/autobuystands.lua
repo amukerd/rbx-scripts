@@ -110,10 +110,14 @@ local function scanPlayerStand(targetPlayer)
                             end
                         )
 
-                        if buySuccess then
+                        if buySuccess and result then
+                            print("Purchase Response:", buySuccess, result)
+
                             sendWebhook(itemName, price, rapValue, targetPlayer.Name)
                         else
                             boughtItems[offerId] = nil
+                        
+                            warn("Purchase failed:", itemName, result)
                         end
                     end
                 end
