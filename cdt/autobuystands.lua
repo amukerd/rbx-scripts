@@ -39,8 +39,9 @@ else
     end)
 end
 
-local GetOffersRemote = ReplicatedStorage:FindFirstChild("GetOffers", true)
-local GetRapRemote = ReplicatedStorage:FindFirstChild("GetRap", true)
+local GetOffersRemote = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.GetOffers
+local GetRapRemote = ReplicatedStorage.Remotes.Services.RapRemotes.GetRap
+local OfferPurchaseRemote = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.OfferPurchase
 
 local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
 local MIN_RAP = 10000
@@ -102,12 +103,11 @@ local function scanPlayerStand(targetPlayer)
         return
     end
 
-    local actualOffers = offersTable[1] or offersTable
-    if type(actualOffers) ~= "table" then
+    if type(offersTable) ~= "table" then
         return
     end
-
-    for _, offer in ipairs(actualOffers) do
+    
+    for _, offer in ipairs(offersTable) do
         if offer.Item and offer.Item.Type == "Car" then
             local itemType = offer.Item.Type
             local itemName = offer.Item.Name
@@ -184,3 +184,54 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 print("--- Lobby Monitor Started ---")
+
+
+
+
+
+
+
+
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HttpService = game:GetService("HttpService")
+
+local GetOffersRemote = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.GetOffers
+local GetRapRemote = ReplicatedStorage.Remotes.Services.RapRemotes.GetRap
+local OfferPurchaseRemote = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.OfferPurchase
+
+local targetPlayer = Players:FindFirstChild(targetName)
+
+if not targetPlayer then
+    warn("Player not found:", targetName)
+    return
+end
+
+local success, offers = pcall(function()
+    return GetOffersRemote:InvokeServer(targetPlayer)
+end)
+
+if not success then
+    warn(offers)
+    return
+end
+
+if typeof(offers) == "table" then
+
+    for i, offer in ipairs(offers) do
+
+        if offer.Item then
+
+            local itemName = offer.Item.Name
+
+            local rapSuccess, rapResult = pcall(function()
+                return GetRapRemote:InvokeServer(itemName)
+            end)
+
+            local purchaseSuccess, purchaseResult = pcall(function()
+                return OfferPurchaseRemote:InvokeServer(targetPlayer, offer)
+            end)
+        end
+    end
+end
