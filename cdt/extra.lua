@@ -1,9 +1,37 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local rootPart = localPlayer.Character:WaitForChild("HumanoidRootPart", 5)
+
+rootPart.Anchored = true
+
 local VirtualUser = game:GetService("VirtualUser")
 local TeleportService = game:GetService("TeleportService")
+local Workspace = game:GetService("Workspace")
 
+game:GetService("RunService"):Set3DRenderingEnabled(false)
 setfpscap(15)
+    
+localPlayer.CharacterAdded:Connect(function(character)
+    local rootPart = character:WaitForChild("HumanoidRootPart", 5)
+    if rootPart and rootPart:IsA("BasePart") then
+        rootPart.Anchored = true
+    end
+end)
+
+local playerCharacters = {}
+for _, player in ipairs(Players:GetPlayers()) do
+    if player.Character then
+        playerCharacters[player.Character] = true
+    end
+end
+
+for _, object in ipairs(Workspace:GetChildren()) do
+    if object ~= Workspace.CurrentCamera and object:IsA("Terrain") == false and playerCharacters[object] == nil then
+        pcall(function()
+            object:Destroy()
+        end)
+    end
+end
 
 local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[8083664487]=true,[8083667110]=true,}
 
