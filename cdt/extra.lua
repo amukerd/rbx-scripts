@@ -80,7 +80,7 @@ Button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Button.Parent = ScreenGui
 
 Button.MouseButton1Click:Connect(function()
-    button.Text = "Teleporting..."
-    button.Active = false
+    Button.Text = "Teleporting..."
+    Button.Active = false
     TeleportService:Teleport(1554960397, LocalPlayer)
 end)
