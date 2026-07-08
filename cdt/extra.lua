@@ -4,19 +4,22 @@ local VirtualUser = game:GetService("VirtualUser")
 local TeleportService = game:GetService("TeleportService")
 local Workspace = game:GetService("Workspace")
 
+game:GetService("SoundService"):ClearAllChildren()
+game.Lighting:ClearAllChildren()
+game.Lighting.GlobalShadows = false
+
 game:GetService("RunService"):Set3dRenderingEnabled(true)
 setfpscap(15)
 
 task.spawn(function()
     while true do
         for _, object in ipairs(Workspace:GetChildren()) do
-            if not object:IsA("Camera") and 
-               not object:IsA("Terrain") and 
+            if not object:IsA("Camera") and not object:IsA("Terrain") and object.Name ~= "Platform" then
                 pcall(function()
                     object:Destroy()
                 end)
-                task.wait(0.1)
             end
+            task.wait(0.1)
         end
         task.wait(1)
     end
