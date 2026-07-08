@@ -10,13 +10,6 @@ local Workspace = game:GetService("Workspace")
 
 game:GetService("RunService"):Set3dRenderingEnabled(false)
 setfpscap(15)
-    
-localPlayer.CharacterAdded:Connect(function(character)
-    local rootPart = character:WaitForChild("HumanoidRootPart", 5)
-    if rootPart and rootPart:IsA("BasePart") then
-        rootPart.Anchored = true
-    end
-end)
 
 local playerCharacters = {}
 for _, player in ipairs(Players:GetPlayers()) do
