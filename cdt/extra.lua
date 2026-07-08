@@ -6,7 +6,7 @@ rootPart.Anchored = true
 
 if rootPart then
     local platform = Instance.new("Part")
-    platform.Name = "SafePlatform"
+    platform.Name = "Platform"
     platform.Size = Vector3.new(2, 0.5, 2)
     platform.Anchored = true
     platform.Position = rootPart.Position - Vector3.new(0, 3, 0)
@@ -17,24 +17,28 @@ local VirtualUser = game:GetService("VirtualUser")
 local TeleportService = game:GetService("TeleportService")
 local Workspace = game:GetService("Workspace")
 
-game:GetService("RunService"):Set3dRenderingEnabled(false)
+game:GetService("RunService"):Set3dRenderingEnabled(true)
 setfpscap(15)
 
-local playerCharacters = {}
-for _, player in ipairs(Players:GetPlayers()) do
-    if player.Character then
-        playerCharacters[player.Character] = true
+task.spawn(function()
+    while true do
+        for _, object in ipairs(Workspace:GetChildren()) do
+            if not object:IsA("Camera") and 
+               not object:IsA("Terrain") and 
+               object.Name ~= "Platform" then
+                
+                pcall(function()
+                    object:Destroy()
+                end)
+                
+                task.wait(0.1)
+            end
+        end
+
+        task.wait(1)
     end
-end
---[[
-for _, object in ipairs(Workspace:GetChildren()) do
-    if object ~= Workspace.CurrentCamera and object.Name ~= "SafePlatform" and object:IsA("Terrain") == false and playerCharacters[object] == nil then
-        pcall(function()
-            object:Destroy()
-        end)
-    end
-end
-]]--
+end)
+
 local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[8083664487]=true,[8083667110]=true,}
 
 task.spawn(function()
