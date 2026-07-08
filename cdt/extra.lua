@@ -2,6 +2,8 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local rootPart = LocalPlayer.Character:WaitForChild("HumanoidRootPart", 5)
 
+rootPart.Anchored = true
+
 if rootPart then
     local platform = Instance.new("Part")
     platform.Name = "SafePlatform"
