@@ -3,7 +3,7 @@ local LocalPlayer = Players.LocalPlayer
 local VirtualUser = game:GetService("VirtualUser")
 local TeleportService = game:GetService("TeleportService")
 
-local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[8083664487]=true}
+local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[8083664487]=true,[8083667110]=true,}
 
 task.spawn(function()
     while task.wait(5) do
