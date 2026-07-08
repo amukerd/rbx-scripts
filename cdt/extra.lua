@@ -3,6 +3,8 @@ local LocalPlayer = Players.LocalPlayer
 local VirtualUser = game:GetService("VirtualUser")
 local TeleportService = game:GetService("TeleportService")
 
+setfpscap(15)
+
 local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[8083664487]=true,[8083667110]=true,}
 
 task.spawn(function()
@@ -19,8 +21,6 @@ task.spawn(function()
         end
     end
 end)
-
-setfpscap(20)
 
 if getconnections then
     for _, connection in ipairs(getconnections(LocalPlayer.Idled)) do
