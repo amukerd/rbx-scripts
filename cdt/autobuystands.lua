@@ -82,10 +82,15 @@ local function scanPlayerStand(targetPlayer)
 
     for _, offer in ipairs(offers) do
         
-        if offer.Item and offer.Item.Type == "Car" then
+        if offer.Item and (offer.Item.Type == "Car" or offer.Item.Type == "Customization") then
             
             local offerId = offer.OfferId
             local itemName = offer.Item.Name
+            local rapName = itemName
+            
+            if offer.Item.Type == "Customization" then
+                rapName = offer.Item.Category .. "-" .. itemName
+            end
             local price = offer.PriceInTokens
 
             if price and not boughtItems[offerId] then
@@ -95,7 +100,7 @@ local function scanPlayerStand(targetPlayer)
                 local rapSuccess, rapValue =
                     pcall(
                     function()
-                        return GetRapRemote:InvokeServer(itemName)
+                        return GetRapRemote:InvokeServer(rapName)
                     end
                 )
 
