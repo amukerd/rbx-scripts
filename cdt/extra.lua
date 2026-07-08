@@ -1,18 +1,5 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local rootPart = LocalPlayer.Character:WaitForChild("HumanoidRootPart", 5)
-
-rootPart.Anchored = true
-
-if rootPart then
-    local platform = Instance.new("Part")
-    platform.Name = "Platform"
-    platform.Size = Vector3.new(2, 0.5, 2)
-    platform.Anchored = true
-    platform.Position = rootPart.Position - Vector3.new(0, 3, 0)
-    platform.Parent = Workspace
-end
-
 local VirtualUser = game:GetService("VirtualUser")
 local TeleportService = game:GetService("TeleportService")
 local Workspace = game:GetService("Workspace")
@@ -25,16 +12,12 @@ task.spawn(function()
         for _, object in ipairs(Workspace:GetChildren()) do
             if not object:IsA("Camera") and 
                not object:IsA("Terrain") and 
-               object.Name ~= "Platform" then
-                
                 pcall(function()
                     object:Destroy()
                 end)
-                
                 task.wait(0.1)
             end
         end
-
         task.wait(1)
     end
 end)
