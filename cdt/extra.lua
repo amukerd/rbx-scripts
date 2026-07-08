@@ -3,6 +3,7 @@ local LocalPlayer = Players.LocalPlayer
 local VirtualUser = game:GetService("VirtualUser")
 local TeleportService = game:GetService("TeleportService")
 local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 game:GetService("SoundService"):ClearAllChildren()
 game.Lighting:ClearAllChildren()
@@ -24,6 +25,9 @@ task.spawn(function()
         task.wait(1)
     end
 end)
+
+ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.OnOfferRemoved:Destroy()
+ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.OnOfferAdded:Destroy()
 
 local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[8083664487]=true,[8083667110]=true,}
 
