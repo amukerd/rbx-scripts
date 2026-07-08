@@ -64,13 +64,13 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
     end
 
     local embedData = {
-        title = "Car Transaction Log",
+        title = "Item Bought",
         color = 16711680,
         fields = {
-            { name = "Item Name", value = tostring(itemName), inline = true },
-            { name = "Price", value = tostring(formatNumber(price)), inline = true },
-            { name = "RAP Value", value = tostring(formatNumber(rapValue)), inline = true },
-            { name = "Seller", value = tostring(sellerName), inline = false }
+            { name = "Item Name:", value = tostring(itemName), inline = true },
+            { name = "Price:", value = tostring(formatNumber(price)), inline = true },
+            { name = "RAP:", value = tostring(formatNumber(rapValue)), inline = true },
+            { name = "Seller:", value = tostring(sellerName), inline = false }
         }
     }
 
