@@ -28,6 +28,7 @@ end)
 
 ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.OnOfferRemoved:Destroy()
 ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.OnOfferAdded:Destroy()
+print("Annoying Remotes Deleted")
 
 local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[8083664487]=true,[8083667110]=true,}
 
