@@ -12,7 +12,7 @@ local OfferPurchaseRemote = ReplicatedStorage.Remotes.Services.TradingHubService
 
 local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
 
-local RAP_PERCENT = 0.80
+local RAP_PERCENT = 0.85
 local SCAN_INTERVAL = 1
 
 local activeThreads = {}
@@ -105,7 +105,7 @@ local function scanPlayerStand(targetPlayer)
                 )
 
                 if rapSuccess and rapValue then
-                    if rapValue >= 20000 and price <= (rapValue * RAP_PERCENT) then
+                    if rapValue >= 15000 and price <= (rapValue * RAP_PERCENT) then
                         boughtItems[offerId] = true
 
                         local buySuccess, result =
