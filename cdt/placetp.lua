@@ -1,5 +1,5 @@
 if game.PlaceId == 135202704953082 then
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/amukerd/rbx-scripts/refs/heads/main/cdt/autobuystands.lua"))()
+    loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/autobuystands.lua"))()
     return
 end
 
