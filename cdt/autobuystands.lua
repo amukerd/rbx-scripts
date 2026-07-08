@@ -1,5 +1,8 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/amukerd/rbx-scripts/refs/heads/main/cdt/extra.lua"))()
 
+local CarsDatabase = require(ReplicatedStorage:WaitForChild("Databases"):WaitForChild("Cars"))
+local CustomizationDatabase = require(ReplicatedStorage:WaitForChild("Databases"):WaitForChild("Customization") or ReplicatedStorage:WaitForChild("Databases"):WaitForChild("Icons"):WaitForChild("Common"))
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
@@ -34,38 +37,61 @@ local function formatNumber(value)
 end
 
 local function sendWebhook(itemName, price, rapValue, sellerName)
-    local message =
-        string.format(
-        "**Car Bought**\n\nPlayer: %s\nItem: %s\nPrice: %s\nRAP: %s\nSeller: %s",
-        LocalPlayer.Name,
-        itemName,
-        formatNumber(price),
-        formatNumber(rapValue),
-        sellerName
-    )
+    local requestFunc = http_request or request or (http and http.request) or HttpPost
 
-    local requestFunc = http_request or request or HttpPost
+    local itemData = CarsDatabase[itemName] or CustomizationDatabase[itemName]
+    local imageUrl = ""
 
-    if requestFunc then
-        pcall(
-            function()
-                requestFunc(
-                    {
-                        Url = WebhookURL,
-                        Method = "POST",
-                        Headers = {
-                            ["Content-Type"] = "application/json"
-                        },
-                        Body = HttpService:JSONEncode(
-                            {
-                                content = message
-                            }
-                        )
-                    }
-                )
-            end
-        )
+    if itemData and itemData.Image then
+        local assetId = string.match(itemData.Image, "%d+")
+        
+        if assetId then
+            local thumbApiUrl = "https://thumbnails.roblox.com/v1/assets?assetIds=" .. assetId .. "&returnPolicy=PlaceHolder&size=420x420&format=png"
+            
+            pcall(function()
+                local res = requestFunc({
+                    Url = thumbApiUrl,
+                    Method = "GET"
+                })
+                if res and res.Body then
+                    local data = HttpService:JSONDecode(res.Body)
+                    if data and data.data and data.data[1] then
+                        imageUrl = data.data[1].imageUrl or ""
+                    end
+                end
+            end)
+        end
     end
+
+    local embedData = {
+        title = "Car Transaction Log",
+        color = 16711680,
+        fields = {
+            { name = "Item Name", value = tostring(itemName), inline = true },
+            { name = "Price", value = tostring(formatNumber(price)), inline = true },
+            { name = "RAP Value", value = tostring(formatNumber(rapValue)), inline = true },
+            { name = "Seller", value = tostring(sellerName), inline = false }
+        }
+    }
+
+    if imageUrl ~= "" then
+        embedData.thumbnail = {
+            url = imageUrl
+        }
+    end
+
+    pcall(function()
+        requestFunc({
+            Url = WebhookURL,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = HttpService:JSONEncode({
+                embeds = { embedData }
+            })
+        })
+    end)
 end
 
 local function scanPlayerStand(targetPlayer)
