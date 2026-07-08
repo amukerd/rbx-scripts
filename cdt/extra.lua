@@ -8,7 +8,7 @@ game:GetService("SoundService"):ClearAllChildren()
 game.Lighting:ClearAllChildren()
 game.Lighting.GlobalShadows = false
 
-game:GetService("RunService"):Set3dRenderingEnabled(true)
+game:GetService("RunService"):Set3dRenderingEnabled(false)
 setfpscap(15)
 
 task.spawn(function()
