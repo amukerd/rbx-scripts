@@ -1,8 +1,5 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/amukerd/rbx-scripts/refs/heads/main/cdt/extra.lua"))()
 
-local CarsDatabase = require(ReplicatedStorage:WaitForChild("Databases"):WaitForChild("Cars"))
-local CustomizationDatabase = require(ReplicatedStorage:WaitForChild("Databases"):WaitForChild("Customization") or ReplicatedStorage:WaitForChild("Databases"):WaitForChild("Icons"):WaitForChild("Common"))
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
@@ -15,6 +12,9 @@ local OfferPurchaseRemote = ReplicatedStorage.Remotes.Services.TradingHubService
 
 local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
 
+local CarsDatabase = require(ReplicatedStorage:WaitForChild("Databases"):WaitForChild("Cars"))
+local CustomizationDatabase = require(ReplicatedStorage:WaitForChild("Databases"):WaitForChild("Customization") or ReplicatedStorage:WaitForChild("Databases"):WaitForChild("Icons"):WaitForChild("Common"))
+
 local RAP_PERCENT = 0.85
 local SCAN_INTERVAL = 1
 
@@ -22,80 +22,72 @@ local activeThreads = {}
 local boughtItems = {}
 
 local function formatNumber(value)
-    local formatted = tostring(value)
-
-    while true do
-        local k
-        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", "%1,%2")
-
-        if k == 0 then
-            break
-        end
-    end
-
-    return formatted
+    return tostring(value):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
 end
 
 local function sendWebhook(itemName, price, rapValue, sellerName)
     local requestFunc = http_request or request or (http and http.request) or HttpPost
+    if not requestFunc then return end
 
-    local itemData = CarsDatabase[itemName] or CustomizationDatabase[itemName]
-    local imageUrl = ""
-    local displayName = itemName
+    task.spawn(function()
+        local itemData = CarsDatabase[itemName] or CustomizationDatabase[itemName]
+        local imageUrl = ""
+        local displayName = itemName
 
-    if itemData then
-        displayName = itemData.DisplayName or itemName
+        if itemData then
+            displayName = itemData.DisplayName or itemName
 
-        if itemData.Image then
-            local assetId = string.match(itemData.Image, "%d+")
-            
-            if assetId then
-                local thumbApiUrl = "https://thumbnails.roblox.com/v1/assets?assetIds=" .. assetId .. "&returnPolicy=PlaceHolder&size=420x420&format=png"
+            if itemData.Image then
+                local assetId = string.match(itemData.Image, "%d+")
                 
-                pcall(function()
-                    local res = requestFunc({
-                        Url = thumbApiUrl,
-                        Method = "GET"
-                    })
-                    if res and res.Body then
-                        local data = HttpService:JSONDecode(res.Body)
-                        if data and data.data and data.data[1] then
-                            imageUrl = data.data[1].imageUrl or ""
+                if assetId then
+                    local thumbApiUrl = "https://thumbnails.roblox.com/v1/assets?assetIds=" .. assetId .. "&returnPolicy=PlaceHolder&size=420x420&format=png"
+                    
+                    pcall(function()
+                        local res = requestFunc({
+                            Url = thumbApiUrl,
+                            Method = "GET"
+                        })
+                        if res and res.Body then
+                            local data = HttpService:JSONDecode(res.Body)
+                            if data and data.data and data.data[1] then
+                                imageUrl = data.data[1].imageUrl or ""
+                            end
                         end
-                    end
-                end)
+                    end)
+                end
             end
         end
-    end
 
-    local embedData = {
-        title = "Car Transaction Log",
-        color = 16711680,
-        fields = {
-            { name = "Item Name", value = tostring(displayName), inline = true },
-            { name = "Price", value = tostring(formatNumber(price)), inline = true },
-            { name = "RAP Value", value = tostring(formatNumber(rapValue)), inline = true },
-            { name = "Seller", value = tostring(sellerName), inline = false }
+        local embedData = {
+            title = "Car Transaction Log",
+            color = 16711680,
+            fields = {
+                { name = "Item Name", value = tostring(displayName), inline = true },
+                { name = "Price", value = tostring(formatNumber(price)), inline = true },
+                { name = "RAP Value", value = tostring(formatNumber(rapValue)), inline = true },
+                { name = "Seller", value = tostring(sellerName), inline = false }
+            }
         }
-    }
 
-    if imageUrl ~= "" then
-        embedData.thumbnail = {
-            url = imageUrl
-        }
-    end
+        if imageUrl ~= "" then
+            embedData.thumbnail = {
+                url = imageUrl
+            }
+        end
 
-    pcall(function()
-        requestFunc({
-            Url = WebhookURL,
-            Method = "POST",
-            Headers = {
-                ["Content-Type"] = "application/json"
-            },
-            Body = HttpService:JSONEncode({
-                embeds = { embedData }
+        pcall(function()
+            requestFunc({
+                Url = WebhookURL,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = HttpService:JSONEncode({
+                    embeds = { embedData }
+                })
             })
-        })
+        end)
     end)
 end
 
