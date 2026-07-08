@@ -5,7 +5,7 @@
 	then require it from a LocalScript like this one.
 ]]
 
-local UILib = require(game:GetService("ReplicatedStorage"):WaitForChild("UILibrary"))
+local UILib = loadstring(game:HttpGet("https://raw.githubusercontent.com/amukerd/rbx-scripts/refs/heads/main/UI/Library.luau"))()
 
 local Window = UILib.new({ Title = "Example UI" })
 
