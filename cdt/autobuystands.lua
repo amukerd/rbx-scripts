@@ -41,36 +41,41 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
 
     local itemData = CarsDatabase[itemName] or CustomizationDatabase[itemName]
     local imageUrl = ""
+    local displayName = itemName
 
-    if itemData and itemData.Image then
-        local assetId = string.match(itemData.Image, "%d+")
-        
-        if assetId then
-            local thumbApiUrl = "https://thumbnails.roblox.com/v1/assets?assetIds=" .. assetId .. "&returnPolicy=PlaceHolder&size=420x420&format=png"
+    if itemData then
+        displayName = itemData.DisplayName or itemName
+
+        if itemData.Image then
+            local assetId = string.match(itemData.Image, "%d+")
             
-            pcall(function()
-                local res = requestFunc({
-                    Url = thumbApiUrl,
-                    Method = "GET"
-                })
-                if res and res.Body then
-                    local data = HttpService:JSONDecode(res.Body)
-                    if data and data.data and data.data[1] then
-                        imageUrl = data.data[1].imageUrl or ""
+            if assetId then
+                local thumbApiUrl = "https://thumbnails.roblox.com/v1/assets?assetIds=" .. assetId .. "&returnPolicy=PlaceHolder&size=420x420&format=png"
+                
+                pcall(function()
+                    local res = requestFunc({
+                        Url = thumbApiUrl,
+                        Method = "GET"
+                    })
+                    if res and res.Body then
+                        local data = HttpService:JSONDecode(res.Body)
+                        if data and data.data and data.data[1] then
+                            imageUrl = data.data[1].imageUrl or ""
+                        end
                     end
-                end
-            end)
+                end)
+            end
         end
     end
 
     local embedData = {
-        title = "Item Bought",
+        title = "Car Transaction Log",
         color = 16711680,
         fields = {
-            { name = "Item Name:", value = tostring(itemName), inline = true },
-            { name = "Price:", value = tostring(formatNumber(price)), inline = true },
-            { name = "RAP:", value = tostring(formatNumber(rapValue)), inline = true },
-            { name = "Seller:", value = tostring(sellerName), inline = false }
+            { name = "Item Name", value = tostring(displayName), inline = true },
+            { name = "Price", value = tostring(formatNumber(price)), inline = true },
+            { name = "RAP Value", value = tostring(formatNumber(rapValue)), inline = true },
+            { name = "Seller", value = tostring(sellerName), inline = false }
         }
     }
 
