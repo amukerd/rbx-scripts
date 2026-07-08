@@ -1,6 +1,6 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local rootPart = localPlayer.Character:WaitForChild("HumanoidRootPart", 5)
+local rootPart = LocalPlayer.Character:WaitForChild("HumanoidRootPart", 5)
 
 rootPart.Anchored = true
 
