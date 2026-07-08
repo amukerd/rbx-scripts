@@ -24,7 +24,7 @@ for _, player in ipairs(Players:GetPlayers()) do
         playerCharacters[player.Character] = true
     end
 end
-
+--[[
 for _, object in ipairs(Workspace:GetChildren()) do
     if object ~= Workspace.CurrentCamera and object.Name ~= "SafePlatform" and object:IsA("Terrain") == false and playerCharacters[object] == nil then
         pcall(function()
@@ -32,7 +32,7 @@ for _, object in ipairs(Workspace:GetChildren()) do
         end)
     end
 end
-
+]]--
 local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[8083664487]=true,[8083667110]=true,}
 
 task.spawn(function()
