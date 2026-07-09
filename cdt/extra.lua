@@ -16,31 +16,33 @@ setfpscap(15)
 
 task.spawn(function()
     while true do
-        for _, object in ipairs(Workspace:GetChildren()) do
-            if not object:IsA("Camera") and not object:IsA("Terrain") and object.Name ~= "Platform" then
+        for _, object in ipairs(workspace:GetChildren()) do
+            if not object:IsA("Camera") 
+               and not object:IsA("Terrain") 
+               and object.Name ~= "Map" then
                 pcall(function()
                     object:Destroy()
                 end)
             end
-            task.wait(0.1)
         end
-        task.wait(1)
+        if workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("Structure") then
+            for _, subObject in ipairs(workspace.Map.Structure:GetChildren()) do
+                if subObject.Name ~= "CylPart" then
+                    pcall(function()
+                        subObject:Destroy()
+                    end)
+                end
+            end
+        end
+        task.wait(5)
     end
 end)
-
-local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[8083664487]=true,[8083667110]=true,}
 
 task.spawn(function()
     while task.wait(5) do
         if #Players:GetPlayers() < 10 then
-            TeleportService:Teleport(135202704953082, LocalPlayer)
+            TeleportService:Teleport(1554960397, LocalPlayer)
             return
-        end
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and BlockedUsers[player.UserId] then
-                TeleportService:Teleport(135202704953082, LocalPlayer)
-                return
-            end
         end
     end
 end)
