@@ -25,12 +25,21 @@ task.spawn(function()
                 end)
             end
         end
-        if workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("Structure") then
-            for _, subObject in ipairs(workspace.Map.Structure:GetChildren()) do
-                if subObject.Name ~= "CylPart" then
+        if workspace:FindFirstChild("Map") then
+            for _, mapObject in ipairs(workspace.Map:GetChildren()) do
+                if mapObject.Name ~= "Structure" then
                     pcall(function()
-                        subObject:Destroy()
+                        mapObject:Destroy()
                     end)
+                end
+            end
+            if workspace.Map:FindFirstChild("Structure") then
+                for _, subObject in ipairs(workspace.Map.Structure:GetChildren()) do
+                    if subObject.Name ~= "CylPart" then
+                        pcall(function()
+                            subObject:Destroy()
+                        end)
+                    end
                 end
             end
         end
