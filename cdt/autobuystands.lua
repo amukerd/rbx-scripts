@@ -14,7 +14,7 @@ local OfferPurchaseRemote = ReplicatedStorage.Remotes.Services.TradingHubService
 local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
 
 local CarsDatabase = require(ReplicatedStorage:WaitForChild("Databases"):WaitForChild("Cars"))
-local CustomizationDatabase = require(ReplicatedStorage:WaitForChild("Databases"):WaitForChild("Customization") or ReplicatedStorage:WaitForChild("Databases"):WaitForChild("Icons"):WaitForChild("Common"))
+--local CustomizationDatabase = require()
 
 local RAP_PERCENT = 0.85
 local SCAN_INTERVAL = 1
@@ -31,7 +31,7 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
     if not requestFunc then return end
 
     task.spawn(function()
-        local itemData = CarsDatabase[itemName] or CustomizationDatabase[itemName]
+        local itemData = CarsDatabase[itemName]
         local imageUrl = ""
         local displayName = itemName
 
