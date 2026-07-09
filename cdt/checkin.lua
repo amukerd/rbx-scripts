@@ -44,7 +44,6 @@ local function sendCheckIn()
     local playerCount = #Players:GetPlayers()
     local jobId = game.JobId ~= "" and game.JobId
     
-    local serverUptimeMins = math.floor(workspace.DistributedGameTime / 60)
     local playerSessionMins = math.floor((os.time() - scriptStartTime) / 60)
 
     local embedData = {
@@ -63,7 +62,7 @@ local function sendCheckIn()
             },
             {
                 name = "Session & Server Time",
-                value = string.format("**Session Duration:** %d mins\n**Total Server Uptime:** %d mins", playerSessionMins, serverUptimeMins),
+                value = string.format("**Session Duration:** %d mins", playerSessionMins),
                 inline = false
             },
             {
