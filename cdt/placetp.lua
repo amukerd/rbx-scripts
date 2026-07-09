@@ -1,10 +1,11 @@
 print("Executed")
 
+task.wait(5)
+
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
-
-local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
 
 local LOBBY_ID = 1554960397
 local GAME_ID = 135202704953082
