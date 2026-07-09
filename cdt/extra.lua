@@ -33,12 +33,12 @@ local BlockedUsers={[4512510904]=true,[8083594000]=true,[8083636321]=true,[80836
 task.spawn(function()
     while task.wait(5) do
         if #Players:GetPlayers() < 10 then
-            TeleportService:Teleport(1554960397, LocalPlayer)
+            TeleportService:Teleport(135202704953082, LocalPlayer)
             return
         end
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and BlockedUsers[player.UserId] then
-                TeleportService:Teleport(1554960397, LocalPlayer)
+                TeleportService:Teleport(135202704953082, LocalPlayer)
                 return
             end
         end
