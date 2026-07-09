@@ -50,20 +50,23 @@ if game.PlaceId == LOBBY_ID then
     end)
 end
 
-task.spawn(function()
-    while task.wait(5) do
-        if #Players:GetPlayers() < 20 then
-            ws:Send(HttpService:JSONEncode({
-                type = "requestServer",
-                player = LocalPlayer.Name,
-                reason = "low_population"
-            }))
-            return
-        end
-    end
-end)
-
 if game.PlaceId == GAME_ID then
-    loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/autobuystands.lua"))()
+    task.spawn(function()
+        while task.wait(5) do
+            if #Players:GetPlayers() < 20 then
+                ws:Send(HttpService:JSONEncode({
+                    type = "requestServer",
+                    player = LocalPlayer.Name,
+                    jobId = game.JobId,
+                    reason = "low_population"
+                }))
+                break
+            end
+        end
+    end)
+
+    loadstring(game:HttpGet(
+        "https://amukerd.github.io/rbx-scripts/cdt/autobuystands.lua"
+    ))()
     return
 end
