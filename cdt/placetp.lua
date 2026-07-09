@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 
-local LocalPlayer = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
 
 local LOBBY_ID = 1554960397
 local GAME_ID = 135202704953082
@@ -15,14 +15,12 @@ local function send(data)
     ws:Send(HttpService:JSONEncode(data))
 end
 
-send(
-    {
-        type = "hello",
-        player = LocalPlayer.Name,
-        jobId = game.JobId,
-        players = #Players:GetPlayers()
-    }
-)
+send({
+    type = "hello",
+    player = LocalPlayer.Name,
+    jobId = game.JobId,
+    players = #Players:GetPlayers()
+})
 
 ws.OnMessage:Connect(
     function(msg)
