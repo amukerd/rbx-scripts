@@ -14,9 +14,6 @@ local OnOfferAddedEvent = ReplicatedStorage.Remotes.Services.TradingHubServiceRe
 
 local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
 
-local CarsDatabase = require(ReplicatedStorage.Databases.Cars)
-local CarCustomization = require(ReplicatedStorage.Databases.CarCustomization)
-
 local IconModule = {}
 pcall(function()
     local requestFunc = http_request or request or (http and http.request) or HttpPost
@@ -44,13 +41,14 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
     task.spawn(function()
         local imageUrl = ""
         local displayName = itemName
-        local itemData = CarsDatabase[itemName]
-        
-        if itemData then
-            displayName = itemData.DisplayName or itemName
-        end
 
-        local assetId = IconModule[itemName]
+        local itemData = IconModule[itemName]
+        local assetId = nil
+
+        if itemData and typeof(itemData) == "table" then
+            displayName = itemData.Name or itemName
+            assetId = itemData.Id
+        end
 
         if assetId then
             local thumbApiUrl = "https://thumbnails.roblox.com/v1/assets?assetIds=" .. tostring(assetId) .. "&returnPolicy=PlaceHolder&size=420x420&format=png"
