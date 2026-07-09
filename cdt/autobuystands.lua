@@ -170,6 +170,9 @@ local function getRap(targetPlayer, offer)
             end)
 
             if rapSuccess and rapValue then
+                
+                print(string.format("[RAP RESULT] %s RAP: %s | Price: %s", rapName, tostring(rapValue), tostring(price)))
+                
                 if rapValue >= 15000 and price <= (rapValue * RAP_PERCENT) then
                     boughtItems[offerId] = true
                     local buySuccess, result = pcall(function()
