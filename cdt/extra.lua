@@ -47,15 +47,6 @@ task.spawn(function()
     end
 end)
 
-task.spawn(function()
-    while task.wait(5) do
-        if #Players:GetPlayers() < 10 then
-            TeleportService:Teleport(1554960397, LocalPlayer)
-            return
-        end
-    end
-end)
-
 if getconnections then
     for _, connection in ipairs(getconnections(LocalPlayer.Idled)) do
         if connection.Disable then
