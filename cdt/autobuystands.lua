@@ -17,10 +17,9 @@ local CarsDatabase = require(ReplicatedStorage.Databases.Cars)
 local CarCustomization = require(ReplicatedStorage.Databases.CarCustomization)
 
 local RAP_PERCENT = 0.85
-local SCAN_INTERVAL = 1
+local SCAN_INTERVAL = 0.1
 
-local activeThreads = {}
-local boughtItems = {}
+local currentOffersByPlayer = {}
 
 local function formatNumber(value)
     return tostring(value):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
@@ -149,62 +148,36 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
     end)
 end
 
-local function scanPlayerStand(targetPlayer)
-    local success, offers =
-        pcall(
-        function()
-            return GetOffersRemote:InvokeServer(targetPlayer)
+local function getRap(targetPlayer, offer)
+    if offer.Item and (offer.Item.Type == "Car" or offer.Item.Type == "Customization") then
+        local offerId = offer.OfferId
+        local itemName = offer.Item.Name
+        local rapName = itemName
+
+        if offer.Item.Type == "Customization" then
+            rapName = offer.Item.Category .. "-" .. itemName
         end
-    )
 
-    if not success or typeof(offers) ~= "table" then
-        return
-    end
+        local price = offer.PriceInTokens
+        if price and not boughtItems[offerId] then
+            task.wait(0.01)
+            local rapSuccess, rapValue = pcall(function()
+                return GetRapRemote:InvokeServer(rapName)
+            end)
 
-    for _, offer in ipairs(offers) do
-        
-        if offer.Item and (offer.Item.Type == "Car" or offer.Item.Type == "Customization") then
-            
-            local offerId = offer.OfferId
-            local itemName = offer.Item.Name
-            local rapName = itemName
-            
-            if offer.Item.Type == "Customization" then
-                rapName = offer.Item.Category .. "-" .. itemName
-            end
-            local price = offer.PriceInTokens
+            if rapSuccess and rapValue then
+                if rapValue >= 15000 and price <= (rapValue * RAP_PERCENT) then
+                    boughtItems[offerId] = true
+                    local buySuccess, result = pcall(function()
+                        return OfferPurchaseRemote:InvokeServer(targetPlayer, offer)
+                    end)
 
-            if price and not boughtItems[offerId] then
-
-                task.wait(0.1)
-
-                local rapSuccess, rapValue =
-                    pcall(
-                    function()
-                        return GetRapRemote:InvokeServer(rapName)
-                    end
-                )
-
-                if rapSuccess and rapValue then
-                    if rapValue >= 15000 and price <= (rapValue * RAP_PERCENT) then
-                        boughtItems[offerId] = true
-
-                        local buySuccess, result =
-                            pcall(
-                            function()
-                                return OfferPurchaseRemote:InvokeServer(targetPlayer, offer)
-                            end
-                        )
-
-                        if buySuccess and result then
-                            print("Purchase Response:", buySuccess, result)
-
-                            sendWebhook(itemName, price, rapValue, targetPlayer.Name)
-                        else
-                            boughtItems[offerId] = nil
-                        
-                            warn("Purchase failed:", itemName, result)
-                        end
+                    if buySuccess and result then
+                        print("Purchase Response:", buySuccess, result)
+                        sendWebhook(itemName, price, rapValue, targetPlayer.Name)
+                    else
+                        boughtItems[offerId] = nil
+                        warn("Purchase failed:", itemName, result)
                     end
                 end
             end
@@ -213,45 +186,79 @@ local function scanPlayerStand(targetPlayer)
 end
 
 local function watchPlayer(targetPlayer)
-    while targetPlayer.Parent do
-        pcall(
-            function()
-                scanPlayerStand(targetPlayer)
-            end
-        )
+    currentOffersByPlayer[targetPlayer] = {}
+    local currentOffers = currentOffersByPlayer[targetPlayer]
 
-        task.wait(SCAN_INTERVAL)
+    local success, offers = pcall(function()
+        return GetOffersRemote:InvokeServer(targetPlayer)
+    end)
+
+    if success and typeof(offers) == "table" then
+        for _, offer in ipairs(offers) do
+            currentOffers[offer.OfferId] = true
+            task.spawn(getRap, targetPlayer, offer)
+        end
     end
+
+    while targetPlayer.Parent do
+        task.wait(SCAN_INTERVAL)
+
+        local ok, newOffers = pcall(function()
+            return GetOffersRemote:InvokeServer(targetPlayer)
+        end)
+
+        if ok and typeof(newOffers) == "table" then
+            local seenIds = {}
+            local freshOffers = {}
+
+            for _, offer in ipairs(newOffers) do
+                local id = offer.OfferId
+                seenIds[id] = true
+                if not currentOffers[id] then
+                    table.insert(freshOffers, offer)
+                end
+            end
+
+            -- drop offers that no longer exist
+            for id in pairs(currentOffers) do
+                if not seenIds[id] then
+                    currentOffers[id] = nil
+                end
+            end
+
+            -- add + process only the new ones
+            for _, offer in ipairs(freshOffers) do
+                currentOffers[offer.OfferId] = true
+                task.spawn(getRap, targetPlayer, offer)
+            end
+        end
+    end
+
+    currentOffersByPlayer[targetPlayer] = nil
 end
 
 local function startWatching(player)
     if player == LocalPlayer then
         return
     end
-
     if activeThreads[player] then
         return
     end
-
-    activeThreads[player] =
-        task.spawn(
-        function()
-            watchPlayer(player)
-        end
-    )
+    activeThreads[player] = task.spawn(function()
+        watchPlayer(player)
+    end)
 end
 
 local function stopWatching(player)
     local thread = activeThreads[player]
-
     if thread then
         task.cancel(thread)
         activeThreads[player] = nil
     end
+    currentOffersByPlayer[player] = nil
 end
 
 Players.PlayerAdded:Connect(startWatching)
-
 Players.PlayerRemoving:Connect(stopWatching)
 
 for _, player in ipairs(Players:GetPlayers()) do
