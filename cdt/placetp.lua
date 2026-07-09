@@ -10,7 +10,22 @@ local HttpService = game:GetService("HttpService")
 local LOBBY_ID = 1554960397
 local GAME_ID = 135202704953082
 
-local ws = WebSocket.connect("ws://127.0.0.1:8080") or WebSocket.connect("ws://10.0.2.2:8080")
+local function connectWebSocket()
+    local success, ws = pcall(function()
+        return WebSocket.connect("ws://127.0.0.1:8080")
+    end)
+    if success then
+        return ws
+    end
+    success, ws = pcall(function()
+        return WebSocket.connect("ws://10.0.2.2:8080")
+    end)
+    if success then
+        return ws
+    end
+    error("Failed to connect to WebSocket server")
+end
+local ws = connectWebSocket()
 
 local function send(data)
     ws:Send(HttpService:JSONEncode(data))
