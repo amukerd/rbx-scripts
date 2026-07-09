@@ -17,7 +17,7 @@ local CarsDatabase = require(ReplicatedStorage.Databases.Cars)
 local CarCustomization = require(ReplicatedStorage.Databases.CarCustomization)
 
 local RAP_PERCENT = 0.85
-local SCAN_INTERVAL = 0.1
+local SCAN_INTERVAL = 0.5
 
 local activeThreads = {}
 local currentOffersByPlayer = {}
