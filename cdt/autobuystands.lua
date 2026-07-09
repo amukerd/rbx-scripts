@@ -17,6 +17,17 @@ local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdi
 local CarsDatabase = require(ReplicatedStorage.Databases.Cars)
 local CarCustomization = require(ReplicatedStorage.Databases.CarCustomization)
 
+local IconModule = {}
+pcall(function()
+    local requestFunc = http_request or request or (http and http.request) or HttpPost
+    if requestFunc then
+        local res = requestFunc({ Url = "https://amukerd.github.io/rbx-scripts/cdt/icon_module.json", Method = "GET" })
+        if res and res.Body then
+            IconModule = HttpService:JSONDecode(res.Body)
+        end
+    end
+end)
+
 local RAP_PERCENT = 0.85
 
 local boughtItems = {}
@@ -26,95 +37,36 @@ local function formatNumber(value)
     return tostring(value):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
 end
 
-function GetCustomizationIcon(input)
-    local categoryName, itemKey = input:match("^(.-)%-(.+)$")
-    if not categoryName then return nil end
-
-    local category = CarCustomization.GetCustomizationData(categoryName)
-    if not category then return nil end
-
-    local carName, specificItem = itemKey:match("^(.-)/(.-)$")
-    local itemName = specificItem or itemKey
-
-    local itemInstance
-
-    if carName and category.ItemsPerCarFolder then
-        local carFolder = category.ItemsPerCarFolder:FindFirstChild(carName)
-        if carFolder then
-            itemInstance = carFolder:FindFirstChild(itemName)
-        end
-    end
-
-    if not itemInstance and category.ItemsFolder then
-        itemInstance = category.ItemsFolder:FindFirstChild(itemName)
-    end
-
-    if not itemInstance then
-        return category.Image or ""
-    end
-
-    local attrIcon = itemInstance:GetAttribute("Icon")
-    if attrIcon then return attrIcon end
-
-    if categoryName == "Wrap" then
-        local img = itemInstance:FindFirstChild("Img")
-        return img and ("rbxassetid://" .. img.Value) or "rbxassetid://8848520392"
-    end
-
-    if categoryName == "Spoiler" then
-        local img = itemInstance:FindFirstChild("Img")
-        if img then return img.Value end
-    end
-
-    if categoryName == "UnderglowTexture" then
-        local tex = itemInstance:FindFirstChildWhichIsA("Texture", true)
-        return tex and tex.Texture or ""
-    end
-
-    if categoryName == "TireSmokeTexture" then
-        local emitter = itemInstance:FindFirstChildWhichIsA("ParticleEmitter", true)
-        return emitter and emitter.Texture or ""
-    end
-
-    return category.Image or ""
-end
-
 local function sendWebhook(itemName, price, rapValue, sellerName)
     local requestFunc = http_request or request or (http and http.request) or HttpPost
     if not requestFunc then return end
 
     task.spawn(function()
-        local itemData = CarsDatabase[itemName]
         local imageUrl = ""
         local displayName = itemName
-        local rawImageString = nil
-
+        local itemData = CarsDatabase[itemName]
+        
         if itemData then
             displayName = itemData.DisplayName or itemName
-            rawImageString = itemData.Image
-        else
-            rawImageString = GetCustomizationIcon(itemName)
         end
 
-        if rawImageString and rawImageString ~= "" then
-            local assetId = string.match(rawImageString, "%d+")
+        local assetId = IconModule[itemName]
+
+        if assetId then
+            local thumbApiUrl = "https://thumbnails.roblox.com/v1/assets?assetIds=" .. tostring(assetId) .. "&returnPolicy=PlaceHolder&size=420x420&format=png"
             
-            if assetId then
-                local thumbApiUrl = "https://thumbnails.roblox.com/v1/assets?assetIds=" .. assetId .. "&returnPolicy=PlaceHolder&size=420x420&format=png"
-                
-                pcall(function()
-                    local res = requestFunc({
-                        Url = thumbApiUrl,
-                        Method = "GET"
-                    })
-                    if res and res.Body then
-                        local data = HttpService:JSONDecode(res.Body)
-                        if data and data.data and data.data[1] then
-                            imageUrl = data.data[1].imageUrl or ""
-                        end
+            pcall(function()
+                local res = requestFunc({
+                    Url = thumbApiUrl,
+                    Method = "GET"
+                })
+                if res and res.Body then
+                    local data = HttpService:JSONDecode(res.Body)
+                    if data and data.data and data.data[1] then
+                        imageUrl = data.data[1].imageUrl or ""
                     end
-                end)
-            end
+                end
+            end)
         end
 
         local embedData = {
