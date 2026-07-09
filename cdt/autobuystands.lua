@@ -19,7 +19,9 @@ local CarCustomization = require(ReplicatedStorage.Databases.CarCustomization)
 local RAP_PERCENT = 0.85
 local SCAN_INTERVAL = 0.1
 
+local activeThreads = {}
 local currentOffersByPlayer = {}
+local boughtItems = {}
 
 local function formatNumber(value)
     return tostring(value):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
