@@ -68,7 +68,7 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
         end
 
         local embedData = {
-            title = "Car Transaction Log",
+            title = LocalPlayer.Name .. " Bought Offer",
             color = 16711680,
             fields = {
                 { name = "Item Name", value = tostring(displayName), inline = true },
