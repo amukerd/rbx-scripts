@@ -26,7 +26,7 @@ pcall(function()
 end)
 
 local RAP_PERCENT = 0.80
-local RAP_PERCENT_UNDER = 0.40
+local RAP_PERCENT_UNDER = 0.50
 
 local boughtItems = {}
 local processedOffers = {}
