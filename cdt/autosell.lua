@@ -142,9 +142,10 @@ for i = 1, 32 do
             i,
             "Invalid booth name"
         )
+        task.wait(0.1)
     end)
 end
-task.wait(1)
+task.wait(5)
 
 local ownedCars = GetOwnedCars:InvokeServer()
 
