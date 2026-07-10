@@ -166,3 +166,5 @@ OnOfferAddedEvent.OnClientEvent:Connect(function(targetPlayer, offerTable)
 end)
 
 print("--- Lobby Monitor Started ---")
+
+loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/autosell.lua"))()
