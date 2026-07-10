@@ -170,21 +170,27 @@ local function listInventoryCars()
 
                     if success and rap then
                         rap = tonumber(rap) or 0
-
-                        ListedCars[carId] = {
-                            Name = carName,
-                            RAP = rap,
-                            Price = rap
-                        }
-
-                        OfferAdd:InvokeServer(
-                            {
-                                Id = carId,
-                                Type = "Car",
-                                Name = carName
-                            },
-                            rap
-                        )
+                    
+                        if rap > 10000 and rap < 250000 then
+                            ListedCars[carId] = {
+                                Name = carName,
+                                RAP = rap,
+                                Price = rap
+                            }
+                    
+                            OfferAdd:InvokeServer(
+                                {
+                                    Id = carId,
+                                    Type = "Car",
+                                    Name = carName
+                                },
+                                rap
+                            )
+                    
+                            print("Listed:", carName, rap)
+                        else
+                            print("Skipped:", carName, rap)
+                        end
                     end
                 end
             )
