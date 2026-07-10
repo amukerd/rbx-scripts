@@ -4,7 +4,8 @@ local HttpService = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
 
-local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
+local WebhookURL =
+    "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
 
 local CarService = ReplicatedStorage.Remotes.Services.CarServiceRemotes
 local TradingService = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes
@@ -19,15 +20,18 @@ local OnCarsRemoved = CarService.OnCarsRemoved
 local ListedCars = {}
 
 local IconModule = {}
-pcall(function()
-    local requestFunc = http_request or request or (http and http.request) or HttpPost
-    if requestFunc then
-        local res = requestFunc({ Url = "https://amukerd.github.io/rbx-scripts/cdt/icon_module.json", Method = "GET" })
-        if res and res.Body then
-            IconModule = HttpService:JSONDecode(res.Body)
+pcall(
+    function()
+        local requestFunc = http_request or request or (http and http.request) or HttpPost
+        if requestFunc then
+            local res =
+                requestFunc({Url = "https://amukerd.github.io/rbx-scripts/cdt/icon_module.json", Method = "GET"})
+            if res and res.Body then
+                IconModule = HttpService:JSONDecode(res.Body)
+            end
         end
     end
-end)
+)
 
 local function formatNumber(num)
     num = tonumber(num) or 0
@@ -137,58 +141,77 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
 end
 
 for i = 1, 32 do
-    task.spawn(function()
-        BoothClaim:FireServer(
-            i,
-            "Invalid booth name"
-        )
-        task.wait(0.1)
-    end)
+    task.spawn(
+        function()
+            BoothClaim:FireServer(i, "Invalid booth name")
+            task.wait(0.1)
+        end
+    )
 end
 task.wait(5)
 
-local ownedCars = GetOwnedCars:InvokeServer()
+local function listInventoryCars()
+    local ownedCars = GetOwnedCars:InvokeServer()
 
-if ownedCars and ownedCars[1] then
-    for _, car in ipairs(ownedCars[1]) do
-        task.spawn(
-            function()
-                local carName = car.Name
-                local carId = car.Id
+    if ownedCars then
+        print("Cars found:", #ownedCars)
 
-                local success, rap =
-                    pcall(
-                    function()
-                        return GetRap:InvokeServer(carName)
-                    end
-                )
+        for _, car in ipairs(ownedCars) do
+            print("Processing:", car.Name, car.Id)
 
-                if success and rap then
-                    rap = tonumber(rap) or 0
+            task.spawn(
+                function()
+                    local carName = car.Name
+                    local carId = car.Id
 
-                    ListedCars[carId] = {
-                        Name = carName,
-                        RAP = rap,
-                        Price = rap
-                    }
-
-                    task.wait(.1)
-
-                    OfferAdd:InvokeServer(
-                        {
-                            Id = carId,
-                            Type = "Car",
-                            Name = carName
-                        },
-                        rap
+                    local success, rap =
+                        pcall(
+                        function()
+                            return GetRap:InvokeServer(carName)
+                        end
                     )
 
-                    print("Listed:", carName, "for", rap)
+                    print("RAP:", carName, rap)
+
+                    if success and rap then
+                        rap = tonumber(rap) or 0
+
+                        ListedCars[carId] = {
+                            Name = carName,
+                            RAP = rap,
+                            Price = rap
+                        }
+
+                        OfferAdd:InvokeServer(
+                            {
+                                Id = carId,
+                                Type = "Car",
+                                Name = carName
+                            },
+                            rap
+                        )
+
+                        print("Listed:", carName, rap)
+                    end
                 end
-            end
-        )
+            )
+        end
     end
 end
+
+listInventoryCars()
+
+task.spawn(
+    function()
+        while true do
+            task.wait(300)
+
+            print("Refreshing booth listings...")
+
+            listInventoryCars()
+        end
+    end
+)
 
 OnCarsRemoved.OnClientEvent:Connect(
     function(removedCars)
