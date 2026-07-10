@@ -96,3 +96,5 @@ task.spawn(function()
         sendCheckIn()
     end
 end)
+
+print("Checkin Executed")
