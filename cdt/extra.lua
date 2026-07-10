@@ -84,3 +84,5 @@ Button.MouseButton1Click:Connect(function()
     Button.Active = false
     TeleportService:Teleport(1554960397, LocalPlayer)
 end)
+
+print("Extra Executed")
