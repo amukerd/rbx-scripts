@@ -1,3 +1,5 @@
+print("Autosell Executed")
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
@@ -153,11 +155,7 @@ local function listInventoryCars()
     local ownedCars = GetOwnedCars:InvokeServer()
 
     if ownedCars then
-        print("Cars found:", #ownedCars)
-
         for _, car in ipairs(ownedCars) do
-            print("Processing:", car.Name, car.Id)
-
             task.spawn(
                 function()
                     local carName = car.Name
@@ -169,8 +167,6 @@ local function listInventoryCars()
                             return GetRap:InvokeServer(carName)
                         end
                     )
-
-                    print("RAP:", carName, rap)
 
                     if success and rap then
                         rap = tonumber(rap) or 0
@@ -189,8 +185,6 @@ local function listInventoryCars()
                             },
                             rap
                         )
-
-                        print("Listed:", carName, rap)
                     end
                 end
             )
