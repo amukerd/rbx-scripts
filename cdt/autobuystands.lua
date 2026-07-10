@@ -25,7 +25,8 @@ pcall(function()
     end
 end)
 
-local RAP_PERCENT = 0.85
+local RAP_PERCENT = 0.80
+local RAP_PERCENT_UNDER = 0.40
 
 local boughtItems = {}
 local processedOffers = {}
@@ -123,7 +124,7 @@ local function getRap(targetPlayer, offer)
                 
                 print(string.format("[RAP RESULT] %s RAP: %s | Price: %s", rapName, tostring(rapValue), tostring(price)))
                 
-                if rapValue >= 15000 and price <= (rapValue * RAP_PERCENT) then
+                if (rapValue >= 25000 and price <= (rapValue * RAP_PERCENT)) or (rapValue >= 10000 and rapValue < 25000 and price <= (rapValue * RAP_PERCENT_UNDER)) then
                     boughtItems[offerId] = true
                     local buySuccess, result = pcall(function()
                         return OfferPurchaseRemote:InvokeServer(targetPlayer, offer)
