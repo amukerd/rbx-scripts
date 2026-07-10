@@ -165,6 +165,6 @@ OnOfferAddedEvent.OnClientEvent:Connect(function(targetPlayer, offerTable)
     task.spawn(getRap, targetPlayer, offerTable)
 end)
 
-print("--- Lobby Monitor Started ---")
+print("Autobuy Executed")
 
 loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/autosell.lua"))()
