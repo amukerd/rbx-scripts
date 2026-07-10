@@ -4,7 +4,7 @@ local HttpService = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
 
-local WebhookURL = "YOUR_WEBHOOK_HERE"
+local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
 
 local CarService = ReplicatedStorage.Remotes.Services.CarServiceRemotes
 local TradingService = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes
@@ -17,6 +17,17 @@ local GetRap = RapService.GetRap
 local OnCarsRemoved = CarService.OnCarsRemoved
 
 local ListedCars = {}
+
+local IconModule = {}
+pcall(function()
+    local requestFunc = http_request or request or (http and http.request) or HttpPost
+    if requestFunc then
+        local res = requestFunc({ Url = "https://amukerd.github.io/rbx-scripts/cdt/icon_module.json", Method = "GET" })
+        if res and res.Body then
+            IconModule = HttpService:JSONDecode(res.Body)
+        end
+    end
+end)
 
 local function formatNumber(num)
     num = tonumber(num) or 0
@@ -31,13 +42,50 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
 
     task.spawn(
         function()
+            local imageUrl = ""
+            local displayName = itemName
+            local assetId = nil
+
+            local itemData = IconModule[itemName]
+
+            if itemData and typeof(itemData) == "table" then
+                displayName = itemData.Name or itemName
+                assetId = itemData.Id
+            end
+
+            if assetId then
+                local thumbApiUrl =
+                    "https://thumbnails.roblox.com/v1/assets?assetIds=" ..
+                    tostring(assetId) .. "&returnPolicy=PlaceHolder&size=420x420&format=png"
+
+                pcall(
+                    function()
+                        local res =
+                            requestFunc(
+                            {
+                                Url = thumbApiUrl,
+                                Method = "GET"
+                            }
+                        )
+
+                        if res and res.Body then
+                            local data = HttpService:JSONDecode(res.Body)
+
+                            if data and data.data and data.data[1] then
+                                imageUrl = data.data[1].imageUrl or ""
+                            end
+                        end
+                    end
+                )
+            end
+
             local embedData = {
-                title = itemName .. " Sold",
+                title = "Sold " .. displayName,
                 color = 255,
                 fields = {
                     {
                         name = "Car Name",
-                        value = tostring(itemName),
+                        value = tostring(displayName),
                         inline = true
                     },
                     {
@@ -57,6 +105,12 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
                     }
                 }
             }
+
+            if imageUrl ~= "" then
+                embedData.thumbnail = {
+                    url = imageUrl
+                }
+            end
 
             pcall(
                 function()
