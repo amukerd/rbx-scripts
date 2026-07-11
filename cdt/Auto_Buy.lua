@@ -1,5 +1,5 @@
-loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/extra.lua"))()
-loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/checkin.lua"))()
+loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/FPS_Antiafk.lua"))()
+loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/Check_In.lua"))()
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
