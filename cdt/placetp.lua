@@ -1,6 +1,6 @@
 print("Executed")
 
-task.wait(2)
+task.wait(5)
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
