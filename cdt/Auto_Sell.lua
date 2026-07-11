@@ -9,14 +9,17 @@ local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdi
 local CarService = ReplicatedStorage.Remotes.Services.CarServiceRemotes
 local TradingService = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes
 local RapService = ReplicatedStorage.Remotes.Services.RapRemotes
+local CustomizationItemsRemotes = require(ReplicatedStorage.Remotes.Services.CustomizationItemsRemotes)
+local CarCustomization = require(ReplicatedStorage.Databases.CarCustomization)
 
 local BoothClaim = TradingService.BoothClaim
 local GetOwnedCars = CarService.GetOwnedCars
 local OfferAdd = TradingService.OfferAdd
 local GetRap = RapService.GetRap
-local OnCarsRemoved = CarService.OnCarsRemoved
+local OnOfferAdded = TradingService.OnOfferAdded
+local OnOfferRemoved = TradingService.OnOfferRemoved
 
-local ListedCars = {}
+local ListedOffers = {}
 
 local IconModule = {}
 pcall(function()
@@ -103,6 +106,40 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
     )
 end
 
+OnOfferAdded.OnClientEvent:Connect(function(player, offerData)
+    if player ~= LocalPlayer then
+        return
+    end
+
+    local offerId = offerData.OfferId
+    local item = offerData.Item
+
+    if item.Type == "Car" then
+
+        ListedOffers[offerId] = {
+            Name = item.Name,
+            RAP = offerData.PriceInTokens,
+            Price = offerData.PriceInTokens
+        }
+
+    elseif item.Type == "Customization" then
+        local key = item.Category .. "-" .. item.Name
+
+        ListedOffers[offerId] = {
+            Name = key,
+            RAP = offerData.PriceInTokens,
+            Price = offerData.PriceInTokens
+        }
+
+    end
+
+    print(
+        "Tracking offer:",
+        offerId,
+        ListedOffers[offerId].Name
+    )
+end)
+
 for i = 1, 32 do
     TradingService.BoothClaim:FireServer(i)
     task.wait(2)
@@ -129,12 +166,6 @@ local function listInventoryCars()
                         rap = tonumber(rap) or 0
                     
                         if rap > 10000 and rap < 250000 then
-                            ListedCars[carId] = {
-                                Name = carName,
-                                RAP = rap,
-                                Price = rap
-                            }
-                    
                             OfferAdd:InvokeServer(
                                 {
                                     Id = carId,
@@ -155,7 +186,57 @@ local function listInventoryCars()
     end
 end
 
+local function listCustomizationItems()
+
+    local items = CustomizationItemsRemotes.GetAll:InvokeServer()
+
+    for category, catItems in pairs(items) do
+        for name in pairs(catItems) do
+
+            if category == "Wrap" and name:match("OG") then
+                continue
+            end
+
+            local itemData = CarCustomization.GetItemData(category, name)
+            if itemData and itemData.Untradeable then
+                continue
+            end
+
+            local rapSuccess, rap = pcall(function()
+                return GetRap:InvokeServer(category .. "-" .. name)
+            end)
+
+            if rapSuccess and rap then
+                rap = tonumber(rap) or 0
+
+                if rap > 10000 and rap < 250000 then
+
+                    local key = category .. "-" .. name
+
+                    local success, err = OfferAdd:InvokeServer(
+                        {
+                            Type = "Customization",
+                            Category = category,
+                            Name = name
+                        },
+                        rap
+                    )
+
+                    if success then
+                        print("Listed customization:", key, rap)
+                    else
+                        warn("Failed:", key, err)
+                    end
+                end
+            end
+
+            task.wait(.05)
+        end
+    end
+end
+
 listInventoryCars()
+listCustomizationItems()
 
 task.spawn(
     function()
@@ -165,46 +246,44 @@ task.spawn(
             print("Refreshing booth listings...")
 
             listInventoryCars()
+			listCustomizationItems()
         end
     end
 )
 
---[[
-local args = {
-	{
-		Type = "Customization",
-		Name = "MazdaOfficial10/LegendaryUnderglow",
-		Category = "UnderglowTexture"
-	},
-	1000
-}
-game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Services"):WaitForChild("TradingHubServiceRemotes"):WaitForChild("OfferAdd"):InvokeServer(unpack(args))
-]]--
-
-OnCarsRemoved.OnClientEvent:Connect(function(removedCars)
-    for _, car in ipairs(removedCars) do
-        if car.Id and ListedCars[car.Id] then
-            local data = ListedCars[car.Id]
-            local currentRap = data.RAP
-                
-            local success, rap = pcall(function()
-                return GetRap:InvokeServer(data.Name)
-            end)
-
-            if success and rap then
-                currentRap = tonumber(rap) or currentRap
-            end
-
-            sendWebhook(
-                data.Name,
-                data.Price,
-                currentRap,
-                LocalPlayer.Name
-            )
-
-            ListedCars[car.Id] = nil
-        end
+OnOfferRemoved.OnClientEvent:Connect(function(player, offerId)
+    if player ~= LocalPlayer then
+        return
     end
+
+    local data = ListedOffers[offerId]
+    if not data then
+        return
+    end
+
+    local currentRap = data.RAP
+
+    local success, rap = pcall(function()
+        return GetRap:InvokeServer(data.Name)
+    end)
+
+    if success and rap then
+        currentRap = tonumber(rap) or currentRap
+    end
+
+    sendWebhook(
+        data.Name,
+        data.Price,
+        currentRap,
+        LocalPlayer.Name
+    )
+
+    ListedOffers[offerId] = nil
+
+    print(
+        "Sold:",
+        data.Name
+    )
 end)
 
 print("Auto_Sell Executed")
