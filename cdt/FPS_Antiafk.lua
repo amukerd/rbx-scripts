@@ -7,6 +7,25 @@ local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
 
+local BoothClaim = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Services"):WaitForChild("TradingHubServiceRemotes"):WaitForChild("BoothClaim")
+local boothsFolder = Workspace.Map.PlayerBooths
+local firstUnclaimed = nil
+
+for _, booth in ipairs(boothsFolder:GetChildren()) do
+    if booth:GetAttribute("OwnerId") == nil then
+        firstUnclaimed = booth
+        break
+    end
+end
+
+if firstUnclaimed then
+    local boothId = tonumber(string.match(firstUnclaimed.Name, "PlayerBooth(%d+)"))
+    print("Claiming booth:", firstUnclaimed.Name, "ID:", boothId)
+    BoothClaim:FireServer(boothId)
+end
+
+task.wait(1)
+
 game:GetService("SoundService"):ClearAllChildren()
 game.Lighting:ClearAllChildren()
 game.Lighting.GlobalShadows = false
