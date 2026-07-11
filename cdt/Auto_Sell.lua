@@ -209,7 +209,7 @@ local function listCustomizationItems()
             if rapSuccess and rap then
                 rap = tonumber(rap) or 0
 
-                if rap > 10000 and rap < 250000 then
+                if rap > 10000 and rap < 70000 then
 
                     local key = category .. "-" .. name
 
