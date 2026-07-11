@@ -17,7 +17,7 @@ local IconModule = {}
 pcall(function()
     local requestFunc = http_request or request or (http and http.request) or HttpPost
     if requestFunc then
-        local res = requestFunc({ Url = "https://amukerd.github.io/rbx-scripts/cdt/icon_module.json", Method = "GET" })
+        local res = requestFunc({ Url = "https://amukerd.github.io/rbx-scripts/cdt/Icon_Module.json", Method = "GET" })
         if res and res.Body then
             IconModule = HttpService:JSONDecode(res.Body)
         end
