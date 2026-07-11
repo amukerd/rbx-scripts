@@ -19,18 +19,18 @@ local OnCarsRemoved = CarService.OnCarsRemoved
 local ListedCars = {}
 
 local IconModule = {}
-pcall(
-    function()
-        local requestFunc = http_request or request or (http and http.request) or HttpPost
-        if requestFunc then
-            local res =
-                requestFunc({Url = "https://amukerd.github.io/rbx-scripts/cdt/Icon_Module.json", Method = "GET"})
-            if res and res.Body then
-                IconModule = HttpService:JSONDecode(res.Body)
-            end
+pcall(function()
+    local requestFunc = http_request or request or (http and http.request) or HttpPost
+    if requestFunc then
+		local res = requestFunc({
+			Url = "https://amukerd.github.io/rbx-scripts/cdt/Icons/Icon_Module.json",
+			Method = "GET"
+		})
+        if res and res.Body then
+            IconModule = HttpService:JSONDecode(res.Body)
         end
     end
-)
+end)
 
 local function formatNumber(num)
     num = tonumber(num) or 0
@@ -45,42 +45,11 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
 
     task.spawn(
         function()
-            local imageUrl = ""
-            local displayName = itemName
-            local assetId = nil
-
-            local itemData = IconModule[itemName]
-
-            if itemData and typeof(itemData) == "table" then
-                displayName = itemData.Name or itemName
-                assetId = itemData.Id
-            end
-
-            if assetId then
-                local thumbApiUrl =
-                    "https://thumbnails.roblox.com/v1/assets?assetIds=" ..
-                    tostring(assetId) .. "&returnPolicy=PlaceHolder&size=420x420&format=png"
-
-                pcall(
-                    function()
-                        local res =
-                            requestFunc(
-                            {
-                                Url = thumbApiUrl,
-                                Method = "GET"
-                            }
-                        )
-
-                        if res and res.Body then
-                            local data = HttpService:JSONDecode(res.Body)
-
-                            if data and data.data and data.data[1] then
-                                imageUrl = data.data[1].imageUrl or ""
-                            end
-                        end
-                    end
-                )
-            end
+			local displayName = IconModule[itemName] or itemName
+			
+			local imageKey = tostring(itemName):gsub("/", "_")
+			
+			local imageUrl = "https://amukerd.github.io/rbx-scripts/cdt/Icons/" .. imageKey .. ".png"
 
             local embedData = {
                 title = LocalPlayer.Name .. " Sold Offer",
