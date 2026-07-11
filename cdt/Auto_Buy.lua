@@ -167,4 +167,4 @@ end)
 
 print("Autobuy Executed")
 
-loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/autosell.lua"))()
+loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/Auto_Sell.lua"))()
