@@ -1,5 +1,4 @@
 loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/FPS_Antiafk.lua"))()
-loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/Check_In.lua"))()
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -165,6 +164,7 @@ OnOfferAddedEvent.OnClientEvent:Connect(function(targetPlayer, offerTable)
     task.spawn(getRap, targetPlayer, offerTable)
 end)
 
-print("Autobuy Executed")
+print("Auto_Buy Executed")
 
+loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/Check_In.lua"))()
 loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/Auto_Sell.lua"))()
