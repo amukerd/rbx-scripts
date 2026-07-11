@@ -200,6 +200,18 @@ task.spawn(
     end
 )
 
+--[[
+local args = {
+	{
+		Type = "Customization",
+		Name = "MazdaOfficial10/LegendaryUnderglow",
+		Category = "UnderglowTexture"
+	},
+	1000
+}
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Services"):WaitForChild("TradingHubServiceRemotes"):WaitForChild("OfferAdd"):InvokeServer(unpack(args))
+]]--
+
 OnCarsRemoved.OnClientEvent:Connect(function(removedCars)
     for _, car in ipairs(removedCars) do
         if car.Id and ListedCars[car.Id] then
