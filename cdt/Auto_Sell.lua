@@ -1,5 +1,3 @@
-print("Autosell Executed")
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
@@ -232,3 +230,6 @@ OnCarsRemoved.OnClientEvent:Connect(function(removedCars)
         end
     end
 end)
+
+print("Auto_Sell Executed")
+
