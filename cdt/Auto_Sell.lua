@@ -180,6 +180,7 @@ local function listInventoryCars()
     end
 end
 
+--[[
 local function listCustomizationItems()
 
     local items = CustomizationItemsRemotes.GetAll:InvokeServer()
@@ -228,9 +229,11 @@ local function listCustomizationItems()
         end
     end
 end
+]]--
 
 listInventoryCars()
-listCustomizationItems()
+
+--listCustomizationItems()
 
 task.spawn(
     function()
@@ -240,7 +243,8 @@ task.spawn(
             print("Refreshing booth listings...")
 
             listInventoryCars()
-			listCustomizationItems()
+			
+			--listCustomizationItems()
         end
     end
 )
