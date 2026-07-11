@@ -85,4 +85,4 @@ Button.MouseButton1Click:Connect(function()
     TeleportService:Teleport(1554960397, LocalPlayer)
 end)
 
-print("Extra Executed")
+print("FPS_Antiafk Executed")
