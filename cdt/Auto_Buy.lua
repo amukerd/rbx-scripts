@@ -147,5 +147,7 @@ end)
 
 print("Auto_Buy Executed")
 
+task.wait(5)
+
 loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/Check_In.lua"))()
 loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/Auto_Sell.lua"))()
