@@ -100,10 +100,7 @@ local function getRap(targetPlayer, offer)
                 return GetRapRemote:InvokeServer(rapName)
             end)
 
-            if rapSuccess and rapValue then
-                
-                print(string.format("[RAP RESULT] %s RAP: %s | Price: %s", rapName, tostring(rapValue), tostring(price)))
-                
+            if rapSuccess and rapValue then                
                 if (rapValue >= 25000 and price <= (rapValue * RAP_PERCENT)) or (rapValue >= 10000 and rapValue < 25000 and price <= (rapValue * RAP_PERCENT_UNDER)) then
                     boughtItems[offerId] = true
                     local buySuccess, result = pcall(function()
