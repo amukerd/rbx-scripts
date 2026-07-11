@@ -85,16 +85,16 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
             end
 
             local embedData = {
-                title = "Sold " .. displayName,
+                title = LocalPlayer.Name .. " Sold Offer",
                 color = 255,
                 fields = {
                     {
-                        name = "Car Name",
+                        name = "Item Name",
                         value = tostring(displayName),
                         inline = true
                     },
                     {
-                        name = "Sold Price",
+                        name = "Price",
                         value = tostring(formatNumber(price)),
                         inline = true
                     },
@@ -102,11 +102,6 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
                         name = "RAP",
                         value = tostring(formatNumber(rapValue)),
                         inline = true
-                    },
-                    {
-                        name = "Seller",
-                        value = tostring(sellerName),
-                        inline = false
                     }
                 }
             }
