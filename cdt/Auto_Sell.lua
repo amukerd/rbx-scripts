@@ -134,13 +134,10 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
     )
 end
 
-local remotes = require(game.ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes)
-
 for i = 1, 32 do
-    remotes.BoothClaim:FireServer(i)
-    task.wait(1)
+    TradingService.BoothClaim:FireServer(i)
+    task.wait(2)
 end
-task.wait(5)
 
 local function listInventoryCars()
     local ownedCars = GetOwnedCars:InvokeServer()
