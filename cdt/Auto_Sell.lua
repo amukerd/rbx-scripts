@@ -134,21 +134,12 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
     )
 end
 
---[[
-local booths = game.Workspace.Map.PlayerBooths
 local remotes = require(game.ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes)
 
-for _, booth in ipairs(booths:GetChildren()) do
-    if booth:GetAttribute("OwnerId") == nil then
-        local id = tonumber(booth.Name:match("PlayerBooth(%d+)"))
-        if id then
-            remotes.BoothClaim:FireServer(id)
-            print("Claimed booth", id)
-            break
-        end
-    end
+for i = 1, 32 do
+    remotes.BoothClaim:FireServer(i)
+    task.wait(1)
 end
-]]--
 task.wait(5)
 
 local function listInventoryCars()
