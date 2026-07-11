@@ -1,3 +1,7 @@
+```
+loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/placetp.lua"))()
+```
+
 change workspace deletion to tp away and only not delete the baseplate no need for random nested logic to not delete the cyl things
 might not be good if a dev joins tho, need to make mod check
 
