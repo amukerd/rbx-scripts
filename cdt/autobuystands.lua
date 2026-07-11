@@ -74,7 +74,7 @@ local function sendWebhook(itemName, price, rapValue, sellerName)
             fields = {
                 { name = "Item Name", value = tostring(displayName), inline = true },
                 { name = "Price", value = tostring(formatNumber(price)), inline = true },
-                { name = "RAP Value", value = tostring(formatNumber(rapValue)), inline = true },
+                { name = "RAP", value = tostring(formatNumber(rapValue)), inline = true },
                 { name = "Seller", value = tostring(sellerName), inline = false }
             }
         }
