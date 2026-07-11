@@ -212,16 +212,28 @@ task.spawn(
     end
 )
 
-OnCarsRemoved.OnClientEvent:Connect(
-    function(removedCars)
-        for _, car in ipairs(removedCars) do
-            if car.Id and ListedCars[car.Id] then
-                local data = ListedCars[car.Id]
+OnCarsRemoved.OnClientEvent:Connect(function(removedCars)
+    for _, car in ipairs(removedCars) do
+        if car.Id and ListedCars[car.Id] then
+            local data = ListedCars[car.Id]
+            local currentRap = data.RAP
+                
+            local success, rap = pcall(function()
+                return GetRap:InvokeServer(data.Name)
+            end)
 
-                sendWebhook(data.Name, data.Price, data.RAP, LocalPlayer.Name)
-
-                ListedCars[car.Id] = nil
+            if success and rap then
+                currentRap = tonumber(rap) or currentRap
             end
+
+            sendWebhook(
+                data.Name,
+                data.Price,
+                currentRap,
+                LocalPlayer.Name
+            )
+
+            ListedCars[car.Id] = nil
         end
     end
-)
+end)
