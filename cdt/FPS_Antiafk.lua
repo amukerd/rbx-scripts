@@ -5,7 +5,6 @@ local VirtualUser = game:GetService("VirtualUser")
 local TeleportService = game:GetService("TeleportService")
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TeleportService = game:GetService("TeleportService")
 
 local BoothClaim = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Services"):WaitForChild("TradingHubServiceRemotes"):WaitForChild("BoothClaim")
 local boothsFolder = Workspace.Map.PlayerBooths
@@ -80,28 +79,5 @@ else
         VirtualUser:ClickButton2(Vector2.new())
     end)
 end
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FullScreenResetGui"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.DisplayOrder = 100000
-ScreenGui.Parent = PlayerGui
-
-local Button = Instance.new("TextButton")
-Button.Name = "ResetButton"
-Button.Size = UDim2.new(1, 0, 1, 0)
-Button.Position = UDim2.new(0, 0, 0, 0)
-Button.Text = "reset"
-Button.TextSize = 32
-Button.Font = Enum.Font.SourceSansBold
-Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-Button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Button.Parent = ScreenGui
-
-Button.MouseButton1Click:Connect(function()
-    Button.Text = "Teleporting..."
-    Button.Active = false
-    TeleportService:Teleport(1554960397, LocalPlayer)
-end)
 
 print("FPS_Antiafk Executed")
