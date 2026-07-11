@@ -12,7 +12,6 @@ local RapService = ReplicatedStorage.Remotes.Services.RapRemotes
 local CustomizationItemsRemotes = require(ReplicatedStorage.Remotes.Services.CustomizationItemsRemotes)
 local CarCustomization = require(ReplicatedStorage.Databases.CarCustomization)
 
-local BoothClaim = TradingService.BoothClaim
 local GetOwnedCars = CarService.GetOwnedCars
 local OfferAdd = TradingService.OfferAdd
 local GetRap = RapService.GetRap
@@ -139,11 +138,6 @@ OnOfferAdded.OnClientEvent:Connect(function(player, offerData)
         ListedOffers[offerId].Name
     )
 end)
-
-for i = 1, 32 do
-    TradingService.BoothClaim:FireServer(i)
-    task.wait(2)
-end
 
 local function listInventoryCars()
     local ownedCars = GetOwnedCars:InvokeServer()
