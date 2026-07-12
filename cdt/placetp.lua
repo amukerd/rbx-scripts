@@ -83,5 +83,5 @@ if game.PlaceId == GAME_ID then
         end
     )
 
-    loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/Auto_Buy.lua"))()
+    loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/Main.lua"))()
 end
