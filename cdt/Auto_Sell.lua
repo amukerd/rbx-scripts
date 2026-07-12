@@ -7,13 +7,12 @@ local WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdi
 local requestFunc = http_request or request or (http and http.request) or HttpPost
 
 local TradingUtil = require(ReplicatedStorage.Util.TradingUtil)
-local TradingService = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes
 
 local GetOwnedCars = ReplicatedStorage.Remotes.Services.CarServiceRemotes.GetOwnedCars
 local GetRap = ReplicatedStorage.Remotes.Services.RapRemotes.GetRap
-local OfferAdd = TradingService.OfferAdd
-local OnOfferAdded = TradingService.OnOfferAdded
-local OnOfferRemoved = TradingService.OnOfferRemoved
+local OfferAdd = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.OfferAdd
+local OnOfferAdded = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.OnOfferAdded
+local OnOfferRemoved = ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes.OnOfferRemoved
 
 local ListedOffers = {}
 local IconModule = {}
