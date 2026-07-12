@@ -19,15 +19,13 @@ local ListedOffers = {}
 local IconModule = {}
 
 pcall(function()
-    if requestFunc then
-        local res = requestFunc({
-            Url = "https://amukerd.github.io/rbx-scripts/cdt/Icons/Icon_Module.json",
-            Method = "GET"
-        })
+    local res = requestFunc({
+        Url = "https://amukerd.github.io/rbx-scripts/cdt/Icons/Icon_Module.json",
+        Method = "GET"
+    })
 
-        if res and res.Body then
-            IconModule = HttpService:JSONDecode(res.Body)
-        end
+    if res and res.Body then
+        IconModule = HttpService:JSONDecode(res.Body)
     end
 end)
 
@@ -158,3 +156,22 @@ OnOfferRemoved.OnClientEvent:Connect(function(player, offerId)
 end)
 
 print("Auto_Sell Executed")
+
+--[[
+local TradingUtil = require(ReplicatedStorage.Util.TradingUtil)
+local TradingHubServiceRemotes = require(ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes)
+local CustomizationItemsRemotes = require(ReplicatedStorage.Remotes.Services.CustomizationItemsRemotes)
+
+local allItems = CustomizationItemsRemotes.GetAll:InvokeServer()
+for category, items in pairs(allItems) do
+    for name, amount in pairs(items) do
+        if amount > 0 and TradingUtil.CanTradeCustomizationItem(player, category, name) then
+            local ok, err = TradingHubServiceRemotes.OfferAdd:InvokeServer({
+                Type = "Customization",
+                Category = category,
+                Name = name
+            }, PRICE)
+        end
+    end
+end
+]]--
