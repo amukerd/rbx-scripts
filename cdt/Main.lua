@@ -363,6 +363,8 @@ aVars.OnOfferRemovedEvent.OnClientEvent:Connect(function(player, offerId)
         currentRap = tonumber(rap) or currentRap
     end
 
+    print("Sold " .. data.ItemName)
+        
     sendWebhook(data.ItemName, data.Price, currentRap, nil, "Sold")
 
     aVars.ListedOffers[offerId] = nil
