@@ -166,7 +166,7 @@ local function sendWebhook(itemName, price, rapValue, sellerName, action)
         local imageUrl = "https://amukerd.github.io/rbx-scripts/cdt/Icons/" .. imageKey .. ".png"
 
         local embedData = {
-            title = aVars.LocalPlayer.Name .. " " .. action .. " Offer"
+            title = aVars.LocalPlayer.Name .. " " .. action .. " Offer",
             color = action == "Sold" and 255 or 16711680,
             fields = {
                 {
