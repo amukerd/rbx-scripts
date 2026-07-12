@@ -146,7 +146,7 @@ local function sendCheckIn()
     }
 
     pcall(function()
-        aVars.requestFunc({Url=CheckInWebhookURL,Method="POST",Headers={["Content-Type"]="application/json"},Body=aVars.HttpService:JSONEncode({embeds={embedData}})})
+        aVars.requestFunc({Url=aVars.CheckInWebhookURL,Method="POST",Headers={["Content-Type"]="application/json"},Body=aVars.HttpService:JSONEncode({embeds={embedData}})})
     end)
 end
 
