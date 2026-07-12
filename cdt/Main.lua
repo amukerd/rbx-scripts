@@ -314,6 +314,9 @@ local function listCars()
                             Id = car.Id
                         }, rap)
                     end)
+                    if listed then
+                        print("Listed", car.Name)
+                    end
                 end
             end
         end
