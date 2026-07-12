@@ -201,7 +201,7 @@ local function sendWebhook(itemName, price, rapValue, sellerName, action)
 
         pcall(function()
             aVars.requestFunc({
-                Url = WebhookURL,
+                Url = aVars.WebhookURL,
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
