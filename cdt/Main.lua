@@ -214,7 +214,7 @@ local function sendWebhook(itemName, price, rapValue, sellerName, action)
     end)
 end
 
---- auto buy functions ---
+--- auto buy function ---
 local function getRap(targetPlayer, offer)
     local offerId = offer.OfferId
     if not offerId or aVars.ProcessedBuyOffers[offerId] then return end
@@ -267,6 +267,7 @@ local function getRap(targetPlayer, offer)
     end
 end
 
+--- initial search loop ---
 
 for _, player in ipairs(aVars.Players:GetPlayers()) do
     if player ~= aVars.LocalPlayer then
@@ -282,6 +283,7 @@ for _, player in ipairs(aVars.Players:GetPlayers()) do
     end
 end
 
+--- auto buy main loop ---
 
 aVars.OnOfferAddedEvent.OnClientEvent:Connect(function(targetPlayer, offerTable)
     if not targetPlayer or typeof(offerTable) ~= "table" or targetPlayer == aVars.LocalPlayer then
@@ -291,23 +293,7 @@ aVars.OnOfferAddedEvent.OnClientEvent:Connect(function(targetPlayer, offerTable)
     task.spawn(getRap, targetPlayer, offerTable)
 end)
 
---- auto sell functions ---
-aVars.OnOfferAddedEvent.OnClientEvent:Connect(function(player, offerData)
-    if player ~= aVars.LocalPlayer then
-        return
-    end
-
-    if offerData.Item.Type ~= "Car" then
-        return
-    end
-
-    aVars.ListedOffers[offerData.OfferId] = {
-        ItemName = offerData.Item.Name,
-        Price = offerData.PriceInTokens,
-    }
-end)
-
-
+--- auto sell function ---
 local function listCars()
     local ownedCars = aVars.GetOwnedCarsRemote:InvokeServer()
 
@@ -332,16 +318,22 @@ local function listCars()
     end
 end
 
-task.spawn(function()
-    listCars()
+--- auto sell client events ---
 
-    while true do
-        task.wait(aVars.AutoSell.RefreshingListingsTime)
-        print("Refreshing cars")
-        listCars()
+aVars.OnOfferAddedEvent.OnClientEvent:Connect(function(player, offerData)
+    if player ~= aVars.LocalPlayer then
+        return
     end
-end)
 
+    if offerData.Item.Type ~= "Car" then
+        return
+    end
+
+    aVars.ListedOffers[offerData.OfferId] = {
+        ItemName = offerData.Item.Name,
+        Price = offerData.PriceInTokens,
+    }
+end)
 
 aVars.OnOfferRemovedEvent.OnClientEvent:Connect(function(player, offerId)
     if player ~= aVars.LocalPlayer then
@@ -368,10 +360,34 @@ aVars.OnOfferRemovedEvent.OnClientEvent:Connect(function(player, offerId)
     aVars.ListedOffers[offerId] = nil
 end)
 
+--- auto sell main loop ---
 
+task.spawn(function()
+    listCars()
 
+    while true do
+        task.wait(aVars.AutoSell.RefreshingListingsTime)
+        print("Refreshing cars")
+        listCars()
+    end
+end)
 
+--- maybe later ---
+--[[
+local TradingUtil = require(ReplicatedStorage.Util.TradingUtil)
+local TradingHubServiceRemotes = require(ReplicatedStorage.Remotes.Services.TradingHubServiceRemotes)
+local CustomizationItemsRemotes = require(ReplicatedStorage.Remotes.Services.CustomizationItemsRemotes)
 
-
-
-
+local allItems = CustomizationItemsRemotes.GetAll:InvokeServer()
+for category, items in pairs(allItems) do
+    for name, amount in pairs(items) do
+        if amount > 0 and TradingUtil.CanTradeCustomizationItem(player, category, name) then
+            local ok, err = TradingHubServiceRemotes.OfferAdd:InvokeServer({
+                Type = "Customization",
+                Category = category,
+                Name = name
+            }, PRICE)
+        end
+    end
+end
+]]--
