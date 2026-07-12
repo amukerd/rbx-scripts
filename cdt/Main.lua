@@ -156,6 +156,7 @@ task.spawn(function()
     sendCheckIn()
     while true do
         task.wait(1800)
+        print("Check In Sent")
         sendCheckIn()
     end
 end)
@@ -398,3 +399,5 @@ for category, items in pairs(allItems) do
     end
 end
 ]]--
+
+print("Script Initialized")
