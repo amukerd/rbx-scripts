@@ -3,6 +3,8 @@ Game : https://www.roblox.com/games/1554960397
 Coded by : Amukerd and most AI's
 ]]--
 
+task.wait(5)
+
 --- global variables ---
 aVars = {}
 aVars.Players = game:GetService("Players")
