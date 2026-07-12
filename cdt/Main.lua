@@ -307,11 +307,13 @@ local function listCars()
                 rap = tonumber(rap) or 0
 
                 if rap > aVars.AutoSell.MinRap and rap < aVars.AutoSell.MaxRap then
-                    local listed, err = aVars.OfferAddRemote:InvokeServer({
-                        Type = "Car",
-                        Name = car.Name,
-                        Id = car.Id
-                    }, rap)
+                    local listed, err = pcall(function()
+                        return aVars.OfferAddRemote:InvokeServer({
+                            Type = "Car",
+                            Name = car.Name,
+                            Id = car.Id
+                        }, rap)
+                    end)
                 end
             end
         end
