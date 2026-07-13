@@ -559,13 +559,13 @@ function Library:CreateWindow(title)
 
         function Tab:CreateTextbox(text, placeholder, callback)
             callback = callback or function() end
-
+        
             local Holder = create("Frame", {
-                Size = UDim2.new(1, 0, 0, 40), -- Increased height from 36
+                Size = UDim2.new(1, 0, 0, 40),
                 BackgroundColor3 = Theme.Secondary,
                 Parent = Section,
             }, { corner(6) })
-
+        
             create("TextLabel", {
                 Size = UDim2.new(0.4, -12, 1, 0),
                 Position = UDim2.new(0, 12, 0, 0),
@@ -577,31 +577,45 @@ function Library:CreateWindow(title)
                 TextXAlignment = Enum.TextXAlignment.Left,
                 Parent = Holder,
             })
-
-            local Box = create("TextBox", {
+        
+            local TextContainer = create("Frame", {
                 Size = UDim2.new(0.6, -12, 0, 28),
                 Position = UDim2.new(0.4, 0, 0.5, -14),
                 BackgroundColor3 = Theme.Background,
+                Parent = Holder,
+            }, { corner(6) })
+        
+            create("UIStroke", {
+                Color = Theme.Border,
+                Thickness = 1,
+                Parent = TextContainer
+            })
+        
+            local Box = create("TextBox", {
+                Size = UDim2.new(1, 0, 1, 0),
+                Position = UDim2.new(0, 0, 0, 0),
+                BackgroundTransparency = 1,
                 PlaceholderText = placeholder or "",
                 Text = "",
                 TextColor3 = Theme.Text,
                 PlaceholderColor3 = Theme.SubText,
                 Font = Enum.Font.Gotham,
                 TextSize = 13,
+                TextXAlignment = Enum.TextXAlignment.Left,
                 ClearTextOnFocus = false,
-                Parent = Holder,
-            }, { corner(5) })
-
-            create("UIStroke", {
-                Color = Theme.Border,
-                Thickness = 1,
+                Parent = TextContainer,
+            })
+        
+            create("UIPadding", {
+                PaddingLeft = UDim.new(0, 10),
+                PaddingRight = UDim.new(0, 10),
                 Parent = Box
             })
-
+        
             Box.FocusLost:Connect(function(enterPressed)
                 callback(Box.Text, enterPressed)
             end)
-
+        
             return Holder
         end
 
