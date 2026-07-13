@@ -47,7 +47,9 @@ local function corner(radius)
 end
 
 local function tween(inst, props, time)
-    TweenService:Create(inst, TweenInfo.new(time or 0.15, Enum.EasingStyle.Quad), props):Play()
+    local t = TweenService:Create(inst, TweenInfo.new(time or 0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), props)
+    t:Play()
+    return t
 end
 
 -- Makes `frame` draggable using `handle` as the grab region
@@ -81,8 +83,7 @@ local function makeDraggable(frame, handle)
 end
 
 -- Makes `frame` resizable by dragging a small handle at one of its corners
--- corner: "TopLeft", "TopRight", "BottomLeft", "BottomRight"
-local function makeResizable(frame, handle, corner, minSize)
+local function makeResizable(frame, handle, cornerName, minSize)
     minSize = minSize or Vector2.new(300, 200)
     local dragging = false
     local dragStart, startSize, startPos
@@ -111,10 +112,10 @@ local function makeResizable(frame, handle, corner, minSize)
             local newX = startPos.X.Offset
             local newY = startPos.Y.Offset
 
-            if corner == "BottomRight" then
+            if cornerName == "BottomRight" then
                 newWidth = math.max(minSize.X, startSize.X.Offset + delta.X)
                 newHeight = math.max(minSize.Y, startSize.Y.Offset + delta.Y)
-            elseif corner == "BottomLeft" then
+            elseif cornerName == "BottomLeft" then
                 newWidth = math.max(minSize.X, startSize.X.Offset - delta.X)
                 newHeight = math.max(minSize.Y, startSize.Y.Offset + delta.Y)
                 newX = startPos.X.Offset + (startSize.X.Offset - newWidth)
@@ -142,14 +143,14 @@ function Library:CreateWindow(title)
     local ScreenGui = create("ScreenGui", {
         Name = LIBRARY_NAME,
         ResetOnSpawn = false,
-        ZIndexBehavior = Enum.ZIndexBehavior.Global,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
         Parent = CoreGui,
     })
 
     local Main = create("Frame", {
         Name = "Main",
-        Size = UDim2.new(0, 550, 0, 380),
-        Position = UDim2.new(0.5, -275, 0.5, -190),
+        Size = UDim2.new(0, 560, 0, 400),
+        Position = UDim2.new(0.5, -280, 0.5, -200),
         BackgroundColor3 = Theme.Background,
         BorderSizePixel = 0,
         Parent = ScreenGui,
@@ -207,7 +208,7 @@ function Library:CreateWindow(title)
     })
 
     local TabListLayout = create("UIListLayout", {
-        Padding = UDim.new(0, 4),
+        Padding = UDim.new(0, 6),
         SortOrder = Enum.SortOrder.LayoutOrder,
         Parent = TabList,
     })
@@ -224,6 +225,7 @@ function Library:CreateWindow(title)
         Size = UDim2.new(1, -140, 1, -40),
         Position = UDim2.new(0, 140, 0, 40),
         BackgroundTransparency = 1,
+        ClipsDescendants = false,
         Parent = Main,
     })
 
@@ -259,7 +261,7 @@ function Library:CreateWindow(title)
     function Window:CreateTab(name)
         local TabButton = create("TextButton", {
             Name = name .. "TabButton",
-            Size = UDim2.new(1, 0, 0, 32),
+            Size = UDim2.new(1, 0, 0, 36), -- Made a bit taller
             BackgroundColor3 = Theme.Background,
             AutoButtonColor = false,
             Text = name,
@@ -280,11 +282,12 @@ function Library:CreateWindow(title)
             CanvasSize = UDim2.new(0, 0, 0, 0),
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
             Visible = false,
+            ClipsDescendants = false, -- Prevent dropdown menus from cropping
             Parent = SectionContainer,
         })
 
         local Layout = create("UIListLayout", {
-            Padding = UDim.new(0, 8),
+            Padding = UDim.new(0, 10), -- Extra padding space between objects
             SortOrder = Enum.SortOrder.LayoutOrder,
             Parent = Section,
         })
@@ -305,7 +308,6 @@ function Library:CreateWindow(title)
 
         Window.Tabs[name] = Tab
 
-        -- Auto-select first tab created
         if not Window.ActiveTab then
             selectTab()
         end
@@ -315,7 +317,7 @@ function Library:CreateWindow(title)
         function Tab:CreateButton(text, callback)
             callback = callback or function() end
             local Btn = create("TextButton", {
-                Size = UDim2.new(1, 0, 0, 36),
+                Size = UDim2.new(1, 0, 0, 40), -- Increased height from 36
                 BackgroundColor3 = Theme.Secondary,
                 AutoButtonColor = false,
                 Text = text,
@@ -341,7 +343,7 @@ function Library:CreateWindow(title)
             local state = default or false
 
             local Holder = create("Frame", {
-                Size = UDim2.new(1, 0, 0, 36),
+                Size = UDim2.new(1, 0, 0, 40), -- Increased height from 36
                 BackgroundColor3 = Theme.Secondary,
                 Parent = Section,
             }, { corner(6) })
@@ -396,14 +398,15 @@ function Library:CreateWindow(title)
             local open = false
 
             local Holder = create("Frame", {
-                Size = UDim2.new(1, 0, 0, 36),
+                Size = UDim2.new(1, 0, 0, 40), -- Base size elevated from 36
                 BackgroundColor3 = Theme.Secondary,
                 ClipsDescendants = false,
+                ZIndex = 10, -- Ensures dropdown content renders clearly over elements below it
                 Parent = Section,
             }, { corner(6) })
 
-            create("TextLabel", {
-                Size = UDim2.new(0.5, -12, 1, 0),
+            local TitleLabel = create("TextLabel", {
+                Size = UDim2.new(0.4, -12, 1, 0),
                 Position = UDim2.new(0, 12, 0, 0),
                 BackgroundTransparency = 1,
                 Text = text,
@@ -414,62 +417,139 @@ function Library:CreateWindow(title)
                 Parent = Holder,
             })
 
-            local SelectedLabel = create("TextButton", {
-                Size = UDim2.new(0.5, -12, 1, 0),
-                Position = UDim2.new(0.5, 0, 0, 0),
-                BackgroundTransparency = 1,
-                Text = tostring(selected) .. "  ▾",
-                TextColor3 = Theme.SubText,
-                Font = Enum.Font.Gotham,
-                TextSize = 14,
-                TextXAlignment = Enum.TextXAlignment.Right,
-                Parent = Holder,
-            })
-
-            local OptionList = create("Frame", {
-                Size = UDim2.new(1, 0, 0, #options * 30),
-                Position = UDim2.new(0, 0, 1, 4),
-                BackgroundColor3 = Theme.Secondary,
-                Visible = false,
-                ZIndex = 5,
+            -- Sleek interactive selector box container
+            local ComboContainer = create("Frame", {
+                Size = UDim2.new(0.6, -12, 0, 28),
+                Position = UDim2.new(0.4, 0, 0.5, -14),
+                BackgroundColor3 = Theme.Background,
                 Parent = Holder,
             }, { corner(6) })
 
-            local Toggle = create("TextButton", {
-                Size = UDim2.new(1, 0, 1, 0),
-                BackgroundTransparency = 1,
-                Text = "",
-                ZIndex = 2,
-                Parent = Holder,
+            local Stroke = create("UIStroke", {
+                Color = Theme.Border,
+                Thickness = 1,
+                Parent = ComboContainer
             })
-            
-            Toggle.MouseButton1Click:Connect(function()
-                open = not open
-                OptionList.Visible = open
-            end)
+
+            local SelectedLabel = create("TextLabel", {
+                Size = UDim2.new(1, -30, 1, 0),
+                Position = UDim2.new(0, 10, 0, 0),
+                BackgroundTransparency = 1,
+                Text = tostring(selected),
+                TextColor3 = Theme.SubText,
+                Font = Enum.Font.Gotham,
+                TextSize = 13,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Parent = ComboContainer,
+            })
+
+            local ArrowIcon = create("TextLabel", {
+                Size = UDim2.new(0, 20, 1, 0),
+                Position = UDim2.new(1, -24, 0, 0),
+                BackgroundTransparency = 1,
+                Text = "▼",
+                TextColor3 = Theme.SubText,
+                Font = Enum.Font.Gotham,
+                TextSize = 10,
+                TextYAlignment = Enum.TextYAlignment.Center,
+                TextXAlignment = Enum.TextXAlignment.Center,
+                Parent = ComboContainer,
+            })
+
+            -- Modern unified scrolling window for entries
+            local OptionList = create("ScrollingFrame", {
+                Size = UDim2.new(1, 0, 0, 0),
+                Position = UDim2.new(0, 0, 1, 4),
+                BackgroundColor3 = Theme.Background,
+                Visible = false,
+                BorderSizePixel = 0,
+                ScrollBarThickness = 4,
+                ScrollBarImageColor3 = Theme.Accent,
+                CanvasSize = UDim2.new(0, 0, 0, 0),
+                AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                ZIndex = 12,
+                Parent = ComboContainer,
+            }, { corner(6) })
+
+            create("UIStroke", {
+                Color = Theme.Border,
+                Thickness = 1,
+                Parent = OptionList
+            })
 
             local OptLayout = create("UIListLayout", {
                 SortOrder = Enum.SortOrder.LayoutOrder,
+                Padding = UDim.new(0, 2),
                 Parent = OptionList,
             })
 
-            for _, opt in ipairs(options) do
+            create("UIPadding", {
+                PaddingTop = UDim.new(0, 4),
+                PaddingBottom = UDim.new(0, 4),
+                PaddingLeft = UDim.new(0, 4),
+                PaddingRight = UDim.new(0, 4),
+                Parent = OptionList,
+            })
+
+            local ToggleButton = create("TextButton", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Text = "",
+                ZIndex = 3,
+                Parent = ComboContainer,
+            })
+
+            -- Calculate height based on options up to a max cutoff limit
+            local maxDisplayItems = math.min(#options, 5)
+            local targetHeight = (maxDisplayItems * 32) + 8
+
+            ToggleButton.MouseButton1Click:Connect(function()
+                open = not open
+                if open then
+                    OptionList.Visible = true
+                    tween(ArrowIcon, { Rotation = 180 }, 0.15)
+                    tween(OptionList, { Size = UDim2.new(1, 0, 0, targetHeight) }, 0.15)
+                else
+                    tween(ArrowIcon, { Rotation = 0 }, 0.15)
+                    local t = tween(OptionList, { Size = UDim2.new(1, 0, 0, 0) }, 0.15)
+                    t.Completed:Connect(function()
+                        if not open then OptionList.Visible = false end
+                    end)
+                end
+            end)
+
+            for i, opt in ipairs(options) do
                 local OptBtn = create("TextButton", {
                     Size = UDim2.new(1, 0, 0, 30),
-                    BackgroundColor3 = Theme.Secondary,
+                    BackgroundColor3 = Theme.Background,
                     AutoButtonColor = false,
-                    Text = tostring(opt),
+                    Text = "  " .. tostring(opt),
                     TextColor3 = Theme.Text,
                     Font = Enum.Font.Gotham,
                     TextSize = 13,
-                    ZIndex = 5,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    ZIndex = 13,
+                    LayoutOrder = i,
                     Parent = OptionList,
-                })
+                }, { corner(4) })
+
+                OptBtn.MouseEnter:Connect(function()
+                    tween(OptBtn, { BackgroundColor3 = Theme.Secondary, TextColor3 = Theme.Accent }, 0.1)
+                end)
+
+                OptBtn.MouseLeave:Connect(function()
+                    tween(OptBtn, { BackgroundColor3 = Theme.Background, TextColor3 = Theme.Text }, 0.1)
+                end)
+
                 OptBtn.MouseButton1Click:Connect(function()
                     selected = opt
-                    SelectedLabel.Text = tostring(opt) .. "  ▾"
-                    OptionList.Visible = false
+                    SelectedLabel.Text = tostring(opt)
                     open = false
+                    tween(ArrowIcon, { Rotation = 0 }, 0.15)
+                    local t = tween(OptionList, { Size = UDim2.new(1, 0, 0, 0) }, 0.15)
+                    t.Completed:Connect(function()
+                        if not open then OptionList.Visible = false end
+                    end)
                     callback(selected)
                 end)
             end
@@ -481,7 +561,7 @@ function Library:CreateWindow(title)
             callback = callback or function() end
 
             local Holder = create("Frame", {
-                Size = UDim2.new(1, 0, 0, 36),
+                Size = UDim2.new(1, 0, 0, 40), -- Increased height from 36
                 BackgroundColor3 = Theme.Secondary,
                 Parent = Section,
             }, { corner(6) })
@@ -499,8 +579,8 @@ function Library:CreateWindow(title)
             })
 
             local Box = create("TextBox", {
-                Size = UDim2.new(0.6, -12, 0, 26),
-                Position = UDim2.new(0.4, 0, 0.5, -13),
+                Size = UDim2.new(0.6, -12, 0, 28),
+                Position = UDim2.new(0.4, 0, 0.5, -14),
                 BackgroundColor3 = Theme.Background,
                 PlaceholderText = placeholder or "",
                 Text = "",
@@ -511,6 +591,12 @@ function Library:CreateWindow(title)
                 ClearTextOnFocus = false,
                 Parent = Holder,
             }, { corner(5) })
+
+            create("UIStroke", {
+                Color = Theme.Border,
+                Thickness = 1,
+                Parent = Box
+            })
 
             Box.FocusLost:Connect(function(enterPressed)
                 callback(Box.Text, enterPressed)
@@ -526,7 +612,7 @@ function Library:CreateWindow(title)
             local dragging = false
 
             local Holder = create("Frame", {
-                Size = UDim2.new(1, 0, 0, 46),
+                Size = UDim2.new(1, 0, 0, 48), -- Increased from 46
                 BackgroundColor3 = Theme.Secondary,
                 Parent = Section,
             }, { corner(6) })
@@ -571,7 +657,7 @@ function Library:CreateWindow(title)
                 end
             end)
 
-            handle.InputChanged:Connect(function(input)
+            UserInputService.InputChanged:Connect(function(input)
                 if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                     setFromX(input.Position.X)
                 end
