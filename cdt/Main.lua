@@ -56,6 +56,7 @@ aVars.FirstUnclaimed = nil
 --- tables ---
 aVars.IconModule = aVars.HttpService:JSONDecode(aVars.requestFunc({Url="https://amukerd.github.io/rbx-scripts/cdt/Icons/Icon_Module.json",Method="GET"}).Body)
 aVars.BoughtItems = {}
+aVars.PendingBuys = {}
 aVars.ProcessedBuyOffers = {}
 aVars.ListedOffers = {}
 
@@ -220,8 +221,11 @@ end
 --- auto buy function ---
 local function getRap(targetPlayer, offer)
     local offerId = offer.OfferId
-    if not offerId or aVars.ProcessedBuyOffers[offerId] then return end
-    aVars.ProcessedBuyOffers[offerId] = true
+    if not offerId then return end
+
+    if aVars.BoughtItems[offerId] or aVars.PendingBuys[offerId] then
+        return
+    end
 
     if offer.Item and (offer.Item.Type == "Car" or offer.Item.Type == "Customization") then
         local itemName = offer.Item.Name
@@ -233,7 +237,7 @@ local function getRap(targetPlayer, offer)
 
         local price = offer.PriceInTokens
 
-        if price and not aVars.BoughtItems[offerId] then
+        if price then
             task.wait(0.01)
 
             local rapSuccess, rapValue = pcall(function()
@@ -244,13 +248,17 @@ local function getRap(targetPlayer, offer)
                 if (rapValue >= aVars.AutoBuy.RapValueTop and price <= (rapValue * aVars.AutoBuy.RapPercentAbove)) 
                 or (rapValue >= aVars.AutoBuy.RapValueBottom and rapValue < aVars.AutoBuy.RapValueTop and price <= (rapValue * aVars.AutoBuy.RapPercentBelow)) then
                     
-                    aVars.BoughtItems[offerId] = true
+                    aVars.PendingBuys[offerId] = true
 
                     local buySuccess, result = pcall(function()
                         return aVars.OfferPurchaseRemote:InvokeServer(targetPlayer, offer)
                     end)
 
+                    aVars.PendingBuys[offerId] = nil
+
                     if buySuccess and result then
+                        aVars.BoughtItems[offerId] = true
+
                         print("Purchase Successful:", itemName, "from", targetPlayer.Name)
 
                         sendWebhook(
@@ -261,7 +269,6 @@ local function getRap(targetPlayer, offer)
                             "Bought"
                         )
                     else
-                        aVars.BoughtItems[offerId] = nil
                         warn("Purchase failed:", itemName, result)
                     end
                 end
