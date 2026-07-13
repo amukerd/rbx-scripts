@@ -5,6 +5,11 @@ local UIS = game:GetService("UserInputService")
 local Library = {}
 
 function Library:CreateWindow(title)
+    
+    local existing = game.CoreGui:FindFirstChild("SimpleUI")
+    if existing then
+        existing:Destroy()
+    end
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "SimpleUI"
