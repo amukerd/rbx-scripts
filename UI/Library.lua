@@ -142,7 +142,7 @@ function Library:CreateWindow(title)
     local ScreenGui = create("ScreenGui", {
         Name = LIBRARY_NAME,
         ResetOnSpawn = false,
-        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+        ZIndexBehavior = Enum.ZIndexBehavior.Global,
         Parent = CoreGui,
     })
 
