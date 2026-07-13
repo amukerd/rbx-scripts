@@ -6,13 +6,13 @@ local Library = {}
 
 function Library:CreateWindow(title)
     
-    local existing = game.CoreGui:FindFirstChild("SimpleUI")
+    local existing = game.CoreGui:FindFirstChild("UI")
     if existing then
         existing:Destroy()
     end
 
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "SimpleUI"
+    ScreenGui.Name = "UI"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.Parent = game.CoreGui
 
