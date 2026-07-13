@@ -144,6 +144,7 @@ function Library:CreateWindow(title)
         Name = LIBRARY_NAME,
         ResetOnSpawn = false,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+        IgnoreGuiInset = true, -- Ensures perfect absolute positioning for drop-downs
         Parent = CoreGui,
     })
 
@@ -153,6 +154,7 @@ function Library:CreateWindow(title)
         Position = UDim2.new(0.5, -280, 0.5, -200),
         BackgroundColor3 = Theme.Background,
         BorderSizePixel = 0,
+        ClipsDescendants = true, -- FIXED: Restricts items from spilling out of the window frame
         Parent = ScreenGui,
     }, { corner(10) })
 
@@ -225,7 +227,7 @@ function Library:CreateWindow(title)
         Size = UDim2.new(1, -140, 1, -40),
         Position = UDim2.new(0, 140, 0, 40),
         BackgroundTransparency = 1,
-        ClipsDescendants = false,
+        ClipsDescendants = true, -- FIXED: Restricts items to the active tab page viewport
         Parent = Main,
     })
 
@@ -261,7 +263,7 @@ function Library:CreateWindow(title)
     function Window:CreateTab(name)
         local TabButton = create("TextButton", {
             Name = name .. "TabButton",
-            Size = UDim2.new(1, 0, 0, 36), -- Made a bit taller
+            Size = UDim2.new(1, 0, 0, 36),
             BackgroundColor3 = Theme.Background,
             AutoButtonColor = false,
             Text = name,
@@ -282,12 +284,12 @@ function Library:CreateWindow(title)
             CanvasSize = UDim2.new(0, 0, 0, 0),
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
             Visible = false,
-            ClipsDescendants = false, -- Prevent dropdown menus from cropping
+            ClipsDescendants = true, -- FIXED: Hides scrolled out elements perfectly
             Parent = SectionContainer,
         })
 
         local Layout = create("UIListLayout", {
-            Padding = UDim.new(0, 10), -- Extra padding space between objects
+            Padding = UDim.new(0, 10),
             SortOrder = Enum.SortOrder.LayoutOrder,
             Parent = Section,
         })
@@ -317,7 +319,7 @@ function Library:CreateWindow(title)
         function Tab:CreateButton(text, callback)
             callback = callback or function() end
             local Btn = create("TextButton", {
-                Size = UDim2.new(1, 0, 0, 40), -- Increased height from 36
+                Size = UDim2.new(1, 0, 0, 40),
                 BackgroundColor3 = Theme.Secondary,
                 AutoButtonColor = false,
                 Text = text,
@@ -343,7 +345,7 @@ function Library:CreateWindow(title)
             local state = default or false
 
             local Holder = create("Frame", {
-                Size = UDim2.new(1, 0, 0, 40), -- Increased height from 36
+                Size = UDim2.new(1, 0, 0, 40),
                 BackgroundColor3 = Theme.Secondary,
                 Parent = Section,
             }, { corner(6) })
@@ -398,10 +400,8 @@ function Library:CreateWindow(title)
             local open = false
 
             local Holder = create("Frame", {
-                Size = UDim2.new(1, 0, 0, 40), -- Base size elevated from 36
+                Size = UDim2.new(1, 0, 0, 40),
                 BackgroundColor3 = Theme.Secondary,
-                ClipsDescendants = false,
-                ZIndex = 10, -- Ensures dropdown content renders clearly over elements below it
                 Parent = Section,
             }, { corner(6) })
 
@@ -417,7 +417,6 @@ function Library:CreateWindow(title)
                 Parent = Holder,
             })
 
-            -- Sleek interactive selector box container
             local ComboContainer = create("Frame", {
                 Size = UDim2.new(0.6, -12, 0, 28),
                 Position = UDim2.new(0.4, 0, 0.5, -14),
@@ -456,10 +455,9 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
 
-            -- Modern unified scrolling window for entries
+            -- FIXED: OptionList is parented to ScreenGui so it is NEVER clipped by ScrollingFrames
             local OptionList = create("ScrollingFrame", {
-                Size = UDim2.new(1, 0, 0, 0),
-                Position = UDim2.new(0, 0, 1, 4),
+                Size = UDim2.new(0, 0, 0, 0),
                 BackgroundColor3 = Theme.Background,
                 Visible = false,
                 BorderSizePixel = 0,
@@ -467,8 +465,8 @@ function Library:CreateWindow(title)
                 ScrollBarImageColor3 = Theme.Accent,
                 CanvasSize = UDim2.new(0, 0, 0, 0),
                 AutomaticCanvasSize = Enum.AutomaticSize.Y,
-                ZIndex = 12,
-                Parent = ComboContainer,
+                ZIndex = 99999, -- Absolute highest priority overlay
+                Parent = ScreenGui,
             }, { corner(6) })
 
             create("UIStroke", {
@@ -499,23 +497,41 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
 
-            -- Calculate height based on options up to a max cutoff limit
             local maxDisplayItems = math.min(#options, 5)
             local targetHeight = (maxDisplayItems * 32) + 8
+
+            -- Helper to position dropdown accurately on screen
+            local function updateDropdownPosition()
+                local absPos = ComboContainer.AbsolutePosition
+                local absSize = ComboContainer.AbsoluteSize
+                OptionList.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 4)
+                OptionList.Size = UDim2.new(0, absSize.X, 0, OptionList.Size.Y.Offset)
+            end
+
+            local function closeDropdown()
+                open = false
+                tween(ArrowIcon, { Rotation = 0 }, 0.15)
+                local t = tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, 0) }, 0.15)
+                t.Completed:Connect(function()
+                    if not open then OptionList.Visible = false end
+                end)
+            end
 
             ToggleButton.MouseButton1Click:Connect(function()
                 open = not open
                 if open then
                     OptionList.Visible = true
+                    updateDropdownPosition()
                     tween(ArrowIcon, { Rotation = 180 }, 0.15)
-                    tween(OptionList, { Size = UDim2.new(1, 0, 0, targetHeight) }, 0.15)
+                    tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, targetHeight) }, 0.15)
                 else
-                    tween(ArrowIcon, { Rotation = 0 }, 0.15)
-                    local t = tween(OptionList, { Size = UDim2.new(1, 0, 0, 0) }, 0.15)
-                    t.Completed:Connect(function()
-                        if not open then OptionList.Visible = false end
-                    end)
+                    closeDropdown()
                 end
+            end)
+
+            -- Automatically close dropdown when scrolling section so it doesn't float away
+            Section:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
+                if open then closeDropdown() end
             end)
 
             for i, opt in ipairs(options) do
@@ -528,7 +544,7 @@ function Library:CreateWindow(title)
                     Font = Enum.Font.Gotham,
                     TextSize = 13,
                     TextXAlignment = Enum.TextXAlignment.Left,
-                    ZIndex = 13,
+                    ZIndex = 100000,
                     LayoutOrder = i,
                     Parent = OptionList,
                 }, { corner(4) })
@@ -544,12 +560,7 @@ function Library:CreateWindow(title)
                 OptBtn.MouseButton1Click:Connect(function()
                     selected = opt
                     SelectedLabel.Text = tostring(opt)
-                    open = false
-                    tween(ArrowIcon, { Rotation = 0 }, 0.15)
-                    local t = tween(OptionList, { Size = UDim2.new(1, 0, 0, 0) }, 0.15)
-                    t.Completed:Connect(function()
-                        if not open then OptionList.Visible = false end
-                    end)
+                    closeDropdown()
                     callback(selected)
                 end)
             end
@@ -559,13 +570,13 @@ function Library:CreateWindow(title)
 
         function Tab:CreateTextbox(text, placeholder, callback)
             callback = callback or function() end
-        
+
             local Holder = create("Frame", {
                 Size = UDim2.new(1, 0, 0, 40),
                 BackgroundColor3 = Theme.Secondary,
                 Parent = Section,
             }, { corner(6) })
-        
+
             create("TextLabel", {
                 Size = UDim2.new(0.4, -12, 1, 0),
                 Position = UDim2.new(0, 12, 0, 0),
@@ -577,20 +588,20 @@ function Library:CreateWindow(title)
                 TextXAlignment = Enum.TextXAlignment.Left,
                 Parent = Holder,
             })
-        
+
             local TextContainer = create("Frame", {
                 Size = UDim2.new(0.6, -12, 0, 28),
                 Position = UDim2.new(0.4, 0, 0.5, -14),
                 BackgroundColor3 = Theme.Background,
                 Parent = Holder,
             }, { corner(6) })
-        
+
             create("UIStroke", {
                 Color = Theme.Border,
                 Thickness = 1,
                 Parent = TextContainer
             })
-        
+
             local Box = create("TextBox", {
                 Size = UDim2.new(1, 0, 1, 0),
                 Position = UDim2.new(0, 0, 0, 0),
@@ -605,17 +616,17 @@ function Library:CreateWindow(title)
                 ClearTextOnFocus = false,
                 Parent = TextContainer,
             })
-        
+
             create("UIPadding", {
                 PaddingLeft = UDim.new(0, 10),
                 PaddingRight = UDim.new(0, 10),
                 Parent = Box
             })
-        
+
             Box.FocusLost:Connect(function(enterPressed)
                 callback(Box.Text, enterPressed)
             end)
-        
+
             return Holder
         end
 
@@ -626,7 +637,7 @@ function Library:CreateWindow(title)
             local dragging = false
 
             local Holder = create("Frame", {
-                Size = UDim2.new(1, 0, 0, 48), -- Increased from 46
+                Size = UDim2.new(1, 0, 0, 48),
                 BackgroundColor3 = Theme.Secondary,
                 Parent = Section,
             }, { corner(6) })
