@@ -435,6 +435,19 @@ function Library:CreateWindow(title)
                 Parent = Holder,
             }, { corner(6) })
 
+            local Toggle = create("TextButton", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Text = "",
+                ZIndex = 2,
+                Parent = Holder,
+            })
+            
+            Toggle.MouseButton1Click:Connect(function()
+                open = not open
+                OptionList.Visible = open
+            end)
+
             local OptLayout = create("UIListLayout", {
                 SortOrder = Enum.SortOrder.LayoutOrder,
                 Parent = OptionList,
@@ -460,11 +473,6 @@ function Library:CreateWindow(title)
                     callback(selected)
                 end)
             end
-
-            SelectedLabel.MouseButton1Click:Connect(function()
-                open = not open
-                OptionList.Visible = open
-            end)
 
             return Holder
         end
