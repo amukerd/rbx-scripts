@@ -118,15 +118,6 @@ local function makeResizable(frame, handle, corner, minSize)
                 newWidth = math.max(minSize.X, startSize.X.Offset - delta.X)
                 newHeight = math.max(minSize.Y, startSize.Y.Offset + delta.Y)
                 newX = startPos.X.Offset + (startSize.X.Offset - newWidth)
-            elseif corner == "TopRight" then
-                newWidth = math.max(minSize.X, startSize.X.Offset + delta.X)
-                newHeight = math.max(minSize.Y, startSize.Y.Offset - delta.Y)
-                newY = startPos.Y.Offset + (startSize.Y.Offset - newHeight)
-            elseif corner == "TopLeft" then
-                newWidth = math.max(minSize.X, startSize.X.Offset - delta.X)
-                newHeight = math.max(minSize.Y, startSize.Y.Offset - delta.Y)
-                newX = startPos.X.Offset + (startSize.X.Offset - newWidth)
-                newY = startPos.Y.Offset + (startSize.Y.Offset - newHeight)
             end
 
             frame.Size = UDim2.new(0, newWidth, 0, newHeight)
@@ -239,8 +230,6 @@ function Library:CreateWindow(title)
     -- Resize handles at each corner
     local handleSize = 32
     local corners = {
-        { name = "TopLeft",     anchor = Vector2.new(0, 0), pos = UDim2.new(0, 0, 0, 0) },
-        { name = "TopRight",    anchor = Vector2.new(1, 0), pos = UDim2.new(1, -handleSize, 0, 0) },
         { name = "BottomLeft",  anchor = Vector2.new(0, 1), pos = UDim2.new(0, 0, 1, -handleSize) },
         { name = "BottomRight", anchor = Vector2.new(1, 1), pos = UDim2.new(1, -handleSize, 1, -handleSize) },
     }
