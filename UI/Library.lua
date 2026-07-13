@@ -55,7 +55,7 @@ local function makeDraggable(frame, handle)
     local dragging = false
     local dragStart, startPos
 
-    UserInputService.InputBegan:Connect(function(input)
+    handle.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
@@ -87,7 +87,7 @@ local function makeResizable(frame, handle, corner, minSize)
     local dragging = false
     local dragStart, startSize, startPos
 
-    UserInputService.InputBegan:Connect(function(input)
+    handle.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
