@@ -55,17 +55,17 @@ local function makeDraggable(frame, handle)
     local dragging = false
     local dragStart, startPos
 
-    handle.InputBegan:Connect(function(input)
+    UserInputService.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
             startPos = frame.Position
+        end
+    end)
 
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
         end
     end)
 
@@ -93,12 +93,12 @@ local function makeResizable(frame, handle, corner, minSize)
             dragStart = input.Position
             startSize = frame.Size
             startPos = frame.Position
+        end
+    end)
 
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
         end
     end)
 
@@ -237,7 +237,7 @@ function Library:CreateWindow(title)
     })
 
     -- Resize handles at each corner
-    local handleSize = 16
+    local handleSize = 32
     local corners = {
         { name = "TopLeft",     anchor = Vector2.new(0, 0), pos = UDim2.new(0, 0, 0, 0) },
         { name = "TopRight",    anchor = Vector2.new(1, 0), pos = UDim2.new(1, -handleSize, 0, 0) },
