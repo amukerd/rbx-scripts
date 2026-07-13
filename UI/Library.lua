@@ -69,7 +69,7 @@ local function makeDraggable(frame, handle)
         end
     end)
 
-    handle.InputChanged:Connect(function(input)
+    UserInputService.InputChanged:Connect(function(input)
         if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - dragStart
             frame.Position = UDim2.new(
@@ -87,7 +87,7 @@ local function makeResizable(frame, handle, corner, minSize)
     local dragging = false
     local dragStart, startSize, startPos
 
-    handle.InputBegan:Connect(function(input)
+    UserInputService.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
@@ -102,7 +102,7 @@ local function makeResizable(frame, handle, corner, minSize)
         end
     end)
 
-    handle.InputChanged:Connect(function(input)
+    UserInputService.InputChanged:Connect(function(input)
         if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - dragStart
 
