@@ -684,6 +684,67 @@ function Library:CreateWindow(title)
             return Holder
         end
 
+        function Tab:CreateSpacer(text)
+            local Holder = create("Frame", {
+                Size = UDim2.new(1, 0, 0, 24),
+                BackgroundTransparency = 1,
+                Parent = Section,
+            })
+        
+            local Layout = create("UIListLayout", {
+                FillDirection = Enum.FillDirection.Horizontal,
+                HorizontalAlignment = Enum.HorizontalAlignment.Center,
+                VerticalAlignment = Enum.VerticalAlignment.Center,
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Padding = UDim.new(0, 10),
+                Parent = Holder,
+            })
+        
+            local LeftLine = create("Frame", {
+                Size = UDim2.new(0.5, -10, 0, 1),
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                BackgroundTransparency = 0.7,
+                BorderSizePixel = 0,
+                LayoutOrder = 1,
+                Parent = Holder,
+            })
+        
+            local Label = create("TextLabel", {
+                Size = UDim2.new(0, 0, 1, 0),
+                AutomaticSize = Enum.AutomaticSize.X,
+                BackgroundTransparency = 1,
+                Text = text or "",
+                TextColor3 = Theme.Text,
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                TextYAlignment = Enum.TextYAlignment.Center,
+                LayoutOrder = 2,
+                Parent = Holder,
+            })
+        
+            local RightLine = create("Frame", {
+                Size = UDim2.new(0.5, -10, 0, 1),
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                BackgroundTransparency = 0.7,
+                BorderSizePixel = 0,
+                LayoutOrder = 3,
+                Parent = Holder,
+            })
+        
+            local function adjustLineWidths()
+                local textWidth = Label.AbsoluteSize.X
+                local spacing = (Holder.AbsoluteSize.X - textWidth - 20) / 2
+                LeftLine.Size = UDim2.new(0, spacing, 0, 1)
+                RightLine.Size = UDim2.new(0, spacing, 0, 1)
+            end
+        
+            Label:GetPropertyChangedSignal("AbsoluteSize"):Connect(adjustLineWidths)
+            Holder:GetPropertyChangedSignal("AbsoluteSize"):Connect(adjustLineWidths)
+            task.spawn(adjustLineWidths)
+        
+            return Holder
+        end
+
         return Tab
     end
 
