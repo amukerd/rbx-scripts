@@ -11,6 +11,8 @@ Tab1:CreateToggle("Enable X", false, function(state)
     print(state)
 end)
 
+Tab1:CreateSpacer("Spacer")
+
 Tab1:CreateDropdown("Mode", {"A","B","C"}, "A", function(choice)
     print(choice) 
 end)
