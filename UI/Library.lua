@@ -420,6 +420,16 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer
             })
         
+            local CornerFlattener = create("Frame", {
+                Size = UDim2.new(1, 0, 0, 6),
+                Position = UDim2.new(0, 0, 1, -6),
+                BackgroundColor3 = Theme.Background,
+                BorderSizePixel = 0,
+                Visible = false,
+                ZIndex = 4,
+                Parent = ComboContainer,
+            })
+        
             local SelectedLabel = create("TextLabel", {
                 Size = UDim2.new(1, -30, 1, 0),
                 Position = UDim2.new(0, 10, 0, 0),
@@ -429,6 +439,7 @@ function Library:CreateWindow(title)
                 Font = Enum.Font.Gotham,
                 TextSize = 13,
                 TextXAlignment = Enum.TextXAlignment.Left,
+                ZIndex = 5,
                 Parent = ComboContainer,
             })
         
@@ -436,29 +447,27 @@ function Library:CreateWindow(title)
                 Size = UDim2.new(0, 20, 1, 0),
                 Position = UDim2.new(1, -24, 0, 0),
                 BackgroundTransparency = 1,
-                Text = "▼",
+                Text = "◄",
+                Rotation = 0,
                 TextColor3 = Theme.SubText,
                 Font = Enum.Font.Gotham,
                 TextSize = 10,
                 TextYAlignment = Enum.TextYAlignment.Center,
                 TextXAlignment = Enum.TextXAlignment.Center,
+                ZIndex = 5,
                 Parent = ComboContainer,
             })
         
-            local OptionList = create("ScrollingFrame", {
+            local OptionList = create("Frame", {
                 Size = UDim2.new(0, 0, 0, 0),
                 BackgroundColor3 = Theme.Background,
                 Visible = false,
                 BorderSizePixel = 0,
-                ScrollBarThickness = 4,
-                ScrollBarImageColor3 = Theme.Accent,
-                CanvasSize = UDim2.new(0, 0, 0, 0),
-                AutomaticCanvasSize = Enum.AutomaticSize.Y,
                 ZIndex = 99999,
                 Parent = ScreenGui,
             }, { corner(6) })
         
-            create("UIStroke", {
+            local ListStroke = create("UIStroke", {
                 Color = Theme.Border,
                 Thickness = 1,
                 Parent = OptionList
@@ -466,15 +475,7 @@ function Library:CreateWindow(title)
         
             local OptLayout = create("UIListLayout", {
                 SortOrder = Enum.SortOrder.LayoutOrder,
-                Padding = UDim.new(0, 2),
-                Parent = OptionList,
-            })
-        
-            create("UIPadding", {
-                PaddingTop = UDim.new(0, 4),
-                PaddingBottom = UDim.new(0, 4),
-                PaddingLeft = UDim.new(0, 4),
-                PaddingRight = UDim.new(0, 4),
+                Padding = UDim.new(0, 0),
                 Parent = OptionList,
             })
         
@@ -482,24 +483,26 @@ function Library:CreateWindow(title)
                 Size = UDim2.new(1, 0, 1, 0),
                 BackgroundTransparency = 1,
                 Text = "",
-                ZIndex = 3,
+                ZIndex = 6,
                 Parent = ComboContainer,
             })
         
-            local maxDisplayItems = math.min(#options, 5)
-            local targetHeight = (maxDisplayItems * 32) + 8
+            local targetHeight = (#options * 30)
         
             local function updateDropdownPosition()
                 local absPos = ComboContainer.AbsolutePosition
                 local absSize = ComboContainer.AbsoluteSize
-                OptionList.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 4)
+                local inset = game:GetService("GuiService"):GetGuiInset()
+        
+                OptionList.Position = UDim2.new(0, absPos.X - inset.X, 0, (absPos.Y + absSize.Y) - inset.Y - 1)
                 OptionList.Size = UDim2.new(0, absSize.X, 0, OptionList.Size.Y.Offset)
             end
         
             local function closeDropdown()
                 open = false
-                tween(ArrowIcon, { Rotation = 0 }, 0.15)
-                local t = tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, 0) }, 0.15)
+                CornerFlattener.Visible = false
+                tween(ArrowIcon, { Rotation = 0 }, 0.12)
+                local t = tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, 0) }, 0.12)
                 t.Completed:Connect(function()
                     if not open then OptionList.Visible = false end
                 end)
@@ -509,9 +512,10 @@ function Library:CreateWindow(title)
                 open = not open
                 if open then
                     OptionList.Visible = true
+                    CornerFlattener.Visible = true
                     updateDropdownPosition()
-                    tween(ArrowIcon, { Rotation = 180 }, 0.15)
-                    tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, targetHeight) }, 0.15)
+                    tween(ArrowIcon, { Rotation = -90 }, 0.12)
+                    tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, targetHeight) }, 0.12)
                 else
                     closeDropdown()
                 end
@@ -522,20 +526,16 @@ function Library:CreateWindow(title)
             end)
         
             local clickConnection
-            clickConnection = UserInputService.InputBegan:Connect(function(input)
+            clickConnection = game:GetService("UserInputService").InputBegan:Connect(function(input)
                 if not open then return end
-                
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    local mPos = UserInputService:GetMouseLocation() -- Gets actual mouse coordinates (accounts for TopBar inset)
-                    
+                    local mPos = game:GetService("UserInputService"):GetMouseLocation()
                     local function isInside(gui)
                         if not gui or not gui.Visible then return false end
                         local pos = gui.AbsolutePosition
                         local size = gui.AbsoluteSize
-                        return mPos.X >= pos.X and mPos.X <= (pos.X + size.X) and
-                               mPos.Y >= pos.Y and mPos.Y <= (pos.Y + size.Y)
+                        return mPos.X >= pos.X and mPos.X <= (pos.X + size.X) and mPos.Y >= pos.Y and mPos.Y <= (pos.Y + size.Y)
                     end
-        
                     if not isInside(ComboContainer) and not isInside(OptionList) then
                         closeDropdown()
                     end
@@ -551,7 +551,7 @@ function Library:CreateWindow(title)
                     Size = UDim2.new(1, 0, 0, 30),
                     BackgroundColor3 = Theme.Background,
                     AutoButtonColor = false,
-                    Text = "  " .. tostring(opt),
+                    Text = "   " .. tostring(opt),
                     TextColor3 = Theme.Text,
                     Font = Enum.Font.Gotham,
                     TextSize = 13,
@@ -559,14 +559,24 @@ function Library:CreateWindow(title)
                     ZIndex = 100000,
                     LayoutOrder = i,
                     Parent = OptionList,
-                }, { corner(4) })
+                })
+        
+                if i == #options then
+                    create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = OptBtn })
+                    create("Frame", {
+                        Size = UDim2.new(1, 0, 0, 4),
+                        BackgroundColor3 = Theme.Background,
+                        BorderSizePixel = 0,
+                        Parent = OptBtn
+                    })
+                end
         
                 OptBtn.MouseEnter:Connect(function()
-                    tween(OptBtn, { BackgroundColor3 = Theme.Secondary, TextColor3 = Theme.Accent }, 0.1)
+                    tween(OptBtn, { BackgroundColor3 = Theme.Secondary, TextColor3 = Theme.Accent }, 0.08)
                 end)
         
                 OptBtn.MouseLeave:Connect(function()
-                    tween(OptBtn, { BackgroundColor3 = Theme.Background, TextColor3 = Theme.Text }, 0.1)
+                    tween(OptBtn, { BackgroundColor3 = Theme.Background, TextColor3 = Theme.Text }, 0.08)
                 end)
         
                 OptBtn.MouseButton1Click:Connect(function()
