@@ -8,7 +8,7 @@ local TweenService = game:GetService("TweenService")
 
 local LIBRARY_NAME = "KERDUI"
 
--- ===== Cleanup: destroy any previous instance so re-executing refreshes cleanly =====
+-- ===== Cleanup ===== --
 local existing = CoreGui:FindFirstChild(LIBRARY_NAME)
 if existing then
     existing:Destroy()
@@ -17,7 +17,7 @@ end
 local Library = {}
 Library.__index = Library
 
--- ===== Helpers =====
+-- ===== Helpers ===== --
 
 local function create(class, props, children)
     local inst = Instance.new(class)
@@ -40,7 +40,7 @@ local function tween(inst, props, time)
     return t
 end
 
--- Makes `frame` draggable using `handle` as the grab region
+-- Draggable
 local function makeDraggable(frame, handle)
     local dragging = false
     local dragStart, startPos
@@ -70,7 +70,7 @@ local function makeDraggable(frame, handle)
     end)
 end
 
--- Makes `frame` resizable by dragging a small handle at one of its corners
+-- Resizable
 local function makeResizable(frame, handle, cornerName, minSize)
     minSize = minSize or Vector2.new(300, 200)
     local dragging = false
@@ -115,7 +115,7 @@ local function makeResizable(frame, handle, cornerName, minSize)
     end)
 end
 
--- ===== Theme =====
+-- ===== Theme ===== --
 local Theme = {
     Background = Color3.fromRGB(24, 24, 27),
     Secondary = Color3.fromRGB(32, 32, 36),
@@ -125,14 +125,14 @@ local Theme = {
     SubText = Color3.fromRGB(160, 160, 168),
 }
 
--- ===== Window =====
+-- ===== Window ===== --
 
 function Library:CreateWindow(title)
     local ScreenGui = create("ScreenGui", {
         Name = LIBRARY_NAME,
         ResetOnSpawn = false,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-        IgnoreGuiInset = true, -- Ensures perfect absolute positioning for drop-downs
+        IgnoreGuiInset = true,
         Parent = CoreGui,
     })
 
@@ -142,18 +142,16 @@ function Library:CreateWindow(title)
         Position = UDim2.new(0.5, -280, 0.5, -200),
         BackgroundColor3 = Theme.Background,
         BorderSizePixel = 0,
-        ClipsDescendants = true, -- FIXED: Restricts items from spilling out of the window frame
+        ClipsDescendants = true,
         Parent = ScreenGui,
     }, { corner(10) })
 
-    -- subtle outline
     create("UIStroke", {
         Color = Theme.Border,
         Thickness = 1,
         Parent = Main,
     })
 
-    -- Top bar
     local TopBar = create("Frame", {
         Name = "TopBar",
         Size = UDim2.new(1, 0, 0, 40),
@@ -162,7 +160,6 @@ function Library:CreateWindow(title)
         Parent = Main,
     }, { corner(10) })
 
-    -- cover bottom corners of topbar so it looks flush, not rounded at the bottom
     create("Frame", {
         Size = UDim2.new(1, 0, 0, 10),
         Position = UDim2.new(0, 0, 1, -10),
@@ -215,11 +212,11 @@ function Library:CreateWindow(title)
         Size = UDim2.new(1, -140, 1, -40),
         Position = UDim2.new(0, 140, 0, 40),
         BackgroundTransparency = 1,
-        ClipsDescendants = true, -- FIXED: Restricts items to the active tab page viewport
+        ClipsDescendants = true,
         Parent = Main,
     })
 
-    -- Resize handles at each corner
+    -- Resize handles
     local handleSize = 32
     local corners = {
         { name = "BottomLeft",  anchor = Vector2.new(0, 1), pos = UDim2.new(0, 0, 1, -handleSize) },
@@ -247,7 +244,7 @@ function Library:CreateWindow(title)
         ActiveTab = nil,
     }, { __index = {} })
 
-    -- ===== Tab creation =====
+    -- ===== Tab creation ===== --
     function Window:CreateTab(name)
         local TabButton = create("TextButton", {
             Name = name .. "TabButton",
@@ -302,7 +299,7 @@ function Library:CreateWindow(title)
             selectTab()
         end
 
-        -- ===== Controls =====
+        -- ===== Controls ===== --
 
         function Tab:CreateButton(text, callback)
             callback = callback or function() end
@@ -443,7 +440,6 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
 
-            -- FIXED: OptionList is parented to ScreenGui so it is NEVER clipped by ScrollingFrames
             local OptionList = create("ScrollingFrame", {
                 Size = UDim2.new(0, 0, 0, 0),
                 BackgroundColor3 = Theme.Background,
@@ -453,7 +449,7 @@ function Library:CreateWindow(title)
                 ScrollBarImageColor3 = Theme.Accent,
                 CanvasSize = UDim2.new(0, 0, 0, 0),
                 AutomaticCanvasSize = Enum.AutomaticSize.Y,
-                ZIndex = 99999, -- Absolute highest priority overlay
+                ZIndex = 99999,
                 Parent = ScreenGui,
             }, { corner(6) })
 
@@ -488,7 +484,6 @@ function Library:CreateWindow(title)
             local maxDisplayItems = math.min(#options, 5)
             local targetHeight = (maxDisplayItems * 32) + 8
 
-            -- Helper to position dropdown accurately on screen
             local function updateDropdownPosition()
                 local absPos = ComboContainer.AbsolutePosition
                 local absSize = ComboContainer.AbsoluteSize
@@ -517,7 +512,6 @@ function Library:CreateWindow(title)
                 end
             end)
 
-            -- Automatically close dropdown when scrolling section so it doesn't float away
             Section:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
                 if open then closeDropdown() end
             end)
