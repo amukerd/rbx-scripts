@@ -275,7 +275,7 @@ function Library:CreateWindow(title)
 
         local Section = create("ScrollingFrame", {
             Name = name .. "Section",
-            Size = UDim2.new(1, -20, 1, -20),
+            Size = UDim2.new(1, -12, 1, -20),
             Position = UDim2.new(0, 10, 0, 10),
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
@@ -284,7 +284,7 @@ function Library:CreateWindow(title)
             CanvasSize = UDim2.new(0, 0, 0, 0),
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
             Visible = false,
-            ClipsDescendants = true, -- FIXED: Hides scrolled out elements perfectly
+            ClipsDescendants = true,
             Parent = SectionContainer,
         })
 
