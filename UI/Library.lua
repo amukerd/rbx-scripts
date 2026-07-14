@@ -470,7 +470,7 @@ function Library:CreateWindow(title)
                 ClipsDescendants = true,
                 Visible = false,
                 ZIndex = 99999,
-                Parent = ScreenGui,
+                Parent = Main,
             }, { corner(6) })
         
             create("UIStroke", {
@@ -498,7 +498,8 @@ function Library:CreateWindow(title)
             local function updateDropdownPosition()
                 local absPos = ComboContainer.AbsolutePosition
                 local absSize = ComboContainer.AbsoluteSize
-                OptionList.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 4)
+                local mainPos = Main.AbsolutePosition
+                OptionList.Position = UDim2.new(0, absPos.X - mainPos.X, 0, (absPos.Y - mainPos.Y) + absSize.Y + 4)
                 OptionList.Size = UDim2.new(0, absSize.X, 0, OptionList.Size.Y.Offset)
             end
         
