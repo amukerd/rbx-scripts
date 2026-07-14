@@ -395,7 +395,7 @@ function Library:CreateWindow(title)
                 Parent = Section,
             }, { corner(6) })
         
-            local TitleLabel = create("TextLabel", {
+            create("TextLabel", {
                 Size = UDim2.new(0.4, -12, 1, 0),
                 Position = UDim2.new(0, 12, 0, 0),
                 BackgroundTransparency = 1,
@@ -415,13 +415,14 @@ function Library:CreateWindow(title)
                 Parent = Holder,
             }, { corner(6) })
         
-            local Stroke = create("UIStroke", {
+            create("UIStroke", {
                 Color = Theme.Border,
                 Thickness = 1,
-                Parent = ComboContainer
+                Parent = ComboContainer,
             })
         
-            -- Sneaky invisible frame that hides the bottom rounded corners when open
+            -- Hides the bottom rounded corners of ComboContainer while open, so it
+            -- reads as one continuous shape with the list below it
             local CornerFlattener = create("Frame", {
                 Size = UDim2.new(1, 0, 0, 6),
                 Position = UDim2.new(0, 0, 1, -6),
@@ -445,12 +446,11 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
         
-            -- Dynamic indicator arrow (No rotation math, changes text characters instead)
             local ArrowIcon = create("TextLabel", {
                 Size = UDim2.new(0, 20, 1, 0),
                 Position = UDim2.new(1, -24, 0, 0),
                 BackgroundTransparency = 1,
-                Text = "◄", -- Left arrow when closed
+                Text = "◄",
                 TextColor3 = Theme.SubText,
                 Font = Enum.Font.Gotham,
                 TextSize = 10,
@@ -460,24 +460,27 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
         
-            -- The item list container
+            -- Option list — parented to ScreenGui so it can float above other rows.
+            -- AnchorPoint stays (0,0) and only Size.Y animates, so it always grows
+            -- downward from a fixed top position instead of drifting upward.
             local OptionList = create("Frame", {
+                AnchorPoint = Vector2.new(0, 0),
                 Size = UDim2.new(0, 0, 0, 0),
                 BackgroundColor3 = Theme.Background,
-                Visible = false,
                 BorderSizePixel = 0,
+                ClipsDescendants = true,
+                Visible = false,
                 ZIndex = 99999,
-                AnchorPoint = Vector2.new(0, 0), -- Explicitly drop downwards from top-left
                 Parent = ScreenGui,
             }, { corner(6) })
         
-            local ListStroke = create("UIStroke", {
+            create("UIStroke", {
                 Color = Theme.Border,
                 Thickness = 1,
-                Parent = OptionList
+                Parent = OptionList,
             })
         
-            local OptLayout = create("UIListLayout", {
+            create("UIListLayout", {
                 SortOrder = Enum.SortOrder.LayoutOrder,
                 Padding = UDim.new(0, 0),
                 Parent = OptionList,
@@ -491,37 +494,41 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
         
-            local targetHeight = (#options * 30)
+            local targetHeight = #options * 30
         
-            -- FIXED: No longer subtracts inset. Aligns perfectly 1px over bottom border edge.
             local function updateDropdownPosition()
                 local absPos = ComboContainer.AbsolutePosition
                 local absSize = ComboContainer.AbsoluteSize
-        
-                OptionList.Position = UDim2.new(0, absPos.X, 0, (absPos.Y + absSize.Y) - 1)
+                OptionList.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 4)
                 OptionList.Size = UDim2.new(0, absSize.X, 0, OptionList.Size.Y.Offset)
             end
         
             local function closeDropdown()
                 open = false
-                CornerFlattener.Visible = false
-                ArrowIcon.Text = "◄" -- Resets back to left arrow
-                local t = tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, 0) }, 0.12)
+                ArrowIcon.Text = "◄"
+                local t = tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, 0) }, 0.15)
                 t.Completed:Connect(function()
-                    if not open then OptionList.Visible = false end
+                    if not open then
+                        OptionList.Visible = false
+                        CornerFlattener.Visible = false
+                    end
                 end)
             end
         
+            local function openDropdown()
+                open = true
+                updateDropdownPosition()
+                OptionList.Visible = true
+                CornerFlattener.Visible = true
+                ArrowIcon.Text = "▼"
+                tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, targetHeight) }, 0.18)
+            end
+        
             ToggleButton.MouseButton1Click:Connect(function()
-                open = not open
                 if open then
-                    OptionList.Visible = true
-                    CornerFlattener.Visible = true
-                    updateDropdownPosition()
-                    ArrowIcon.Text = "▼" -- Instantly swaps to down arrow cleanly
-                    tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, targetHeight) }, 0.12)
-                else
                     closeDropdown()
+                else
+                    openDropdown()
                 end
             end)
         
@@ -529,21 +536,19 @@ function Library:CreateWindow(title)
                 if open then closeDropdown() end
             end)
         
-            -- Click anywhere else detector
             local clickConnection
-            clickConnection = game:GetService("UserInputService").InputBegan:Connect(function(input)
+            clickConnection = UserInputService.InputBegan:Connect(function(input)
                 if not open then return end
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    local mPos = game:GetService("UserInputService"):GetMouseLocation()
-                    
+                    local mPos = UserInputService:GetMouseLocation()
+        
                     local function isInside(gui)
                         if not gui or not gui.Visible then return false end
-                        local pos = gui.AbsolutePosition
-                        local size = gui.AbsoluteSize
-                        return mPos.X >= pos.X and mPos.X <= (pos.X + size.X) and mPos.Y >= pos.Y and mPos.Y <= (pos.Y + size.Y)
+                        local pos, size = gui.AbsolutePosition, gui.AbsoluteSize
+                        return mPos.X >= pos.X and mPos.X <= pos.X + size.X
+                           and mPos.Y >= pos.Y and mPos.Y <= pos.Y + size.Y
                     end
-                    
-                    -- Close if clicked outside both the selection box and the option list
+        
                     if not isInside(ComboContainer) and not isInside(OptionList) then
                         closeDropdown()
                     end
@@ -552,6 +557,7 @@ function Library:CreateWindow(title)
         
             Holder.Destroying:Connect(function()
                 if clickConnection then clickConnection:Disconnect() end
+                OptionList:Destroy()
             end)
         
             for i, opt in ipairs(options) do
@@ -568,16 +574,6 @@ function Library:CreateWindow(title)
                     LayoutOrder = i,
                     Parent = OptionList,
                 })
-        
-                if i == #options then
-                    create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = OptBtn })
-                    create("Frame", {
-                        Size = UDim2.new(1, 0, 0, 4),
-                        BackgroundColor3 = Theme.Background,
-                        BorderSizePixel = 0,
-                        Parent = OptBtn
-                    })
-                end
         
                 OptBtn.MouseEnter:Connect(function()
                     tween(OptBtn, { BackgroundColor3 = Theme.Secondary, TextColor3 = Theme.Accent }, 0.08)
