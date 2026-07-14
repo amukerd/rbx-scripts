@@ -580,6 +580,7 @@ function Library:CreateWindow(title)
                 Size = UDim2.new(0.6, -12, 0, 28),
                 Position = UDim2.new(0.4, 0, 0.5, -14),
                 BackgroundColor3 = Theme.Background,
+                ClipsDescendants = true,
                 Parent = Holder,
             }, { corner(6) })
 
