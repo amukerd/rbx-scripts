@@ -491,9 +491,7 @@ function Library:CreateWindow(title)
             local function updateDropdownPosition()
                 local absPos = ComboContainer.AbsolutePosition
                 local absSize = ComboContainer.AbsoluteSize
-                local inset = game:GetService("GuiService"):GetGuiInset()
-        
-                OptionList.Position = UDim2.new(0, absPos.X - inset.X, 0, (absPos.Y + absSize.Y) - inset.Y - 1)
+                OptionList.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 2)
                 OptionList.Size = UDim2.new(0, absSize.X, 0, OptionList.Size.Y.Offset)
             end
         
