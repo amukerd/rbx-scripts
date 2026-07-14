@@ -407,6 +407,7 @@ function Library:CreateWindow(title)
                 Parent = Holder,
             })
         
+            -- Main input container
             local ComboContainer = create("Frame", {
                 Size = UDim2.new(0.6, -12, 0, 28),
                 Position = UDim2.new(0.4, 0, 0.5, -14),
@@ -420,6 +421,7 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer
             })
         
+            -- Sneaky invisible frame that hides the bottom rounded corners when open
             local CornerFlattener = create("Frame", {
                 Size = UDim2.new(1, 0, 0, 6),
                 Position = UDim2.new(0, 0, 1, -6),
@@ -443,11 +445,12 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
         
+            -- Dynamic indicator arrow (No rotation math, changes text characters instead)
             local ArrowIcon = create("TextLabel", {
                 Size = UDim2.new(0, 20, 1, 0),
                 Position = UDim2.new(1, -24, 0, 0),
                 BackgroundTransparency = 1,
-                Text = "◄",
+                Text = "◄", -- Left arrow when closed
                 TextColor3 = Theme.SubText,
                 Font = Enum.Font.Gotham,
                 TextSize = 10,
@@ -457,12 +460,14 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
         
+            -- The item list container
             local OptionList = create("Frame", {
                 Size = UDim2.new(0, 0, 0, 0),
                 BackgroundColor3 = Theme.Background,
                 Visible = false,
                 BorderSizePixel = 0,
                 ZIndex = 99999,
+                AnchorPoint = Vector2.new(0, 0), -- Explicitly drop downwards from top-left
                 Parent = ScreenGui,
             }, { corner(6) })
         
@@ -488,17 +493,19 @@ function Library:CreateWindow(title)
         
             local targetHeight = (#options * 30)
         
+            -- FIXED: No longer subtracts inset. Aligns perfectly 1px over bottom border edge.
             local function updateDropdownPosition()
                 local absPos = ComboContainer.AbsolutePosition
                 local absSize = ComboContainer.AbsoluteSize
-                OptionList.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 2)
+        
+                OptionList.Position = UDim2.new(0, absPos.X, 0, (absPos.Y + absSize.Y) - 1)
                 OptionList.Size = UDim2.new(0, absSize.X, 0, OptionList.Size.Y.Offset)
             end
         
             local function closeDropdown()
                 open = false
                 CornerFlattener.Visible = false
-                ArrowIcon.Text = "◄"
+                ArrowIcon.Text = "◄" -- Resets back to left arrow
                 local t = tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, 0) }, 0.12)
                 t.Completed:Connect(function()
                     if not open then OptionList.Visible = false end
@@ -511,7 +518,7 @@ function Library:CreateWindow(title)
                     OptionList.Visible = true
                     CornerFlattener.Visible = true
                     updateDropdownPosition()
-                    ArrowIcon.Text = "▼"
+                    ArrowIcon.Text = "▼" -- Instantly swaps to down arrow cleanly
                     tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, targetHeight) }, 0.12)
                 else
                     closeDropdown()
@@ -522,6 +529,7 @@ function Library:CreateWindow(title)
                 if open then closeDropdown() end
             end)
         
+            -- Click anywhere else detector
             local clickConnection
             clickConnection = game:GetService("UserInputService").InputBegan:Connect(function(input)
                 if not open then return end
@@ -535,6 +543,7 @@ function Library:CreateWindow(title)
                         return mPos.X >= pos.X and mPos.X <= (pos.X + size.X) and mPos.Y >= pos.Y and mPos.Y <= (pos.Y + size.Y)
                     end
                     
+                    -- Close if clicked outside both the selection box and the option list
                     if not isInside(ComboContainer) and not isInside(OptionList) then
                         closeDropdown()
                     end
