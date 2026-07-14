@@ -272,10 +272,15 @@ function Library:CreateWindow(title)
             ClipsDescendants = true,
             Parent = SectionContainer,
         })
-
+        
         local Layout = create("UIListLayout", {
             Padding = UDim.new(0, 10),
             SortOrder = Enum.SortOrder.LayoutOrder,
+            Parent = Section,
+        })
+        
+        create("UIPadding", {
+            PaddingRight = UDim.new(0, 8),
             Parent = Section,
         })
 
