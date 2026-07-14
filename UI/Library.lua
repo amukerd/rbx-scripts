@@ -388,13 +388,13 @@ function Library:CreateWindow(title)
             callback = callback or function() end
             local selected = default or options[1]
             local open = false
-
+        
             local Holder = create("Frame", {
                 Size = UDim2.new(1, 0, 0, 40),
                 BackgroundColor3 = Theme.Secondary,
                 Parent = Section,
             }, { corner(6) })
-
+        
             local TitleLabel = create("TextLabel", {
                 Size = UDim2.new(0.4, -12, 1, 0),
                 Position = UDim2.new(0, 12, 0, 0),
@@ -406,20 +406,20 @@ function Library:CreateWindow(title)
                 TextXAlignment = Enum.TextXAlignment.Left,
                 Parent = Holder,
             })
-
+        
             local ComboContainer = create("Frame", {
                 Size = UDim2.new(0.6, -12, 0, 28),
                 Position = UDim2.new(0.4, 0, 0.5, -14),
                 BackgroundColor3 = Theme.Background,
                 Parent = Holder,
             }, { corner(6) })
-
+        
             local Stroke = create("UIStroke", {
                 Color = Theme.Border,
                 Thickness = 1,
                 Parent = ComboContainer
             })
-
+        
             local SelectedLabel = create("TextLabel", {
                 Size = UDim2.new(1, -30, 1, 0),
                 Position = UDim2.new(0, 10, 0, 0),
@@ -431,7 +431,7 @@ function Library:CreateWindow(title)
                 TextXAlignment = Enum.TextXAlignment.Left,
                 Parent = ComboContainer,
             })
-
+        
             local ArrowIcon = create("TextLabel", {
                 Size = UDim2.new(0, 20, 1, 0),
                 Position = UDim2.new(1, -24, 0, 0),
@@ -444,7 +444,7 @@ function Library:CreateWindow(title)
                 TextXAlignment = Enum.TextXAlignment.Center,
                 Parent = ComboContainer,
             })
-
+        
             local OptionList = create("ScrollingFrame", {
                 Size = UDim2.new(0, 0, 0, 0),
                 BackgroundColor3 = Theme.Background,
@@ -457,19 +457,19 @@ function Library:CreateWindow(title)
                 ZIndex = 99999,
                 Parent = ScreenGui,
             }, { corner(6) })
-
+        
             create("UIStroke", {
                 Color = Theme.Border,
                 Thickness = 1,
                 Parent = OptionList
             })
-
+        
             local OptLayout = create("UIListLayout", {
                 SortOrder = Enum.SortOrder.LayoutOrder,
                 Padding = UDim.new(0, 2),
                 Parent = OptionList,
             })
-
+        
             create("UIPadding", {
                 PaddingTop = UDim.new(0, 4),
                 PaddingBottom = UDim.new(0, 4),
@@ -477,7 +477,7 @@ function Library:CreateWindow(title)
                 PaddingRight = UDim.new(0, 4),
                 Parent = OptionList,
             })
-
+        
             local ToggleButton = create("TextButton", {
                 Size = UDim2.new(1, 0, 1, 0),
                 BackgroundTransparency = 1,
@@ -485,17 +485,17 @@ function Library:CreateWindow(title)
                 ZIndex = 3,
                 Parent = ComboContainer,
             })
-
+        
             local maxDisplayItems = math.min(#options, 5)
             local targetHeight = (maxDisplayItems * 32) + 8
-
+        
             local function updateDropdownPosition()
                 local absPos = ComboContainer.AbsolutePosition
                 local absSize = ComboContainer.AbsoluteSize
                 OptionList.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 4)
                 OptionList.Size = UDim2.new(0, absSize.X, 0, OptionList.Size.Y.Offset)
             end
-
+        
             local function closeDropdown()
                 open = false
                 tween(ArrowIcon, { Rotation = 0 }, 0.15)
@@ -504,7 +504,7 @@ function Library:CreateWindow(title)
                     if not open then OptionList.Visible = false end
                 end)
             end
-
+        
             ToggleButton.MouseButton1Click:Connect(function()
                 open = not open
                 if open then
@@ -516,11 +516,36 @@ function Library:CreateWindow(title)
                     closeDropdown()
                 end
             end)
-
+        
             Section:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
                 if open then closeDropdown() end
             end)
-
+        
+            local clickConnection
+            clickConnection = UserInputService.InputBegan:Connect(function(input)
+                if not open then return end
+                
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    local mPos = UserInputService:GetMouseLocation() -- Gets actual mouse coordinates (accounts for TopBar inset)
+                    
+                    local function isInside(gui)
+                        if not gui or not gui.Visible then return false end
+                        local pos = gui.AbsolutePosition
+                        local size = gui.AbsoluteSize
+                        return mPos.X >= pos.X and mPos.X <= (pos.X + size.X) and
+                               mPos.Y >= pos.Y and mPos.Y <= (pos.Y + size.Y)
+                    end
+        
+                    if not isInside(ComboContainer) and not isInside(OptionList) then
+                        closeDropdown()
+                    end
+                end
+            end)
+        
+            Holder.Destroying:Connect(function()
+                if clickConnection then clickConnection:Disconnect() end
+            end)
+        
             for i, opt in ipairs(options) do
                 local OptBtn = create("TextButton", {
                     Size = UDim2.new(1, 0, 0, 30),
@@ -535,15 +560,15 @@ function Library:CreateWindow(title)
                     LayoutOrder = i,
                     Parent = OptionList,
                 }, { corner(4) })
-
+        
                 OptBtn.MouseEnter:Connect(function()
                     tween(OptBtn, { BackgroundColor3 = Theme.Secondary, TextColor3 = Theme.Accent }, 0.1)
                 end)
-
+        
                 OptBtn.MouseLeave:Connect(function()
                     tween(OptBtn, { BackgroundColor3 = Theme.Background, TextColor3 = Theme.Text }, 0.1)
                 end)
-
+        
                 OptBtn.MouseButton1Click:Connect(function()
                     selected = opt
                     SelectedLabel.Text = tostring(opt)
@@ -551,7 +576,7 @@ function Library:CreateWindow(title)
                     callback(selected)
                 end)
             end
-
+        
             return Holder
         end
 
