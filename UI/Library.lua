@@ -132,7 +132,6 @@ function Library:CreateWindow(title)
         Name = LIBRARY_NAME,
         ResetOnSpawn = false,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-        IgnoreGuiInset = true,
         Parent = CoreGui,
     })
 
