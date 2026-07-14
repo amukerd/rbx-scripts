@@ -1,17 +1,5 @@
 --[[
-    Library.lua
-    A lightweight, self-contained script UI library.
-
-    Usage:
-        local Library = loadstring(game:HttpGet("..."))()
-        local Window = Library:CreateWindow("My Window")
-
-        local Tab1 = Window:CreateTab("Main")
-        Tab1:CreateButton("Click me", function() print("clicked") end)
-        Tab1:CreateToggle("Enabled", false, function(state) print(state) end)
-        Tab1:CreateDropdown("Mode", {"A","B","C"}, "A", function(choice) print(choice) end)
-        Tab1:CreateTextbox("Name", "Type here", function(text) print(text) end)
-        Tab1:CreateSlider("Speed", 0, 100, 50, function(value) print(value) end)
+    KerdHub
 ]]
 
 local CoreGui = game:GetService("CoreGui")
