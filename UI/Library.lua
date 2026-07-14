@@ -448,7 +448,6 @@ function Library:CreateWindow(title)
                 Position = UDim2.new(1, -24, 0, 0),
                 BackgroundTransparency = 1,
                 Text = "◄",
-                Rotation = 0,
                 TextColor3 = Theme.SubText,
                 Font = Enum.Font.Gotham,
                 TextSize = 10,
@@ -501,7 +500,7 @@ function Library:CreateWindow(title)
             local function closeDropdown()
                 open = false
                 CornerFlattener.Visible = false
-                tween(ArrowIcon, { Rotation = 0 }, 0.12)
+                ArrowIcon.Text = "◄"
                 local t = tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, 0) }, 0.12)
                 t.Completed:Connect(function()
                     if not open then OptionList.Visible = false end
@@ -514,7 +513,7 @@ function Library:CreateWindow(title)
                     OptionList.Visible = true
                     CornerFlattener.Visible = true
                     updateDropdownPosition()
-                    tween(ArrowIcon, { Rotation = -90 }, 0.12)
+                    ArrowIcon.Text = "▼"
                     tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, targetHeight) }, 0.12)
                 else
                     closeDropdown()
@@ -530,12 +529,14 @@ function Library:CreateWindow(title)
                 if not open then return end
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                     local mPos = game:GetService("UserInputService"):GetMouseLocation()
+                    
                     local function isInside(gui)
                         if not gui or not gui.Visible then return false end
                         local pos = gui.AbsolutePosition
                         local size = gui.AbsoluteSize
                         return mPos.X >= pos.X and mPos.X <= (pos.X + size.X) and mPos.Y >= pos.Y and mPos.Y <= (pos.Y + size.Y)
                     end
+                    
                     if not isInside(ComboContainer) and not isInside(OptionList) then
                         closeDropdown()
                     end
@@ -589,7 +590,7 @@ function Library:CreateWindow(title)
         
             return Holder
         end
-
+        
         function Tab:CreateTextbox(text, placeholder, callback)
             callback = callback or function() end
 
