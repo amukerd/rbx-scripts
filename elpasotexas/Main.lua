@@ -30,15 +30,6 @@ aVars.SellTP = Vector3.new(3147, -6, -184)
 aVars.WashTP = Vector3.new(-1834, -6, -15)
 aVars.ContainerTP = Vector3.new(3488, -6, -631)
 
---- game assets ---
-aVars.Watch = aVars.Workspace.Smuggling.Items["Fake Watch"].Main.PromptAtt.SmugglePurchasePrompt
-aVars.Bag = aVars.Workspace.Smuggling.Items["Fake Designer Bag"].Main.PromptAtt.SmugglePurchasePrompt
-aVars.Sar = aVars.Workspace.Smuggling.Items.Sarsaparilla.Main.PromptAtt.SmugglePurchasePrompt
-aVars.Taco = aVars.Workspace.Smuggling.Items.Taco.Main.PromptAtt.SmugglePurchasePrompt
-aVars.Sell = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Sell"):WaitForChild("Prompt"):WaitForChild("SmuggleSellPrompt")
-aVars.Laundering = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Laundering"):GetChildren()[4]:WaitForChild("SmuggleLaundryPrompt")
-aVars.Containers = aVars.Workspace:WaitForChild("GContaienrs"):WaitForChild("Prueba"):WaitForChild("Attachment1"):WaitForChild("Open")
-
 local Platform = Instance.new("Part")
 Platform.Size = Vector3.new(10, 1, 10)
 Platform.Anchored = true
@@ -170,6 +161,7 @@ while true do
 		teleportTo(aVars.BuyTP)
 		
 		repeat
+			aVars.Watch = aVars.Workspace.Smuggling.Items["Fake Watch"].Main.PromptAtt.SmugglePurchasePrompt
 			aVars.Watch.HoldDuration = 0
 			aVars.Watch.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Watch)
@@ -177,6 +169,7 @@ while true do
 		until countInBackpack("Fake Watch") >= 3
 		
 		repeat
+			aVars.Bag = aVars.Workspace.Smuggling.Items["Fake Designer Bag"].Main.PromptAtt.SmugglePurchasePrompt
 			aVars.Bag.HoldDuration = 0
 			aVars.Bag.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Bag)
@@ -184,6 +177,7 @@ while true do
 		until countInBackpack("Fake Designer Bag") >= 3
 		
 		repeat
+			aVars.Sar = aVars.Workspace.Smuggling.Items.Sarsaparilla.Main.PromptAtt.SmugglePurchasePrompt
 			aVars.Sar.HoldDuration = 0
 			aVars.Sar.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Sar)
@@ -193,7 +187,7 @@ while true do
 		teleportTo(aVars.SellTP)
 				
 		repeat
-			local 
+			aVars.Sell = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Sell"):WaitForChild("Prompt"):WaitForChild("SmuggleSellPrompt")
 			aVars.Sell.HoldDuration = 0
 			aVars.Sell.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Sell)
@@ -203,6 +197,7 @@ while true do
 		teleportTo(aVars.WashTP)
 		
 		repeat
+			aVars.Laundering = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Laundering"):GetChildren()[4]:WaitForChild("SmuggleLaundryPrompt")
 			aVars.Laundering.HoldDuration = 0
 			aVars.Laundering.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Laundering)
@@ -213,6 +208,7 @@ while true do
 			teleportTo(aVars.ContainerTP)
 			
 			repeat
+				aVars.Containers = aVars.Workspace:WaitForChild("GContaienrs"):WaitForChild("Prueba"):WaitForChild("Attachment1"):WaitForChild("Open")
 				aVars.Containers.HoldDuration = 0
 				aVars.Containers.RequiresLineOfSight = false
 				fireproximityprompt(aVars.Containers)
@@ -227,6 +223,7 @@ while true do
 		teleportTo(aVars.BuyTP)
 			
 		repeat
+			aVars.Taco = aVars.Workspace.Smuggling.Items.Taco.Main.PromptAtt.SmugglePurchasePrompt
 			aVars.Taco.HoldDuration = 0
 			aVars.Taco.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Taco)
@@ -236,6 +233,7 @@ while true do
 		teleportTo(aVars.SellTP)
 		
 		repeat
+			aVars.Sell = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Sell"):WaitForChild("Prompt"):WaitForChild("SmuggleSellPrompt")
 			aVars.Sell.HoldDuration = 0
 			aVars.Sell.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Sell)
@@ -245,6 +243,7 @@ while true do
 		teleportTo(aVars.WashTP)
 
 		repeat
+			aVars.Laundering = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Laundering"):GetChildren()[4]:WaitForChild("SmuggleLaundryPrompt")
 			aVars.Laundering.HoldDuration = 0
 			aVars.Laundering.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Laundering)
