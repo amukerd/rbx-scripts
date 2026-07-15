@@ -197,7 +197,12 @@ while true do
 		teleportTo(aVars.WashTP)
 		
 		repeat
-			aVars.Laundering = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Laundering"):GetChildren()[4]:WaitForChild("SmuggleLaundryPrompt")
+			local smuggling = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Laundering")
+			repeat
+			    task.wait()
+			until #smuggling:GetChildren() >= 4
+			local fourthChild = laundering:GetChildren()[4]
+			aVars.Laundering = fourthChild:WaitForChild("SmuggleLaundryPrompt")
 			aVars.Laundering.HoldDuration = 0
 			aVars.Laundering.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Laundering)
@@ -243,7 +248,12 @@ while true do
 		teleportTo(aVars.WashTP)
 
 		repeat
-			aVars.Laundering = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Laundering"):GetChildren()[4]:WaitForChild("SmuggleLaundryPrompt")
+			local smuggling = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Laundering")
+			repeat
+			    task.wait()
+			until #smuggling:GetChildren() >= 4
+			local fourthChild = laundering:GetChildren()[4]
+			aVars.Laundering = fourthChild:WaitForChild("SmuggleLaundryPrompt")
 			aVars.Laundering.HoldDuration = 0
 			aVars.Laundering.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Laundering)
