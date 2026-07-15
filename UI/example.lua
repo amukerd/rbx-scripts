@@ -1,14 +1,30 @@
 local Library = loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/UI/Library.lua"))()
 
 local Window = Library:CreateWindow("KerdHub")
+
+Window:SetGlobal("printing", false)
+
 local Tab1 = Window:CreateTab("Main")
 
-Tab1:CreateButton("Button", function()
-    print("clicked")
+Tab1:CreateButton("Start Tracking", function()
+    local connection = Window:Connect(game:GetService("RunService").Heartbeat, function()
+        print("Heartbeat running")
+    end)
 end)
 
-Tab1:CreateToggle("Enable", false, function(state)
-    print(state)
+Tab1:CreateToggle("Enable Printing", false, function(state)
+
+    _G.printing = state
+
+    if state then
+        task.spawn(function()
+            while _G.printing do
+                print("running")
+                task.wait(1)
+            end
+        end)
+    end
+
 end)
 
 Tab1:CreateSpacer("Spacer")
