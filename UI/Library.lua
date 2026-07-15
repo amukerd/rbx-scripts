@@ -304,6 +304,10 @@ function Library:CreateWindow(title)
         local Tab = setmetatable({ Section = Section, Button = TabButton }, { __index = {} })
 
         local function selectTab()
+            if ActiveDropdown and ActiveDropdown.close then
+                ActiveDropdown.close()
+                ActiveDropdown = nil
+            end
             for _, t in ipairs(Window.Tabs) do
                 t.Section.Visible = false
                 tween(t.Button, { BackgroundColor3 = Theme.Background, TextColor3 = Theme.SubText }, 0.12)
@@ -513,10 +517,10 @@ function Library:CreateWindow(title)
             })
 
             create("UIPadding", {
-                PaddingTop = UDim.new(0, 2),
-                PaddingBottom = UDim.new(0, 2),
-                PaddingLeft = UDim.new(0, 2),
-                PaddingRight = UDim.new(0, 2),
+                PaddingTop = UDim.new(0, 6),
+                PaddingBottom = UDim.new(0, 6),
+                PaddingLeft = UDim.new(0, 6),
+                PaddingRight = UDim.new(0, 6),
                 Parent = OptionList,
             })
         
@@ -602,6 +606,10 @@ function Library:CreateWindow(title)
                     LayoutOrder = i,
                     Parent = OptionList,
                 })
+
+                if i == 1 or i == #options then
+                    create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = OptBtn })
+                end
         
                 OptBtn.MouseEnter:Connect(function()
                     if opt ~= selected then
@@ -633,6 +641,7 @@ function Library:CreateWindow(title)
         
             return Holder
         end
+        
         function Tab:CreateTextbox(text, placeholder, callback)
             callback = callback or function() end
 
