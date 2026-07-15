@@ -1,29 +1,57 @@
+--[[
+Game : https://www.roblox.com/games/109872214376771
+Coded by : Amukerd and most AI's
+]]--
+
 loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/General/adonis.lua"))()
 loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/General/antiafk.lua"))()
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local lplr = Players.LocalPlayer
-local placeId = game.PlaceId
-local TeleportService = game:GetService("TeleportService")
-local char = lplr.Character or lplr.CharacterAdded:Wait()
-local root = char:WaitForChild("HumanoidRootPart")
-local lastCF, stop, heartbeatConnection, cfConnection
-local enabled = false
+--- global variables ---
+aVars = {}
+aVars.Players = game:GetService("Players")
+aVars.LocalPlayer = aVars.Players.LocalPlayer
+aVars.RunService = game:GetService("RunService")
+aVars.TeleportService = game:GetService("TeleportService")
+aVars.Workspace = game:GetService("Workspace")
 
-local buytp = Vector3.new(-1837, -6, 0)
-local selltp = Vector3.new(3147, -6, -184)
-local washtp = Vector3.new(-1834, -6, -15)
-local continertp = Vector3.new(3488, -6, -631)
+--- script variables ---
+aVars.PlaceId = game.PlaceId
+aVars.Character = aVars.LocalPlayer.Character or aVars.LocalPlayer.CharacterAdded:Wait()
+aVars.HumanoidRootPart = aVars.Character:WaitForChild("HumanoidRootPart")
 
-local platform = Instance.new("Part")
-platform.Size = Vector3.new(10, 1, 10)
-platform.Anchored = true
-platform.Transparency = 1
-platform.CanCollide = true
-platform.Parent = workspace
+aVars.LastCF = nil
+aVars.Stop = false
+aVars.HeartbeatConnection = nil
+aVars.CfConnection = nil
+aVars.Enabled = false
 
--- anti moderator --
+aVars.BuyTP = Vector3.new(-1837, -6, 0)
+aVars.SellTP = Vector3.new(3147, -6, -184)
+aVars.WashTP = Vector3.new(-1834, -6, -15)
+aVars.ContainerTP = Vector3.new(3488, -6, -631)
+
+aVars.Platform = Instance.new("Part")
+aVars.Platform.Size = Vector3.new(10, 1, 10)
+aVars.Platform.Anchored = true
+aVars.Platform.Transparency = 1
+aVars.Platform.CanCollide = true
+aVars.Platform.Parent = aVars.Workspace
+
+--- game assets ---
+aVars.Watch = aVars.Workspace.Smuggling.Items["Fake Watch"].Main.PromptAtt.SmugglePurchasePrompt
+aVars.Bag = aVars.Workspace.Smuggling.Items["Fake Designer Bag"].Main.PromptAtt.SmugglePurchasePrompt
+aVars.Sar = aVars.Workspace.Smuggling.Items.Sarsaparilla.Main.PromptAtt.SmugglePurchasePrompt
+aVars.Taco = aVars.Workspace.Smuggling.Items.Taco.Main.PromptAtt.SmugglePurchasePrompt
+aVars.Sell = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Sell"):WaitForChild("Prompt"):WaitForChild("SmuggleSellPrompt")
+aVars.Laundering = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Laundering"):GetChildren()[4]:WaitForChild("SmuggleLaundryPrompt")
+aVars.Containers = aVars.Workspace:WaitForChild("GContaienrs"):WaitForChild("Prueba"):WaitForChild("Attachment1"):WaitForChild("Open")
+
+-- Set initial hold durations
+aVars.Watch.HoldDuration = 0
+aVars.Bag.HoldDuration = 0
+aVars.Sar.HoldDuration = 0
+
+--- anti moderator ---
 task.spawn(function()
 	if game.CreatorType ~= Enum.CreatorType.Group then
 		return
@@ -32,7 +60,7 @@ task.spawn(function()
 	local groupId = game.CreatorId
 
 	local function checkPlayer(player)
-		if player == lplr then
+		if player == aVars.LocalPlayer then
 			return
 		end
 
@@ -41,7 +69,7 @@ task.spawn(function()
 		if rank >= 2 then
 			local role = player:GetRoleInGroup(groupId)
 
-			lplr:Kick(
+			aVars.LocalPlayer:Kick(
 				"Staff Detected\n" ..
 				"User: " .. player.Name .. "\n" ..
 				"UserId: " .. player.UserId .. "\n" ..
@@ -51,214 +79,177 @@ task.spawn(function()
 		end
 	end
 
-	for _, player in ipairs(Players:GetPlayers()) do
+	for _, player in ipairs(aVars.Players:GetPlayers()) do
 		checkPlayer(player)
 	end
 
-	Players.PlayerAdded:Connect(checkPlayer)
+	aVars.Players.PlayerAdded:Connect(checkPlayer)
 end)
 
--- anti-anti-teleport --
+--- anti-anti-teleport ---
 local function cleanup()
-    if heartbeatConnection then heartbeatConnection:Disconnect() heartbeatConnection = nil end
-    if cfConnection then cfConnection:Disconnect() cfConnection = nil end
+	if aVars.HeartbeatConnection then aVars.HeartbeatConnection:Disconnect() aVars.HeartbeatConnection = nil end
+	if aVars.CfConnection then aVars.CfConnection:Disconnect() aVars.CfConnection = nil end
 end
 
 local function start()
-    if not lplr.Character or not lplr.Character:FindFirstChildOfClass('Humanoid') or not lplr.Character:FindFirstChildOfClass('Humanoid').RootPart then return end
-    cleanup()
-    heartbeatConnection = RunService.Heartbeat:Connect(function()
-        if stop or not enabled then return end
-        lastCF = lplr.Character:FindFirstChildOfClass('Humanoid').RootPart.CFrame
-    end)
-    cfConnection = lplr.Character:FindFirstChildOfClass('Humanoid').RootPart:GetPropertyChangedSignal('CFrame'):Connect(function()
-        if not enabled then return end
-        stop = true
-        lplr.Character:FindFirstChildOfClass('Humanoid').RootPart.CFrame = lastCF
-        RunService.Heartbeat:Wait()
-        stop = false
-    end)
-    lplr.Character:FindFirstChildOfClass('Humanoid').Died:Connect(function()
-        cleanup()
-    end)
+	if not aVars.LocalPlayer.Character or not aVars.LocalPlayer.Character:FindFirstChildOfClass('Humanoid') or not aVars.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').RootPart then return end
+	cleanup()
+	aVars.HeartbeatConnection = aVars.RunService.Heartbeat:Connect(function()
+		if aVars.Stop or not aVars.Enabled then return end
+		aVars.LastCF = aVars.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').RootPart.CFrame
+	end)
+	aVars.CfConnection = aVars.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').RootPart:GetPropertyChangedSignal('CFrame'):Connect(function()
+		if not aVars.Enabled then return end
+		aVars.Stop = true
+		aVars.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').RootPart.CFrame = aVars.LastCF
+		aVars.RunService.Heartbeat:Wait()
+		aVars.Stop = false
+	end)
+	aVars.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').Died:Connect(function()
+		cleanup()
+	end)
 end
 
 local function enableAntiTeleport()
-    enabled = true
+	aVars.Enabled = true
 end
 
 local function disableAntiTeleport()
-    enabled = false
-    stop = false
+	aVars.Enabled = false
+	aVars.Stop = false
 end
 
-lplr.CharacterAdded:Connect(function(character)
-    repeat RunService.Heartbeat:Wait() until character:FindFirstChildOfClass('Humanoid')
-    repeat RunService.Heartbeat:Wait() until character:FindFirstChildOfClass('Humanoid').RootPart
-    start()
+aVars.LocalPlayer.CharacterAdded:Connect(function(character)
+	repeat aVars.RunService.Heartbeat:Wait() until character:FindFirstChildOfClass('Humanoid')
+	repeat aVars.RunService.Heartbeat:Wait() until character:FindFirstChildOfClass('Humanoid').RootPart
+	start()
 end)
 
-lplr.CharacterRemoving:Connect(function()
-    cleanup()
+aVars.LocalPlayer.CharacterRemoving:Connect(function()
+	cleanup()
 end)
 
 enableAntiTeleport()
 start()
 
 local function teleportTo(position)
-    disableAntiTeleport()
-    RunService.Heartbeat:Wait()
-    platform.Position = position - Vector3.new(0, 3.5, 0)
-	RunService.Heartbeat:Wait()
-    char.HumanoidRootPart.CFrame = CFrame.new(position)
-    RunService.Heartbeat:Wait()
-    enableAntiTeleport()
+	disableAntiTeleport()
+	aVars.RunService.Heartbeat:Wait()
+	aVars.Platform.Position = position - Vector3.new(0, 3.5, 0)
+	aVars.RunService.Heartbeat:Wait()
+	aVars.Character.HumanoidRootPart.CFrame = CFrame.new(position)
+	aVars.RunService.Heartbeat:Wait()
+	enableAntiTeleport()
 end
 
--- main script start --
+--- main functions ---
 local function countInBackpack(itemName)
-    local count = 0
+	local count = 0
 
-    for _, item in ipairs(lplr.Backpack:GetChildren()) do
-        if item.Name == itemName then
-            count += 1
-        end
-    end
+	for _, item in ipairs(aVars.LocalPlayer.Backpack:GetChildren()) do
+		if item.Name == itemName then
+			count += 1
+		end
+	end
 
-    if lplr.Character then
-        for _, item in ipairs(lplr.Character:GetChildren()) do
-            if item:IsA("Tool") and item.Name == itemName then
-                count += 1
-            end
-        end
-    end
+	if aVars.LocalPlayer.Character then
+		for _, item in ipairs(aVars.LocalPlayer.Character:GetChildren()) do
+			if item:IsA("Tool") and item.Name == itemName then
+				count += 1
+			end
+		end
+	end
 
-    return count
+	return count
 end
 
 local function getMoney()
-	local text = game.Players.LocalPlayer.leaderstats.Cash.Value
+	local text = aVars.LocalPlayer.leaderstats.Cash.Value
 	return tonumber(text) or 0
 end
 
-local watch = workspace.Smuggling.Items["Fake Watch"].Main.PromptAtt.SmugglePurchasePrompt
-local bag = workspace.Smuggling.Items["Fake Designer Bag"].Main.PromptAtt.SmugglePurchasePrompt
-local sar = workspace.Smuggling.Items.Sarsaparilla.Main.PromptAtt.SmugglePurchasePrompt
-local taco = workspace.Smuggling.Items.Taco.Main.PromptAtt.SmugglePurchasePrompt
-
-watch.HoldDuration = 0
-bag.HoldDuration = 0
-sar.HoldDuration = 0
-
+--- main loop ---
 while true do	
 	if getMoney() >= 5000 then
-	    teleportTo(buytp)
+		teleportTo(aVars.BuyTP)
 		
 		repeat
-		    watch.RequiresLineOfSight = false
-		    watch.MaxActivationDistance = 999999
-		    fireproximityprompt(watch)
-		    RunService.Heartbeat:Wait()
+			aVars.Watch.RequiresLineOfSight = false
+			aVars.Watch.MaxActivationDistance = 999999
+			fireproximityprompt(aVars.Watch)
+			aVars.RunService.Heartbeat:Wait()
 		until countInBackpack("Fake Watch") >= 3
-	    
-	    repeat
-			bag.RequiresLineOfSight = false
-	        fireproximityprompt(bag)
-	        RunService.Heartbeat:Wait()
-	    until countInBackpack("Fake Designer Bag") >= 3
-	    
-	    repeat
-			sar.RequiresLineOfSight = false
-	        fireproximityprompt(sar)
-	        RunService.Heartbeat:Wait()
-	    until countInBackpack("Sarsaparilla") >= 4
-
-	    teleportTo(selltp)
-				
-	    repeat
-			local sell = workspace:WaitForChild("Smuggling"):WaitForChild("Sell"):WaitForChild("Prompt"):WaitForChild("SmuggleSellPrompt")
-			sell.RequiresLineOfSight = false
-			sell.HoldDuration = 0
-	        fireproximityprompt(sell)
-	        RunService.Heartbeat:Wait()
-	    until countInBackpack("Briefcase") >= 1
-
-	    teleportTo(washtp)
 		
 		repeat
-	        local laundering = workspace:WaitForChild("Smuggling"):WaitForChild("Laundering")
-			local fourthChild
-			repeat
-				task.wait()
-				fourthChild = laundering:GetChildren()[4]
-			until fourthChild
-			local wash = fourthChild:WaitForChild("SmuggleLaundryPrompt")
-	        wash.HoldDuration = 0
+			aVars.Bag.RequiresLineOfSight = false
+			fireproximityprompt(aVars.Bag)
+			aVars.RunService.Heartbeat:Wait()
+		until countInBackpack("Fake Designer Bag") >= 3
+		
+		repeat
+			aVars.Sar.RequiresLineOfSight = false
+			fireproximityprompt(aVars.Sar)
+			aVars.RunService.Heartbeat:Wait()
+		until countInBackpack("Sarsaparilla") >= 4
 
-			wash.RequiresLineOfSight = false
-			
-	        fireproximityprompt(wash)
-	        RunService.Heartbeat:Wait()
-	    until countInBackpack("Briefcase") <= 0
+		teleportTo(aVars.SellTP)
+				
+		repeat
+			local 
+			aVars.Sell.RequiresLineOfSight = false
+			aVars.Sell.HoldDuration = 0
+			fireproximityprompt(aVars.Sell)
+			aVars.RunService.Heartbeat:Wait()
+		until countInBackpack("Briefcase") >= 1
+
+		teleportTo(aVars.WashTP)
+		
+		repeat
+			aVars.Laundering.HoldDuration = 0
+			aVars.Laundering.RequiresLineOfSight = false
+			fireproximityprompt(aVars.Laundering)
+			aVars.RunService.Heartbeat:Wait()
+		until countInBackpack("Briefcase") <= 0
 
 		if getMoney() >= 90000 then
-			local startTime = nil
-			teleportTo(containertp)
+			teleportTo(aVars.ContainerTP)
 			
 			repeat
-				local prompt = workspace:WaitForChild("GContaienrs"):WaitForChild("Prueba"):WaitForChild("Attachment1"):WaitForChild("Open")
-
-				prompt.RequiresLineOfSight = false
-				
-				fireproximityprompt(prompt)
-	     	    RunService.Heartbeat:Wait()
-
-				if getMoney() <= 90000 and not startTime then
-					startTime = tick()
-				end
-			until getMoney() <= 90000 and (tick() - startTime) >= 4
+				aVars.Containers.RequiresLineOfSight = false
+				fireproximityprompt(aVars.Containers)
+				aVars.RunService.Heartbeat:Wait()
+			until getMoney() <= 90000
 		end
 	end
 	
 	if getMoney() <= 5000 then
 		local amount = math.min(8, math.floor(getMoney() / 35))
 
-	    teleportTo(buytp)
+		teleportTo(aVars.BuyTP)
 			
 		repeat
-			taco.RequiresLineOfSight = false
-	        fireproximityprompt(taco)
-	        RunService.Heartbeat:Wait()
-	    until countInBackpack("Taco") >= amount
+			aVars.Taco.RequiresLineOfSight = false
+			fireproximityprompt(aVars.Taco)
+			aVars.RunService.Heartbeat:Wait()
+		until countInBackpack("Taco") >= amount
 
-		teleportTo(seltp)
+		teleportTo(aVars.SellTP)
 		
-	    repeat
-	        local sell = workspace:WaitForChild("Smuggling"):WaitForChild("Sell"):WaitForChild("Prompt"):WaitForChild("SmuggleSellPrompt")
-	        sell.HoldDuration = 0
+		repeat
+			aVars.Sell.HoldDuration = 0
+			aVars.Sell.RequiresLineOfSight = false
+			fireproximityprompt(aVars.Sell)
+			aVars.RunService.Heartbeat:Wait()
+		until countInBackpack("Briefcase") >= 1
 
-			sell.RequiresLineOfSight = false
-			
-	        fireproximityprompt(sell)
-	        RunService.Heartbeat:Wait()
-	    until countInBackpack("Briefcase") >= 1
+		teleportTo(aVars.WashTP)
 
-		teleportTo(washtp)
-
-	    repeat
-	        local laundering = workspace:WaitForChild("Smuggling"):WaitForChild("Laundering")
-			local fourthChild
-			repeat
-				task.wait()
-				fourthChild = laundering:GetChildren()[4]
-			until fourthChild
-			local wash = fourthChild:WaitForChild("SmuggleLaundryPrompt")
-	        wash.HoldDuration = 0
-
-			wash.RequiresLineOfSight = false
-			
-	        fireproximityprompt(wash)
-	        RunService.Heartbeat:Wait()
-	    until countInBackpack("Briefcase") <= 0
+		repeat
+			aVars.Laundering.HoldDuration = 0
+			aVars.Laundering.RequiresLineOfSight = false
+			fireproximityprompt(aVars.Laundering)
+			aVars.RunService.Heartbeat:Wait()
+		until countInBackpack("Briefcase") <= 0
 	end
 end
