@@ -453,18 +453,14 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
         
-            local ArrowIcon = create("TextLabel", {
-                Size = UDim2.new(0, 24, 1, 0),
-                Position = UDim2.new(1, -16, 0.5, 0),
+            local ArrowIcon = create("ImageLabel", {
+                Size = UDim2.new(0, 14, 0, 14),
+                Position = UDim2.new(1, -22, 0.5, 0),
                 AnchorPoint = Vector2.new(1, 0.5),
                 BackgroundTransparency = 1,
-                Text = "▶",
+                Image = "rbxassetid://6031091004",
+                ImageColor3 = Theme.SubText,
                 Rotation = 180,
-                TextColor3 = Theme.SubText,
-                Font = Enum.Font.Gotham,
-                TextSize = 20,
-                TextYAlignment = Enum.TextYAlignment.Center,
-                TextXAlignment = Enum.TextXAlignment.Center,
                 ZIndex = 5,
                 Parent = ComboContainer,
             })
