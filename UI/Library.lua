@@ -264,6 +264,7 @@ function Library:CreateWindow(title)
         HorizontalAlignment = Enum.HorizontalAlignment.Right,
         VerticalAlignment = Enum.VerticalAlignment.Center,
         Padding = UDim.new(0, 6),
+        SortOrder = Enum.SortOrder.LayoutOrder,
         Parent = ButtonHolder,
     })
 
@@ -282,8 +283,13 @@ function Library:CreateWindow(title)
     end
 
     local SettingsButton = createTopButton("Settings", "⚙")
+    SettingsButton.LayoutOrder = 1
+    
     local MinimizeButton = createTopButton("Minimize", "−")
+    MinimizeButton.LayoutOrder = 2
+    
     local CloseButton = createTopButton("Close", "×")
+    CloseButton.LayoutOrder = 3
 
     for _, button in ipairs({CloseButton, MinimizeButton, SettingsButton}) do
         button.MouseEnter:Connect(function()
