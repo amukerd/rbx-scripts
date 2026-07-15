@@ -13,7 +13,7 @@ end)
 
 Tab1:CreateSpacer("Spacer")
 
-Tab1:CreateDropdown("Mode", {"A","B","C"}, "A", function(choice)
+Tab1:CreateDropdown("Mode", {"A","B","C","D","E","F","G","H","I","J","K"}, "A", function(choice)
     print(choice) 
 end)
 
