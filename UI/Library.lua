@@ -585,54 +585,29 @@ function Library:CreateWindow(title)
             end)
         
             for i, opt in ipairs(options) do
-                local ButtonHolder = create("Frame", {
+                local Item = create("Frame", {
                     Size = UDim2.new(1, 0, 0, itemHeight),
                     BackgroundTransparency = 1,
                     LayoutOrder = i,
                     Parent = OptionList,
                 })
             
+                local LeftAccent = create("Frame", {
+                    Size = UDim2.new(0, 3, 1, 0),
+                    BackgroundColor3 = Theme.Accent,
+                    Visible = (opt == selected),
+                    Parent = Item,
+                })
+            
                 local OptBtn = create("TextButton", {
                     Size = UDim2.new(1, 0, 1, 0),
-                    BackgroundColor3 = (opt == selected) and Theme.Accent or Theme.Background,
+                    BackgroundColor3 = (opt == selected) and Theme.Secondary or Theme.Background,
+                    BorderSizePixel = 0,
                     AutoButtonColor = false,
                     Text = "",
-                    Parent = ButtonHolder,
+                    Parent = Item,
                     ZIndex = 100000,
                 })
-            
-                local Corner = create("UICorner", {
-                    CornerRadius = UDim.new(0, 0),
-                    Parent = OptBtn,
-                })
-            
-                if #options == 1 then
-                    Corner.CornerRadius = UDim.new(0, 6)
-                elseif i == 1 then
-                    Corner.CornerRadius = UDim.new(0, 6)
-                elseif i == #options then
-                    Corner.CornerRadius = UDim.new(0, 6)
-                end
-            
-                if i ~= 1 and i ~= #options then
-                    Corner:Destroy()
-                end
-            
-                if i == 1 or i == #options then
-                    local Fix = create("Frame", {
-                        BackgroundColor3 = OptBtn.BackgroundColor3,
-                        BorderSizePixel = 0,
-                        Parent = OptBtn,
-                    })
-            
-                    if i == 1 then
-                        Fix.Size = UDim2.new(1, 0, 0.5, 0)
-                        Fix.Position = UDim2.new(0, 0, 0.5, 0)
-                    else
-                        Fix.Size = UDim2.new(1, 0, 0.5, 0)
-                        Fix.Position = UDim2.new(0, 0, 0, 0)
-                    end
-                end
             
                 create("UIPadding", {
                     PaddingLeft = UDim.new(0, 12),
@@ -643,7 +618,7 @@ function Library:CreateWindow(title)
                     Size = UDim2.new(1, 0, 1, 0),
                     BackgroundTransparency = 1,
                     Text = tostring(opt),
-                    TextColor3 = (opt == selected) and Color3.new(1,1,1) or Theme.Text,
+                    TextColor3 = (opt == selected) and Theme.Accent or Theme.Text,
                     Font = Enum.Font.Gotham,
                     TextSize = 13,
                     TextXAlignment = Enum.TextXAlignment.Left,
@@ -655,11 +630,7 @@ function Library:CreateWindow(title)
                     if opt ~= selected then
                         tween(OptBtn, {
                             BackgroundColor3 = Theme.Secondary:Lerp(Color3.new(1,1,1), 0.03)
-                        }, 0.1)
-            
-                        tween(Label, {
-                            TextColor3 = Theme.Accent
-                        }, 0.1)
+                        }, 0.08)
                     end
                 end)
             
@@ -667,33 +638,24 @@ function Library:CreateWindow(title)
                     if opt ~= selected then
                         tween(OptBtn, {
                             BackgroundColor3 = Theme.Background
-                        }, 0.1)
-            
-                        tween(Label, {
-                            TextColor3 = Theme.Text
-                        }, 0.1)
+                        }, 0.08)
                     end
                 end)
             
                 OptBtn.MouseButton1Click:Connect(function()
                     selected = opt
             
-                    for _, holder in ipairs(OptionList:GetChildren()) do
-                        if holder:IsA("Frame") then
-                            local btn = holder:FindFirstChildWhichIsA("TextButton")
-                            local txt = btn and btn:FindFirstChildWhichIsA("TextLabel")
+                    for _, child in ipairs(OptionList:GetChildren()) do
+                        local btn = child:FindFirstChildWhichIsA("TextButton")
+                        local txt = btn and btn:FindFirstChildWhichIsA("TextLabel")
+                        local accent = child:FindFirstChildWhichIsA("Frame")
             
-                            if btn and txt then
-                                local chosen = txt.Text == tostring(selected)
+                        if btn and txt and accent then
+                            local chosen = txt.Text == tostring(selected)
             
-                                btn.BackgroundColor3 = chosen and Theme.Accent or Theme.Background
-                                txt.TextColor3 = chosen and Color3.new(1,1,1) or Theme.Text
-            
-                                local filler = btn:FindFirstChildWhichIsA("Frame")
-                                if filler then
-                                    filler.BackgroundColor3 = btn.BackgroundColor3
-                                end
-                            end
+                            btn.BackgroundColor3 = chosen and Theme.Secondary or Theme.Background
+                            txt.TextColor3 = chosen and Theme.Accent or Theme.Text
+                            accent.Visible = chosen
                         end
                     end
             
@@ -702,7 +664,7 @@ function Library:CreateWindow(title)
                     closeDropdown()
                     ActiveDropdown = nil
                 end)
-            end        
+            end
             return Holder
         end
         
