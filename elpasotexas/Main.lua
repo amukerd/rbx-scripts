@@ -60,7 +60,7 @@ end
 local function start()
     if not lplr.Character or not lplr.Character:FindFirstChildOfClass('Humanoid') or not lplr.Character:FindFirstChildOfClass('Humanoid').RootPart then return end
     cleanup()
-    heartbeatConnection = runService.Heartbeat:Connect(function()
+    heartbeatConnection = RunService.Heartbeat:Connect(function()
         if stop or not enabled then return end
         lastCF = lplr.Character:FindFirstChildOfClass('Humanoid').RootPart.CFrame
     end)
@@ -86,8 +86,8 @@ local function disableAntiTeleport()
 end
 
 lplr.CharacterAdded:Connect(function(character)
-    repeat runService.Heartbeat:Wait() until character:FindFirstChildOfClass('Humanoid')
-    repeat runService.Heartbeat:Wait() until character:FindFirstChildOfClass('Humanoid').RootPart
+    repeat RunService.Heartbeat:Wait() until character:FindFirstChildOfClass('Humanoid')
+    repeat RunService.Heartbeat:Wait() until character:FindFirstChildOfClass('Humanoid').RootPart
     start()
 end)
 
@@ -100,9 +100,9 @@ start()
 
 local function teleportTo(position)
     disableAntiTeleport()
-    runService.Heartbeat:Wait()
+    RunService.Heartbeat:Wait()
     lplr.Character:FindFirstChildOfClass('Humanoid').RootPart.CFrame = CFrame.new(position)
-    runService.Heartbeat:Wait()
+    RunService.Heartbeat:Wait()
     enableAntiTeleport()
 end
 
