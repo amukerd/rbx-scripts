@@ -285,10 +285,10 @@ function Library:CreateWindow(title)
     for _, button in ipairs({CloseButton, MinimizeButton, SettingsButton}) do
         button.MouseEnter:Connect(function()
             tween(button, {
-                BackgroundColor3 = Theme.Accent
+                BackgroundColor3 = button == CloseButton and Color3.fromRGB(255, 60, 60) or Theme.Accent
             }, 0.12)
         end)
-
+    
         button.MouseLeave:Connect(function()
             tween(button, {
                 BackgroundColor3 = Theme.Background
@@ -296,7 +296,7 @@ function Library:CreateWindow(title)
         end)
     end
 
-        local minimized = false
+    local minimized = false
     local oldSize = Main.Size
 
     MinimizeButton.MouseButton1Click:Connect(function()
@@ -312,14 +312,12 @@ function Library:CreateWindow(title)
             TabList.Visible = false
             SectionContainer.Visible = false
         else
+            TabList.Visible = true
+            SectionContainer.Visible = true
+                
             tween(Main, {
                 Size = oldSize
             }, 0.2)
-
-            task.delay(0.2, function()
-                TabList.Visible = true
-                SectionContainer.Visible = true
-            end)
         end
     end)
 
