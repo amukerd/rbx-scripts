@@ -400,11 +400,14 @@ function Library:CreateWindow(title)
             return Holder
         end
 
+        local ActiveDropdown = nil
+
         function Tab:CreateDropdown(text, options, default, callback)
             options = options or {}
             callback = callback or function() end
             local selected = default or options[1]
             local open = false
+            local itemHeight = 30
         
             local Holder = create("Frame", {
                 Size = UDim2.new(1, 0, 0, 40),
@@ -437,16 +440,6 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
         
-            local CornerFlattener = create("Frame", {
-                Size = UDim2.new(1, 1, 0, 6),
-                Position = UDim2.new(0, -0.5, 1, -6),
-                BackgroundColor3 = Theme.Background,
-                BorderSizePixel = 0,
-                Visible = false,
-                ZIndex = 4,
-                Parent = ComboContainer,
-            })
-        
             local SelectedLabel = create("TextLabel", {
                 Size = UDim2.new(1, -30, 1, 0),
                 Position = UDim2.new(0, 10, 0, 0),
@@ -461,56 +454,17 @@ function Library:CreateWindow(title)
             })
         
             local ArrowIcon = create("TextLabel", {
-                Size = UDim2.new(0, 20, 1, 0),
-                Position = UDim2.new(1, -24, 0, 0),
+                Size = UDim2.new(0, 24, 1, 0),
+                Position = UDim2.new(1, -28, 0, 0),
                 BackgroundTransparency = 1,
                 Text = "▶",
-                Rotation = 180,
                 TextColor3 = Theme.SubText,
                 Font = Enum.Font.Gotham,
-                TextSize = 10,
+                TextSize = 20,
                 TextYAlignment = Enum.TextYAlignment.Center,
                 TextXAlignment = Enum.TextXAlignment.Center,
                 ZIndex = 5,
                 Parent = ComboContainer,
-            })
-        
-            local maxVisibleItems = 7
-            local itemHeight = 30
-            local listHeight = math.min(#options, maxVisibleItems) * itemHeight
-
-            local OptionListMask = create("CanvasGroup", {
-                AnchorPoint = Vector2.new(0, 0),
-                Size = UDim2.new(0, 0, 0, 0),
-                BackgroundColor3 = Theme.Background,
-                BorderSizePixel = 0,
-                ClipsDescendants = true,
-                Visible = false,
-                ZIndex = 99999,
-                Parent = Main,
-            }, { corner(6) })
-            
-            local OptionList = create("ScrollingFrame", {
-                Size = UDim2.new(1, 0, 1, 0),
-                BackgroundTransparency = 1,
-                BorderSizePixel = 0,
-                ScrollBarThickness = 4,
-                ScrollBarImageColor3 = Theme.Accent,
-                CanvasSize = UDim2.new(0, 0, 0, (#options * itemHeight) + 10),
-                ElasticBehavior = Enum.ElasticBehavior.Never,
-                Parent = OptionListMask,
-            })
-        
-            create("UIStroke", {
-                Color = Theme.Border,
-                Thickness = 1,
-                Parent = OptionListMask,
-            })
-        
-            create("UIListLayout", {
-                SortOrder = Enum.SortOrder.LayoutOrder,
-                Padding = UDim.new(0, 0),
-                Parent = OptionList,
             })
         
             local ToggleButton = create("TextButton", {
@@ -521,77 +475,91 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
         
-            local targetHeight = listHeight
-        
-            local function updateDropdownPosition()
-                local absPos = ComboContainer.AbsolutePosition
-                local absSize = ComboContainer.AbsoluteSize
-                local mainPos = Main.AbsolutePosition
-                OptionListMask.Position = UDim2.new(0, absPos.X - mainPos.X, 0, (absPos.Y - mainPos.Y) + absSize.Y + 2)
-                OptionListMask.Size = UDim2.new(0, absSize.X, 0, OptionListMask.Size.Y.Offset)
+            local TextService = game:GetService("TextService")
+            local maxWidth = 0
+            for _, opt in ipairs(options) do
+                local size = TextService:GetTextSize(tostring(opt), 13, Enum.Font.Gotham, Vector2.new(math.huge, itemHeight))
+                if size.X > maxWidth then maxWidth = size.X end
             end
+            local panelWidth = maxWidth + 40
+        
+            local OptionListMask = create("CanvasGroup", {
+                AnchorPoint = Vector2.new(0, 0),
+                Size = UDim2.new(0, 0, 1, 0),
+                Position = UDim2.new(1, 0, 0, 0),
+                BackgroundColor3 = Theme.Background,
+                BorderSizePixel = 0,
+                ClipsDescendants = true,
+                Visible = false,
+                ZIndex = 99999,
+                Parent = Main,
+            }, { corner(6) })
+        
+            create("UIStroke", {
+                Color = Theme.Border,
+                Thickness = 1,
+                Parent = OptionListMask,
+            })
+        
+            local OptionList = create("ScrollingFrame", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                BorderSizePixel = 0,
+                ScrollBarThickness = 4,
+                ScrollBarImageColor3 = Theme.Accent,
+                CanvasSize = UDim2.new(0, 0, 0, #options * itemHeight),
+                ElasticBehavior = Enum.ElasticBehavior.Never,
+                Parent = OptionListMask,
+            })
+        
+            create("UIListLayout", {
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Padding = UDim.new(0, 0),
+                Parent = OptionList,
+            })
         
             local function closeDropdown()
                 open = false
-                tween(ArrowIcon, { Rotation = 180 }, 0.15)
-                local t = tween(OptionListMask, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, 0) }, 0.15)
+                tween(ArrowIcon, { Rotation = 0 }, 0.15)
+                local t = tween(OptionListMask, { Size = UDim2.new(0, 0, 1, 0) }, 0.2)
                 t.Completed:Connect(function()
                     if not open then
                         OptionListMask.Visible = false
-                        CornerFlattener.Visible = false
                     end
                 end)
             end
         
             local function openDropdown()
                 open = true
-                updateDropdownPosition()
                 OptionListMask.Visible = true
-                CornerFlattener.Visible = true
                 tween(ArrowIcon, { Rotation = 90 }, 0.15)
-                tween(OptionListMask, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, targetHeight) }, 0.18)
+                tween(OptionListMask, { Size = UDim2.new(0, panelWidth, 1, 0) }, 0.22)
             end
         
             ToggleButton.MouseButton1Click:Connect(function()
                 if open then
                     closeDropdown()
+                    ActiveDropdown = nil
                 else
+                    if ActiveDropdown and ActiveDropdown.close then
+                        ActiveDropdown.close()
+                    end
                     openDropdown()
-                end
-            end)
-        
-            Section:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
-                if open then closeDropdown() end
-            end)
-        
-            local clickConnection
-            clickConnection = UserInputService.InputBegan:Connect(function(input)
-                if not open then return end
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    local mPos = UserInputService:GetMouseLocation()
-        
-                    local function isInside(gui)
-                        if not gui or not gui.Visible then return false end
-                        local pos, size = gui.AbsolutePosition, gui.AbsoluteSize
-                        return mPos.X >= pos.X and mPos.X <= pos.X + size.X
-                           and mPos.Y >= pos.Y and mPos.Y <= pos.Y + size.Y
-                    end
-        
-                    if not isInside(ComboContainer) and not isInside(OptionListMask) then
-                        closeDropdown()
-                    end
+                    ActiveDropdown = { close = closeDropdown, instance = OptionListMask }
                 end
             end)
         
             Holder.Destroying:Connect(function()
-                if clickConnection then clickConnection:Disconnect() end
-                OptionList:Destroy()
+                if ActiveDropdown and ActiveDropdown.instance == OptionListMask then
+                    ActiveDropdown = nil
+                end
+                OptionListMask:Destroy()
             end)
         
             for i, opt in ipairs(options) do
                 local OptBtn = create("TextButton", {
-                    Size = UDim2.new(1, 0, 0, 30),
-                    BackgroundColor3 = Theme.Background,
+                    Size = UDim2.new(1, 0, 0, itemHeight),
+                    BackgroundColor3 = (opt == selected) and Theme.Accent or Theme.Background,
                     AutoButtonColor = false,
                     Text = "   " .. tostring(opt),
                     TextColor3 = Theme.Text,
@@ -602,18 +570,13 @@ function Library:CreateWindow(title)
                     LayoutOrder = i,
                     Parent = OptionList,
                 })
-
-                if opt == selected then
-                    OptBtn.BackgroundColor3 = Theme.Accent
-                    OptBtn.TextColor3 = Theme.Text
-                end
         
                 OptBtn.MouseEnter:Connect(function()
                     if opt ~= selected then
                         tween(OptBtn, { BackgroundColor3 = Theme.Secondary, TextColor3 = Theme.Accent }, 0.08)
                     end
                 end)
-                
+        
                 OptBtn.MouseLeave:Connect(function()
                     if opt ~= selected then
                         tween(OptBtn, { BackgroundColor3 = Theme.Background, TextColor3 = Theme.Text }, 0.08)
@@ -630,14 +593,14 @@ function Library:CreateWindow(title)
                         end
                     end
                     SelectedLabel.Text = tostring(opt)
-                    closeDropdown()
                     callback(selected)
+                    closeDropdown()
+                    ActiveDropdown = nil
                 end)
             end
         
             return Holder
         end
-        
         function Tab:CreateTextbox(text, placeholder, callback)
             callback = callback or function() end
 
