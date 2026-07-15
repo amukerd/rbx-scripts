@@ -509,7 +509,7 @@ function Library:CreateWindow(title)
             create("UIStroke", {
                 Color = Theme.Border,
                 Thickness = 1,
-                Parent = OptionList,
+                Parent = OptionListMask,
             })
         
             create("UIListLayout", {
@@ -538,7 +538,7 @@ function Library:CreateWindow(title)
         
             local function closeDropdown()
                 open = false
-                tween(ArrowIcon, { Rotation = 0 }, 0.15)
+                tween(ArrowIcon, { Rotation = 180 }, 0.15)
                 local t = tween(OptionListMask, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, 0) }, 0.15)
                 t.Completed:Connect(function()
                     if not open then
@@ -553,7 +553,7 @@ function Library:CreateWindow(title)
                 updateDropdownPosition()
                 OptionListMask.Visible = true
                 CornerFlattener.Visible = true
-                tween(ArrowIcon, { Rotation = -90 }, 0.15)
+                tween(ArrowIcon, { Rotation = 90 }, 0.15)
                 tween(OptionListMask, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, targetHeight) }, 0.18)
             end
         
