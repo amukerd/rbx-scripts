@@ -30,13 +30,6 @@ aVars.SellTP = Vector3.new(3147, -6, -184)
 aVars.WashTP = Vector3.new(-1834, -6, -15)
 aVars.ContainerTP = Vector3.new(3488, -6, -631)
 
-aVars.Platform = Instance.new("Part")
-aVars.Platform.Size = Vector3.new(10, 1, 10)
-aVars.Platform.Anchored = true
-aVars.Platform.Transparency = 1
-aVars.Platform.CanCollide = true
-aVars.Platform.Parent = aVars.Workspace
-
 --- game assets ---
 aVars.Watch = aVars.Workspace.Smuggling.Items["Fake Watch"].Main.PromptAtt.SmugglePurchasePrompt
 aVars.Bag = aVars.Workspace.Smuggling.Items["Fake Designer Bag"].Main.PromptAtt.SmugglePurchasePrompt
@@ -46,10 +39,12 @@ aVars.Sell = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Sell"):Wait
 aVars.Laundering = aVars.Workspace:WaitForChild("Smuggling"):WaitForChild("Laundering"):GetChildren()[4]:WaitForChild("SmuggleLaundryPrompt")
 aVars.Containers = aVars.Workspace:WaitForChild("GContaienrs"):WaitForChild("Prueba"):WaitForChild("Attachment1"):WaitForChild("Open")
 
--- Set initial hold durations
-aVars.Watch.HoldDuration = 0
-aVars.Bag.HoldDuration = 0
-aVars.Sar.HoldDuration = 0
+local Platform = Instance.new("Part")
+Platform.Size = Vector3.new(10, 1, 10)
+Platform.Anchored = true
+Platform.Transparency = 1
+Platform.CanCollide = true
+Platform.Parent = aVars.Workspace
 
 --- anti moderator ---
 task.spawn(function()
@@ -136,7 +131,7 @@ start()
 local function teleportTo(position)
 	disableAntiTeleport()
 	aVars.RunService.Heartbeat:Wait()
-	aVars.Platform.Position = position - Vector3.new(0, 3.5, 0)
+	Platform.Position = position - Vector3.new(0, 3.5, 0)
 	aVars.RunService.Heartbeat:Wait()
 	aVars.Character.HumanoidRootPart.CFrame = CFrame.new(position)
 	aVars.RunService.Heartbeat:Wait()
@@ -175,19 +170,21 @@ while true do
 		teleportTo(aVars.BuyTP)
 		
 		repeat
+			aVars.Watch.HoldDuration = 0
 			aVars.Watch.RequiresLineOfSight = false
-			aVars.Watch.MaxActivationDistance = 999999
 			fireproximityprompt(aVars.Watch)
 			aVars.RunService.Heartbeat:Wait()
 		until countInBackpack("Fake Watch") >= 3
 		
 		repeat
+			aVars.Bag.HoldDuration = 0
 			aVars.Bag.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Bag)
 			aVars.RunService.Heartbeat:Wait()
 		until countInBackpack("Fake Designer Bag") >= 3
 		
 		repeat
+			aVars.Sar.HoldDuration = 0
 			aVars.Sar.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Sar)
 			aVars.RunService.Heartbeat:Wait()
@@ -197,8 +194,8 @@ while true do
 				
 		repeat
 			local 
-			aVars.Sell.RequiresLineOfSight = false
 			aVars.Sell.HoldDuration = 0
+			aVars.Sell.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Sell)
 			aVars.RunService.Heartbeat:Wait()
 		until countInBackpack("Briefcase") >= 1
@@ -216,6 +213,7 @@ while true do
 			teleportTo(aVars.ContainerTP)
 			
 			repeat
+				aVars.Containers.HoldDuration = 0
 				aVars.Containers.RequiresLineOfSight = false
 				fireproximityprompt(aVars.Containers)
 				aVars.RunService.Heartbeat:Wait()
@@ -229,6 +227,7 @@ while true do
 		teleportTo(aVars.BuyTP)
 			
 		repeat
+			aVars.Taco.HoldDuration = 0
 			aVars.Taco.RequiresLineOfSight = false
 			fireproximityprompt(aVars.Taco)
 			aVars.RunService.Heartbeat:Wait()
