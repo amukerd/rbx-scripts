@@ -141,7 +141,7 @@ function Library:CreateWindow(title)
         Position = UDim2.new(0.5, -340, 0.5, -240),
         BackgroundColor3 = Theme.Background,
         BorderSizePixel = 0,
-        ClipsDescendants = true,
+        ClipsDescendants = false,
         Parent = ScreenGui,
     }, { corner(10) })
 
@@ -194,7 +194,7 @@ function Library:CreateWindow(title)
         CanvasSize = UDim2.new(0, 0, 0, 0),
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
         Parent = Main,
-    })
+    }, { corner(10) })
 
     local TabListLayout = create("UIListLayout", {
         Padding = UDim.new(0, 6),
@@ -203,6 +203,7 @@ function Library:CreateWindow(title)
     })
     create("UIPadding", {
         PaddingTop = UDim.new(0, 8),
+        PaddingBottom = UDim.new(0, 8),
         PaddingLeft = UDim.new(0, 8),
         PaddingRight = UDim.new(0, 8),
         Parent = TabList,
@@ -216,7 +217,7 @@ function Library:CreateWindow(title)
         BackgroundTransparency = 1,
         ClipsDescendants = true,
         Parent = Main,
-    })
+    }, { corner(10) })
 
     -- Resize handles
     local handleSize = 32
@@ -578,6 +579,10 @@ function Library:CreateWindow(title)
                     LayoutOrder = i,
                     Parent = OptionList,
                 })
+
+                if i == 1 or i == #options then
+                    create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = OptBtn })
+                end
 
                 if opt == selected then
                     OptBtn.BackgroundColor3 = Theme.Secondary
