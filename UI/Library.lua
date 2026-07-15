@@ -141,7 +141,7 @@ function Library:CreateWindow(title)
         Position = UDim2.new(0.5, -340, 0.5, -240),
         BackgroundColor3 = Theme.Background,
         BorderSizePixel = 0,
-        ClipsDescendants = false,
+        ClipsDescendants = true,
         Parent = ScreenGui,
     }, { corner(10) })
 
@@ -158,15 +158,6 @@ function Library:CreateWindow(title)
         BorderSizePixel = 0,
         Parent = Main,
     }, { corner(10) })
-
-    create("Frame", {
-        Size = UDim2.new(1, 0, 0, 10),
-        Position = UDim2.new(0, 0, 1, -10),
-        BackgroundColor3 = Theme.Secondary,
-        BorderSizePixel = 0,
-        ZIndex = 1,
-        Parent = TopBar,
-    })
 
     local Title = create("TextLabel", {
         Name = "Title",
