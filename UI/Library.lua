@@ -517,8 +517,8 @@ function Library:CreateWindow(title)
             })
 
             create("UIPadding", {
-                PaddingTop = UDim.new(0, 6),
-                PaddingBottom = UDim.new(0, 6),
+                PaddingTop = UDim.new(0, 10),
+                PaddingBottom = UDim.new(0, 10),
                 PaddingLeft = UDim.new(0, 6),
                 PaddingRight = UDim.new(0, 6),
                 Parent = OptionList,
