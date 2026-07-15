@@ -7,37 +7,6 @@ local char = lplr.Character or lplr.CharacterAdded:Wait()
 local root = char:WaitForChild("HumanoidRootPart")
 
 task.spawn(function()
-		task.wait(60)
-		local servers = {}
-	
-		local req = game:HttpGet(
-			"https://games.roblox.com/v1/games/"
-			.. game.PlaceId ..
-			"/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true"
-		)
-	
-		local body = game:GetService("HttpService"):JSONDecode(req)
-	
-		if body and body.data then
-			for _, v in next, body.data do
-				if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) and v.playing < v.maxPlayers and v.id ~= game.JobId then
-					table.insert(servers, v.id)
-				end
-			end
-		end
-	
-		if #servers > 0 then
-			local server = servers[math.random(1, #servers)]
-	
-			TeleportService:TeleportToPlaceInstance(
-				game.PlaceId,
-				server,
-				lplr
-			)
-		end
-	end)
-
-task.spawn(function()
 	if game.CreatorType ~= Enum.CreatorType.Group then
 		return
 	end
@@ -92,15 +61,7 @@ local function countInBackpack(itemName)
 end
 
 local function getMoney()
-	local label = lplr.PlayerGui:WaitForChild("HUD"):WaitForChild("Money"):WaitForChild("MoneyLabel")
-
-	while label.Text == "Loading..." do
-		task.wait()
-	end
-
-	local text = label.Text
-	text = text:gsub("%$", ""):gsub(",", "")
-
+	local text = game.Players.LocalPlayer.leaderstats.Cash.Value
 	return tonumber(text) or 0
 end
 
@@ -164,9 +125,6 @@ while true do
 	        RunService.Heartbeat:Wait()
 	    until countInBackpack("Briefcase") <= 0
 
-		loopCount += 1
-
-		--[[
 		if getMoney() >= 90000 then
 			local startTime = nil
 			
@@ -180,39 +138,6 @@ while true do
 					startTime = tick()
 				end
 			until getMoney() <= 90000 and (tick() - startTime) >= 4
-		end
-		]]--
-	
-		if loopCount >= 3 then
-			local servers = {}
-		
-			local req = game:HttpGet(
-				"https://games.roblox.com/v1/games/"
-				.. game.PlaceId ..
-				"/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true"
-			)
-		
-			local body = game:GetService("HttpService"):JSONDecode(req)
-		
-			if body and body.data then
-				for _, v in next, body.data do
-					if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) and v.playing < v.maxPlayers and v.id ~= game.JobId then
-						table.insert(servers, v.id)
-					end
-				end
-			end
-		
-			if #servers > 0 then
-				local server = servers[math.random(1, #servers)]
-		
-				TeleportService:TeleportToPlaceInstance(
-					game.PlaceId,
-					server,
-					lplr
-				)
-			end
-		
-			break
 		end
 	end
 	if getMoney() <= 5000 then
