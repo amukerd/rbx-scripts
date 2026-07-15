@@ -543,7 +543,7 @@ function Library:CreateWindow(title)
                 tween(ArrowIcon, { Rotation = -90 }, 0.15)
             
                 local contentHeight = #options * itemHeight
-                local maxPanelHeight = Main.AbsoluteSize.Y - 16
+                local maxPanelHeight = Main.AbsoluteSize.Y
                 local panelHeight = math.min(contentHeight, maxPanelHeight)
             
                 tween(OptionListMask, { Size = UDim2.new(0, panelWidth, 0, panelHeight) }, 0.22)
