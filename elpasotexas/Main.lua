@@ -121,11 +121,13 @@ start()
 
 local function teleportTo(position)
 	disableAntiTeleport()
+	aVars.Character.HumanoidRootPart.Anchored = false
 	aVars.RunService.Heartbeat:Wait()
 	Platform.Position = position - Vector3.new(0, 3.5, 0)
 	aVars.RunService.Heartbeat:Wait()
 	aVars.Character.HumanoidRootPart.CFrame = CFrame.new(position)
 	aVars.RunService.Heartbeat:Wait()
+	aVars.Character.HumanoidRootPart.Anchored = true
 	enableAntiTeleport()
 end
 
@@ -156,7 +158,9 @@ local function getMoney()
 end
 
 --- main loop ---
-while true do	
+while true do
+	aVars.Character.HumanoidRootPart.Anchored = true
+	
 	if getMoney() >= 5000 then
 		teleportTo(aVars.BuyTP)
 		
