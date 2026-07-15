@@ -424,7 +424,6 @@ function Library:CreateWindow(title)
                 Parent = Holder,
             })
         
-            -- Main input container
             local ComboContainer = create("Frame", {
                 Size = UDim2.new(0.6, -12, 0, 28),
                 Position = UDim2.new(0.4, 0, 0.5, -14),
@@ -438,11 +437,9 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
         
-            -- Hides the bottom rounded corners of ComboContainer while open, so it
-            -- reads as one continuous shape with the list below it
             local CornerFlattener = create("Frame", {
-                Size = UDim2.new(1, 0, 0, 6),
-                Position = UDim2.new(0, 0, 1, -6),
+                Size = UDim2.new(1, 4, 0, 8),
+                Position = UDim2.new(0, -2, 1, -8),
                 BackgroundColor3 = Theme.Background,
                 BorderSizePixel = 0,
                 Visible = false,
@@ -471,16 +468,13 @@ function Library:CreateWindow(title)
                 Rotation = 180,
                 TextColor3 = Theme.SubText,
                 Font = Enum.Font.Gotham,
-                TextSize = 20,
+                TextSize = 10,
                 TextYAlignment = Enum.TextYAlignment.Center,
                 TextXAlignment = Enum.TextXAlignment.Center,
                 ZIndex = 5,
                 Parent = ComboContainer,
             })
         
-            -- Option list — parented to ScreenGui so it can float above other rows.
-            -- AnchorPoint stays (0,0) and only Size.Y animates, so it always grows
-            -- downward from a fixed top position instead of drifting upward.
             local maxVisibleItems = 7
             local itemHeight = 30
             local listHeight = math.min(#options, maxVisibleItems) * itemHeight
@@ -503,6 +497,7 @@ function Library:CreateWindow(title)
                 ScrollBarThickness = 4,
                 ScrollBarImageColor3 = Theme.Accent,
                 CanvasSize = UDim2.new(0, 0, 0, #options * itemHeight),
+                ElasticBehavior = Enum.ElasticBehavior.Never,
                 Parent = OptionListMask,
             })
         
