@@ -201,7 +201,7 @@ while true do
 			repeat
 			    task.wait()
 			until #smuggling:GetChildren() >= 4
-			local fourthChild = laundering:GetChildren()[4]
+			local fourthChild = smuggling:GetChildren()[4]
 			aVars.Laundering = fourthChild:WaitForChild("SmuggleLaundryPrompt")
 			aVars.Laundering.HoldDuration = 0
 			aVars.Laundering.RequiresLineOfSight = false
@@ -252,7 +252,7 @@ while true do
 			repeat
 			    task.wait()
 			until #smuggling:GetChildren() >= 4
-			local fourthChild = laundering:GetChildren()[4]
+			local fourthChild = smuggling:GetChildren()[4]
 			aVars.Laundering = fourthChild:WaitForChild("SmuggleLaundryPrompt")
 			aVars.Laundering.HoldDuration = 0
 			aVars.Laundering.RequiresLineOfSight = false
