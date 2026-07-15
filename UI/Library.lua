@@ -127,8 +127,6 @@ local Theme = {
 
 -- ===== Window ===== --
 
-Window.ActiveDropdown = nil
-
 function Library:CreateWindow(title)
     local ScreenGui = create("ScreenGui", {
         Name = LIBRARY_NAME,
@@ -247,6 +245,7 @@ function Library:CreateWindow(title)
         SectionContainer = SectionContainer,
         Tabs = {},
         ActiveTab = nil,
+        ActiveDropdown = nil,
     }, { __index = {} })
 
     -- ===== Tab creation ===== --
