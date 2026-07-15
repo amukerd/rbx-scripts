@@ -12,9 +12,9 @@ local lastCF, stop, heartbeatConnection, cfConnection
 local enabled = false
 
 local buytp = Vector3.new(-1837, -6, 0)
-local selltp = CFrame.new(3147, -6, -184)
-local washtp = CFrame.new(-1834, -6, -15)
-local continertp = CFrame.new(3488, -6, -631)
+local selltp = Vector3.new(3147, -6, -184)
+local washtp = Vector3.new(-1834, -6, -15)
+local continertp = Vector3.new(3488, -6, -631)
 
 local platform = Instance.new("Part")
 platform.Size = Vector3.new(10, 1, 10)
@@ -75,7 +75,7 @@ local function start()
         if not enabled then return end
         stop = true
         lplr.Character:FindFirstChildOfClass('Humanoid').RootPart.CFrame = lastCF
-        runService.Heartbeat:Wait()
+        RunService.Heartbeat:Wait()
         stop = false
     end)
     lplr.Character:FindFirstChildOfClass('Humanoid').Died:Connect(function()
