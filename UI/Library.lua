@@ -408,7 +408,8 @@ function Library:CreateWindow(title)
             local selected = default or options[1]
             local open = false
             local itemHeight = 30
-        
+            local dropdownPadding = 6
+            
             local Holder = create("Frame", {
                 Size = UDim2.new(1, 0, 0, 40),
                 BackgroundColor3 = Theme.Secondary,
@@ -507,16 +508,16 @@ function Library:CreateWindow(title)
                 BorderSizePixel = 0,
                 ScrollBarThickness = 4,
                 ScrollBarImageColor3 = Theme.Accent,
-                CanvasSize = UDim2.new(0, 0, 0, #options * itemHeight),
+                CanvasSize = UDim2.new(0, 0, 0, (#options * itemHeight) + (dropdownPadding * 2)),
                 ElasticBehavior = Enum.ElasticBehavior.Never,
                 Parent = OptionListMask,
             })
-
+        
             create("UIPadding", {
-                PaddingTop = UDim.new(0, 2),
-                PaddingBottom = UDim.new(0, 2),
-                PaddingLeft = UDim.new(0, 2),
-                PaddingRight = UDim.new(0, 2),
+                PaddingTop = UDim.new(0, dropdownPadding),
+                PaddingBottom = UDim.new(0, dropdownPadding),
+                PaddingLeft = UDim.new(0, dropdownPadding),
+                PaddingRight = UDim.new(0, dropdownPadding),
                 Parent = OptionList,
             })
         
@@ -542,16 +543,16 @@ function Library:CreateWindow(title)
                 OptionListMask.Visible = true
                 tween(ArrowIcon, { Rotation = -90 }, 0.15)
             
-                local contentHeight = #options * itemHeight
+                local contentHeight = (#options * itemHeight) + (dropdownPadding * 2)
                 local maxPanelHeight = Main.AbsoluteSize.Y - 16
                 local panelHeight = math.min(contentHeight, maxPanelHeight)
             
                 tween(OptionListMask, { Size = UDim2.new(0, panelWidth, 0, panelHeight) }, 0.22)
             end
-
+        
             local function refreshPanelHeight()
                 if not open then return end
-                local contentHeight = #options * itemHeight
+                local contentHeight = (#options * itemHeight) + (dropdownPadding * 2)
                 local maxPanelHeight = Main.AbsoluteSize.Y - 16
                 local panelHeight = math.min(contentHeight, maxPanelHeight)
                 OptionListMask.Size = UDim2.new(0, OptionListMask.Size.X.Offset, 0, panelHeight)
@@ -593,7 +594,7 @@ function Library:CreateWindow(title)
                     Size = UDim2.new(1, 0, 0, itemHeight),
                     BackgroundColor3 = (opt == selected) and Theme.Accent or Theme.Background,
                     AutoButtonColor = false,
-                    Text = "   " .. tostring(opt),
+                    Text = "    " .. tostring(opt),
                     TextColor3 = Theme.Text,
                     Font = Enum.Font.Gotham,
                     TextSize = 13,
@@ -602,6 +603,11 @@ function Library:CreateWindow(title)
                     LayoutOrder = i,
                     Parent = OptionList,
                 })
+        
+                if i == 1 or i == #options then
+                    local uicorner = corner(6)
+                    uicorner.Parent = OptBtn
+                end
         
                 OptBtn.MouseEnter:Connect(function()
                     if opt ~= selected then
@@ -633,6 +639,7 @@ function Library:CreateWindow(title)
         
             return Holder
         end
+        
         function Tab:CreateTextbox(text, placeholder, callback)
             callback = callback or function() end
 
