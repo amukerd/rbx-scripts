@@ -516,14 +516,6 @@ function Library:CreateWindow(title)
                 Parent = OptionListMask,
             })
 
-            create("UIPadding", {
-                PaddingTop = UDim.new(0, 10),
-                PaddingBottom = UDim.new(0, 10),
-                PaddingLeft = UDim.new(0, 6),
-                PaddingRight = UDim.new(0, 6),
-                Parent = OptionList,
-            })
-        
             create("UIListLayout", {
                 SortOrder = Enum.SortOrder.LayoutOrder,
                 Padding = UDim.new(0, 0),
@@ -593,48 +585,124 @@ function Library:CreateWindow(title)
             end)
         
             for i, opt in ipairs(options) do
-                local OptBtn = create("TextButton", {
+                local ButtonHolder = create("Frame", {
                     Size = UDim2.new(1, 0, 0, itemHeight),
-                    BackgroundColor3 = (opt == selected) and Theme.Accent or Theme.Background,
-                    AutoButtonColor = false,
-                    Text = "   " .. tostring(opt),
-                    TextColor3 = Theme.Text,
-                    Font = Enum.Font.Gotham,
-                    TextSize = 13,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    ZIndex = 100000,
+                    BackgroundTransparency = 1,
                     LayoutOrder = i,
                     Parent = OptionList,
                 })
-
+            
+                local OptBtn = create("TextButton", {
+                    Size = UDim2.new(1, 0, 1, 0),
+                    BackgroundColor3 = (opt == selected) and Theme.Accent or Theme.Background,
+                    AutoButtonColor = false,
+                    Text = "",
+                    Parent = ButtonHolder,
+                    ZIndex = 100000,
+                })
+            
+                local Corner = create("UICorner", {
+                    CornerRadius = UDim.new(0, 0),
+                    Parent = OptBtn,
+                })
+            
+                if #options == 1 then
+                    Corner.CornerRadius = UDim.new(0, 6)
+                elseif i == 1 then
+                    Corner.CornerRadius = UDim.new(0, 6)
+                elseif i == #options then
+                    Corner.CornerRadius = UDim.new(0, 6)
+                end
+            
+                if i ~= 1 and i ~= #options then
+                    Corner:Destroy()
+                end
+            
+                if i == 1 or i == #options then
+                    local Fix = create("Frame", {
+                        BackgroundColor3 = OptBtn.BackgroundColor3,
+                        BorderSizePixel = 0,
+                        Parent = OptBtn,
+                    })
+            
+                    if i == 1 then
+                        Fix.Size = UDim2.new(1, 0, 0.5, 0)
+                        Fix.Position = UDim2.new(0, 0, 0.5, 0)
+                    else
+                        Fix.Size = UDim2.new(1, 0, 0.5, 0)
+                        Fix.Position = UDim2.new(0, 0, 0, 0)
+                    end
+                end
+            
+                create("UIPadding", {
+                    PaddingLeft = UDim.new(0, 12),
+                    Parent = OptBtn,
+                })
+            
+                local Label = create("TextLabel", {
+                    Size = UDim2.new(1, 0, 1, 0),
+                    BackgroundTransparency = 1,
+                    Text = tostring(opt),
+                    TextColor3 = (opt == selected) and Color3.new(1,1,1) or Theme.Text,
+                    Font = Enum.Font.Gotham,
+                    TextSize = 13,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = OptBtn,
+                    ZIndex = 100001,
+                })
+            
                 OptBtn.MouseEnter:Connect(function()
                     if opt ~= selected then
-                        tween(OptBtn, { BackgroundColor3 = Theme.Secondary, TextColor3 = Theme.Accent }, 0.08)
+                        tween(OptBtn, {
+                            BackgroundColor3 = Theme.Secondary:Lerp(Color3.new(1,1,1), 0.03)
+                        }, 0.1)
+            
+                        tween(Label, {
+                            TextColor3 = Theme.Accent
+                        }, 0.1)
                     end
                 end)
-        
+            
                 OptBtn.MouseLeave:Connect(function()
                     if opt ~= selected then
-                        tween(OptBtn, { BackgroundColor3 = Theme.Background, TextColor3 = Theme.Text }, 0.08)
+                        tween(OptBtn, {
+                            BackgroundColor3 = Theme.Background
+                        }, 0.1)
+            
+                        tween(Label, {
+                            TextColor3 = Theme.Text
+                        }, 0.1)
                     end
                 end)
-        
+            
                 OptBtn.MouseButton1Click:Connect(function()
                     selected = opt
-                    for _, child in ipairs(OptionList:GetChildren()) do
-                        if child:IsA("TextButton") then
-                            local isSelected = child.Text:match("^%s*(.*)$") == tostring(selected)
-                            child.BackgroundColor3 = isSelected and Theme.Accent or Theme.Background
-                            child.TextColor3 = Theme.Text
+            
+                    for _, holder in ipairs(OptionList:GetChildren()) do
+                        if holder:IsA("Frame") then
+                            local btn = holder:FindFirstChildWhichIsA("TextButton")
+                            local txt = btn and btn:FindFirstChildWhichIsA("TextLabel")
+            
+                            if btn and txt then
+                                local chosen = txt.Text == tostring(selected)
+            
+                                btn.BackgroundColor3 = chosen and Theme.Accent or Theme.Background
+                                txt.TextColor3 = chosen and Color3.new(1,1,1) or Theme.Text
+            
+                                local filler = btn:FindFirstChildWhichIsA("Frame")
+                                if filler then
+                                    filler.BackgroundColor3 = btn.BackgroundColor3
+                                end
+                            end
                         end
                     end
+            
                     SelectedLabel.Text = tostring(opt)
                     callback(selected)
                     closeDropdown()
                     ActiveDropdown = nil
                 end)
-            end
-        
+            end        
             return Holder
         end
         
