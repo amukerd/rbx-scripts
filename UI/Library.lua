@@ -485,7 +485,7 @@ function Library:CreateWindow(title)
         
             local OptionListMask = create("CanvasGroup", {
                 AnchorPoint = Vector2.new(0, 0),
-                Size = UDim2.new(0, 0, 1, 0),
+                Size = UDim2.new(0, 0, 0, 0),
                 Position = UDim2.new(1, 8, 0, 0),
                 BackgroundColor3 = Theme.Background,
                 BorderSizePixel = 0,
@@ -511,6 +511,14 @@ function Library:CreateWindow(title)
                 ElasticBehavior = Enum.ElasticBehavior.Never,
                 Parent = OptionListMask,
             })
+
+            create("UIPadding", {
+                PaddingTop = UDim.new(0, 2),
+                PaddingBottom = UDim.new(0, 2),
+                PaddingLeft = UDim.new(0, 2),
+                PaddingRight = UDim.new(0, 2),
+                Parent = OptionList,
+            })
         
             create("UIListLayout", {
                 SortOrder = Enum.SortOrder.LayoutOrder,
@@ -521,7 +529,7 @@ function Library:CreateWindow(title)
             local function closeDropdown()
                 open = false
                 tween(ArrowIcon, { Rotation = 90 }, 0.15)
-                local t = tween(OptionListMask, { Size = UDim2.new(0, 0, 1, 0) }, 0.2)
+                local t = tween(OptionListMask, { Size = UDim2.new(0, 0, 0, 0) }, 0.2)
                 t.Completed:Connect(function()
                     if not open then
                         OptionListMask.Visible = false
@@ -533,7 +541,12 @@ function Library:CreateWindow(title)
                 open = true
                 OptionListMask.Visible = true
                 tween(ArrowIcon, { Rotation = -90 }, 0.15)
-                tween(OptionListMask, { Size = UDim2.new(0, panelWidth, 1, 0) }, 0.22)
+            
+                local contentHeight = #options * itemHeight
+                local maxPanelHeight = Main.AbsoluteSize.Y - 16
+                local panelHeight = math.min(contentHeight, maxPanelHeight)
+            
+                tween(OptionListMask, { Size = UDim2.new(0, panelWidth, 0, panelHeight) }, 0.22)
             end
         
             ToggleButton.MouseButton1Click:Connect(function()
