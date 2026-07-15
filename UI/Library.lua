@@ -278,11 +278,14 @@ function Library:CreateWindow(title)
     
     local MinimizeButton = createTopButton("Minimize", "−")
     MinimizeButton.LayoutOrder = 2
+
+    local HideButton = createTopButton("Hide", "_")
+    HideButton.LayoutOrder = 3
     
     local CloseButton = createTopButton("Close", "×")
-    CloseButton.LayoutOrder = 3
+    CloseButton.LayoutOrder = 4
 
-    for _, button in ipairs({CloseButton, MinimizeButton, SettingsButton}) do
+    for _, button in ipairs({CloseButton, MinimizeButton, HideButton, SettingsButton}) do
         button.MouseEnter:Connect(function()
             tween(button, {
                 BackgroundColor3 = button == CloseButton and Color3.fromRGB(255, 60, 60) or Theme.Accent
@@ -299,7 +302,15 @@ function Library:CreateWindow(title)
     local minimized = false
     local oldSize = Main.Size
 
+    SettingsButton.MouseButton1Click:Connect(function()
+        print("Settings clicked")
+    end)
+
     MinimizeButton.MouseButton1Click:Connect(function()
+        ScreenGui.Enabled = false
+    end)
+
+    HideButton.MouseButton1Click:Connect(function()
         minimized = not minimized
 
         if minimized then
@@ -323,10 +334,6 @@ function Library:CreateWindow(title)
 
     CloseButton.MouseButton1Click:Connect(function()
         Window:Unload()
-    end)
-
-    SettingsButton.MouseButton1Click:Connect(function()
-        print("Settings clicked")
     end)
 
     function Window:SetGlobal(name, value)
