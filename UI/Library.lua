@@ -311,6 +311,11 @@ function Library:CreateWindow(title)
     end)
 
     HideButton.MouseButton1Click:Connect(function()
+        if Window.ActiveDropdown and Window.ActiveDropdown.close then
+            Window.ActiveDropdown.close()
+            Window.ActiveDropdown = nil
+        end
+    
         minimized = not minimized
 
         if minimized then
@@ -733,9 +738,7 @@ function Library:CreateWindow(title)
                 local panelHeight = math.min(contentHeight, maxPanelHeight)
                 OptionListMask.Size = UDim2.new(0, OptionListMask.Size.X.Offset, 0, panelHeight)
             end
-            
-            Main:GetPropertyChangedSignal("AbsoluteSize"):Connect(refreshPanelHeight)
-        
+
             ToggleButton.MouseButton1Click:Connect(function()
                 if open then
                     closeDropdown()
@@ -832,25 +835,29 @@ function Library:CreateWindow(title)
             
                 OptBtn.MouseButton1Click:Connect(function()
                     selected = opt
-            
+                
                     for _, child in ipairs(OptionList:GetChildren()) do
                         local btn = child:FindFirstChildWhichIsA("TextButton")
                         local txt = btn and btn:FindFirstChildWhichIsA("TextLabel")
                         local accent = child:FindFirstChildWhichIsA("Frame")
-            
+                
                         if btn and txt and accent then
                             local chosen = txt.Text == tostring(selected)
-            
+                
                             btn.BackgroundColor3 = chosen and Theme.Secondary or Theme.Background
                             txt.TextColor3 = chosen and Theme.Accent or Theme.Text
                             accent.Visible = chosen
                         end
                     end
-            
+                
                     SelectedLabel.Text = tostring(opt)
                     callback(selected)
                     closeDropdown()
-                    ActiveDropdown = nil
+                
+                    if Window.ActiveDropdown 
+                        and Window.ActiveDropdown.instance == OptionListMask then
+                        Window.ActiveDropdown = nil
+                    end
                 end)
             end
             return Holder
