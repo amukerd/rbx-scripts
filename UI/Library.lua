@@ -281,9 +281,9 @@ function Library:CreateWindow(title)
         }, { corner(6) })
     end
 
-    local CloseButton = createTopButton("Close", "×")
-    local MinimizeButton = createTopButton("Minimize", "−")
     local SettingsButton = createTopButton("Settings", "⚙")
+    local MinimizeButton = createTopButton("Minimize", "−")
+    local CloseButton = createTopButton("Close", "×")
 
     for _, button in ipairs({CloseButton, MinimizeButton, SettingsButton}) do
         button.MouseEnter:Connect(function()
