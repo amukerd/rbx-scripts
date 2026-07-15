@@ -181,6 +181,89 @@ function Library:CreateWindow(title)
         Parent = TopBar,
     })
 
+    local ButtonHolder = create("Frame", {
+        Name = "TopButtons",
+        Size = UDim2.new(0, 100, 1, 0),
+        Position = UDim2.new(1, -110, 0, 0),
+        BackgroundTransparency = 1,
+        Parent = TopBar,
+    })
+
+    local ButtonLayout = create("UIListLayout", {
+        FillDirection = Enum.FillDirection.Horizontal,
+        HorizontalAlignment = Enum.HorizontalAlignment.Right,
+        VerticalAlignment = Enum.VerticalAlignment.Center,
+        Padding = UDim.new(0, 6),
+        Parent = ButtonHolder,
+    })
+
+    local function createTopButton(name, text)
+        return create("TextButton", {
+            Name = name,
+            Size = UDim2.new(0, 26, 0, 26),
+            BackgroundColor3 = Theme.Background,
+            AutoButtonColor = false,
+            Text = text,
+            TextColor3 = Theme.Text,
+            Font = Enum.Font.GothamBold,
+            TextSize = 16,
+            Parent = ButtonHolder,
+        }, { corner(6) })
+    end
+
+    local SettingsButton = createTopButton("Settings", "⚙")
+    local MinimizeButton = createTopButton("Minimize", "−")
+    local CloseButton = createTopButton("Close", "×")
+
+    for _, button in ipairs({SettingsButton, MinimizeButton, CloseButton}) do
+        button.MouseEnter:Connect(function()
+            tween(button, {
+                BackgroundColor3 = Theme.Accent
+            }, 0.12)
+        end)
+
+        button.MouseLeave:Connect(function()
+            tween(button, {
+                BackgroundColor3 = Theme.Background
+            }, 0.12)
+        end)
+    end
+
+        local minimized = false
+    local oldSize = Main.Size
+
+    MinimizeButton.MouseButton1Click:Connect(function()
+        minimized = not minimized
+
+        if minimized then
+            oldSize = Main.Size
+
+            tween(Main, {
+                Size = UDim2.new(0, oldSize.X.Offset, 0, 40)
+            }, 0.2)
+
+            TabList.Visible = false
+            SectionContainer.Visible = false
+        else
+            tween(Main, {
+                Size = oldSize
+            }, 0.2)
+
+            task.delay(0.2, function()
+                TabList.Visible = true
+                SectionContainer.Visible = true
+            end)
+        end
+    end)
+
+    CloseButton.MouseButton1Click:Connect(function()
+        Window:Unload()
+    end)
+
+    SettingsButton.MouseButton1Click:Connect(function()
+        print("Settings clicked")
+    end)
+
     makeDraggable(Main, TopBar)
 
     local TabList = create("ScrollingFrame", {
@@ -246,7 +329,70 @@ function Library:CreateWindow(title)
         Tabs = {},
         ActiveTab = nil,
         ActiveDropdown = nil,
+        UnloadCallbacks = {},
+        GlobalVariables = {},
+        Connections = {},
     }, { __index = {} })
+
+    function Window:SetGlobal(name, value)
+        _G[name] = value
+    
+        self.GlobalVariables[name] = true
+    
+        return value
+    end
+
+    function Window:Connect(signal, callback)
+        local connection = signal:Connect(callback)
+    
+        table.insert(self.Connections, connection)
+    
+        return connection
+    end
+
+    function Window:CreateTask(name, callback)
+        local running = true
+    
+        task.spawn(function()
+            callback(function()
+                return running
+            end)
+        end)
+    
+        self:AddUnloadCallback(function()
+            running = false
+        end)
+    
+        return function()
+            running = false
+        end
+    end
+
+    function Window:Unload()
+        for _, callback in ipairs(self.UnloadCallbacks) do
+            pcall(callback)
+        end
+    
+        self.UnloadCallbacks = {}
+    
+        for name in pairs(self.GlobalVariables) do
+            _G[name] = nil
+        end
+    
+        self.GlobalVariables = {}
+    
+        for _, connection in ipairs(self.Connections) do
+            if connection.Connected then
+                connection:Disconnect()
+            end
+        end
+    
+        self.Connections = {}
+    
+        if self.ScreenGui then
+            self.ScreenGui:Destroy()
+        end
+    end
 
     -- ===== Tab creation ===== --
     function Window:CreateTab(name)
