@@ -16,6 +16,13 @@ local selltp = CFrame.new(3147, -6, -184)
 local washtp = CFrame.new(-1834, -6, -15)
 local continertp = CFrame.new(3488, -6, -631)
 
+local platform = Instance.new("Part")
+platform.Size = Vector3.new(10, 1, 10)
+platform.Anchored = true
+platform.Transparency = 1
+platform.CanCollide = true
+platform.Parent = workspace
+
 -- anti moderator --
 task.spawn(function()
 	if game.CreatorType ~= Enum.CreatorType.Group then
@@ -101,7 +108,8 @@ start()
 local function teleportTo(position)
     disableAntiTeleport()
     RunService.Heartbeat:Wait()
-    lplr.Character:FindFirstChildOfClass('Humanoid').RootPart.CFrame = CFrame.new(position)
+    platform.Position = position - Vector3.new(0, 3.5, 0)
+    char.HumanoidRootPart.CFrame = CFrame.new(position)
     RunService.Heartbeat:Wait()
     enableAntiTeleport()
 end
@@ -141,14 +149,11 @@ watch.HoldDuration = 0
 bag.HoldDuration = 0
 sar.HoldDuration = 0
 
-while true do
-	--char.HumanoidRootPart.Anchored = true
-	
+while true do	
 	if getMoney() >= 5000 then
-	    --teleportTo(buytp)
+	    teleportTo(buytp)
 		
 		repeat
-			print("buy watch")
 		    watch.RequiresLineOfSight = false
 		    watch.MaxActivationDistance = 999999
 		    fireproximityprompt(watch)
