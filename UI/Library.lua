@@ -491,7 +491,7 @@ function Library:CreateWindow(title)
                 AnchorPoint = Vector2.new(0, 0),
                 Size = UDim2.new(0, 0, 0, 0),
                 Position = UDim2.new(1, 8, 0, 0),
-                BackgroundColor3 = Theme.Background,
+                BackgroundColor3 = Theme.Secondary,
                 BorderSizePixel = 0,
                 ClipsDescendants = true,
                 Visible = false,
@@ -607,10 +607,6 @@ function Library:CreateWindow(title)
                     Parent = OptionList,
                 })
 
-                if i == 1 or i == #options then
-                    create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = OptBtn })
-                end
-        
                 OptBtn.MouseEnter:Connect(function()
                     if opt ~= selected then
                         tween(OptBtn, { BackgroundColor3 = Theme.Secondary, TextColor3 = Theme.Accent }, 0.08)
