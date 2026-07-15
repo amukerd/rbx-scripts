@@ -148,6 +148,7 @@ while true do
 	    --teleportTo(buytp)
 		
 		repeat
+			print("buy watch")
 		    watch.RequiresLineOfSight = false
 		    watch.MaxActivationDistance = 999999
 		    fireproximityprompt(watch)
