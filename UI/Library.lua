@@ -438,8 +438,8 @@ function Library:CreateWindow(title)
             })
         
             local CornerFlattener = create("Frame", {
-                Size = UDim2.new(1, 4, 0, 8),
-                Position = UDim2.new(0, -2, 1, -8),
+                Size = UDim2.new(1, 1, 0, 6),
+                Position = UDim2.new(0, -0.5, 1, -6),
                 BackgroundColor3 = Theme.Background,
                 BorderSizePixel = 0,
                 Visible = false,
@@ -496,7 +496,7 @@ function Library:CreateWindow(title)
                 BorderSizePixel = 0,
                 ScrollBarThickness = 4,
                 ScrollBarImageColor3 = Theme.Accent,
-                CanvasSize = UDim2.new(0, 0, 0, #options * itemHeight),
+                CanvasSize = UDim2.new(0, 0, 0, (#options * itemHeight) + 10),
                 ElasticBehavior = Enum.ElasticBehavior.Never,
                 Parent = OptionListMask,
             })
