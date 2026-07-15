@@ -21,8 +21,55 @@ Tab1:CreateTextbox("Name", "Type here...", function(text)
     print(text)
 end)
 
+
+
+
+
 local Tab2 = Window:CreateTab("Main")
+
+Tab2:CreateButton("Do thing", function()
+    print("clicked")
+end)
+
+Tab2:CreateToggle("Enable X", false, function(state)
+    print(state)
+end)
+
+Tab2:CreateSpacer("Spacer")
+
+Tab2:CreateDropdown("Mode", {"A","B","C"}, "A", function(choice)
+    print(choice) 
+end)
+
+Tab2:CreateTextbox("Name", "Type here...", function(text)
+    print(text)
+end)
+
+
+
+
+
+
 local Tab3 = Window:CreateTab("Main")
+
+Tab3:CreateButton("Do thing", function()
+    print("clicked")
+end)
+
+Tab3:CreateToggle("Enable X", false, function(state)
+    print(state)
+end)
+
+Tab3:CreateSpacer("Spacer")
+
+Tab3:CreateDropdown("Mode", {"A","B","C"}, "A", function(choice)
+    print(choice) 
+end)
+
+Tab3:CreateTextbox("Name", "Type here...", function(text)
+    print(text)
+end)
+
 local Tab4 = Window:CreateTab("Main")
 local Tab5 = Window:CreateTab("Main")
 local Tab6 = Window:CreateTab("Main")
