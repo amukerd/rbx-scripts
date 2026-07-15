@@ -69,34 +69,81 @@ Tab:Button({
 })
 
 Tab:Button({
-    Text = "Do Tasks (Also Sucks)",
+    Text = "Do Tasks",
     Callback = function(self)
-        for _, d in pairs(workspace:GetDescendants()) do
-            if d:IsA("ProximityPrompt") then
-                local a = d.Parent
-                if a and a:IsA("Attachment") then
-                    local b = a.Parent
-                    if b and b:IsA("BasePart") then
-                        local l = b:FindFirstChild("LightContainer")
-                        if l then
-                            local p = l:FindFirstChildOfClass("PointLight")
-                            if p then
-                                local rb = math.round(p.Brightness * 10^2) / 10^2
-                                if rb == 0.28 and p.Color ~= Color3.fromRGB(137, 255, 111) then
-                                    local targetPosition = b.Position + Vector3.new(0, 2.5, 0)
-                                    game.Players.LocalPlayer.Character:PivotTo(CFrame.new(targetPosition))
-                                    wait(0.5)
-                                    local pp = d
-                                    game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                                    wait(pp.HoldDuration or 2)
-                                    game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
-                                    wait(1)
+        local vim = game:GetService("VirtualInputManager")
+        
+        local function getNextTask()
+            for _, d in pairs(workspace:GetDescendants()) do
+                if d:IsA("ProximityPrompt") then
+                    local a = d.Parent
+                    if a and a:IsA("Attachment") then
+                        local b = a.Parent
+                        if b and b:IsA("BasePart") then
+                            local l = b:FindFirstChild("LightContainer")
+                            if l then
+                                local p = l:FindFirstChildOfClass("PointLight")
+                                if p then
+                                    local rb = math.round(p.Brightness * 10^2) / 10^2
+                                    if rb == 0.28 and p.Color ~= Color3.fromRGB(137, 255, 111) then
+                                        return d, b
+                                    end
                                 end
                             end
                         end
                     end
                 end
             end
+            return nil
+        end
+
+        while true do
+            local d, b = getNextTask()
+            
+            if not d then 
+                break 
+            end
+            
+            local targetPosition = b.Position + Vector3.new(0, 2.5, 0)
+            game.Players.LocalPlayer.Character:PivotTo(CFrame.new(targetPosition))
+            task.wait(0.25)
+            
+            d.MaxActivationDistance = 50
+            d.HoldDuration = 0.2
+            
+            local taskCompleted = false
+            
+            while not taskCompleted do
+                if not d.Enabled then
+                    d.Enabled = true
+                    task.wait(0.05)
+                end
+                
+                vim:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+                
+                local holdTime = 0
+                local interrupted = false
+                
+                while holdTime < 0.21 do
+                    task.wait(0.05)
+                    holdTime = holdTime + 0.05
+                    
+                    if not d.Enabled then
+                        interrupted = true
+                        break
+                    end
+                end
+                
+                vim:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                
+                if not interrupted then
+                    taskCompleted = true
+                else
+                    task.wait(0.1)
+                end
+            end
+            
+            task.wait(0.1)
         end
     end,
     BackgroundTransparency = 0,
