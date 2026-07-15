@@ -8,7 +8,15 @@ local placeId = game.PlaceId
 local TeleportService = game:GetService("TeleportService")
 local char = lplr.Character or lplr.CharacterAdded:Wait()
 local root = char:WaitForChild("HumanoidRootPart")
+local lastCF, stop, heartbeatConnection, cfConnection
+local enabled = false
 
+local buytp = Vector3.new(-1837, -6, 0)
+local selltp = CFrame.new(3147, -6, -184)
+local washtp = CFrame.new(-1834, -6, -15)
+local continertp = CFrame.new(3488, -6, -631)
+
+-- anti moderator --
 task.spawn(function()
 	if game.CreatorType ~= Enum.CreatorType.Group then
 		return
@@ -43,6 +51,62 @@ task.spawn(function()
 	Players.PlayerAdded:Connect(checkPlayer)
 end)
 
+-- anti-anti-teleport --
+local function cleanup()
+    if heartbeatConnection then heartbeatConnection:Disconnect() heartbeatConnection = nil end
+    if cfConnection then cfConnection:Disconnect() cfConnection = nil end
+end
+
+local function start()
+    if not lplr.Character or not lplr.Character:FindFirstChildOfClass('Humanoid') or not lplr.Character:FindFirstChildOfClass('Humanoid').RootPart then return end
+    cleanup()
+    heartbeatConnection = runService.Heartbeat:Connect(function()
+        if stop or not enabled then return end
+        lastCF = lplr.Character:FindFirstChildOfClass('Humanoid').RootPart.CFrame
+    end)
+    cfConnection = lplr.Character:FindFirstChildOfClass('Humanoid').RootPart:GetPropertyChangedSignal('CFrame'):Connect(function()
+        if not enabled then return end
+        stop = true
+        lplr.Character:FindFirstChildOfClass('Humanoid').RootPart.CFrame = lastCF
+        runService.Heartbeat:Wait()
+        stop = false
+    end)
+    lplr.Character:FindFirstChildOfClass('Humanoid').Died:Connect(function()
+        cleanup()
+    end)
+end
+
+local function enableAntiTeleport()
+    enabled = true
+end
+
+local function disableAntiTeleport()
+    enabled = false
+    stop = false
+end
+
+lplr.CharacterAdded:Connect(function(character)
+    repeat runService.Heartbeat:Wait() until character:FindFirstChildOfClass('Humanoid')
+    repeat runService.Heartbeat:Wait() until character:FindFirstChildOfClass('Humanoid').RootPart
+    start()
+end)
+
+lplr.CharacterRemoving:Connect(function()
+    cleanup()
+end)
+
+enableAntiTeleport()
+start()
+
+local function teleportTo(position)
+    disableAntiTeleport()
+    runService.Heartbeat:Wait()
+    lplr.Character:FindFirstChildOfClass('Humanoid').RootPart.CFrame = CFrame.new(position)
+    runService.Heartbeat:Wait()
+    enableAntiTeleport()
+end
+
+-- main script start --
 local function countInBackpack(itemName)
     local count = 0
 
@@ -76,55 +140,44 @@ local taco = workspace.Smuggling.Items.Taco.Main.PromptAtt.SmugglePurchasePrompt
 watch.HoldDuration = 0
 bag.HoldDuration = 0
 sar.HoldDuration = 0
-local loopCount = 0
 
 while true do
+	char.Anchored = true
+	
 	if getMoney() >= 5000 then
-		root.CFrame = CFrame.new(-1837, -6, 0)
-	    
+	    teleportTo(buytp)
+		
 	    repeat
 			watch.RequiresLineOfSight = false
-			
 	        fireproximityprompt(watch)
 	        RunService.Heartbeat:Wait()
-	
-	        local target = Vector3.new(-1837, -6, 0)
-	        root.CFrame = CFrame.new(target)
 	    until countInBackpack("Fake Watch") >= 3
 	    
 	    repeat
 			bag.RequiresLineOfSight = false
-			
 	        fireproximityprompt(bag)
 	        RunService.Heartbeat:Wait()
-	
-	        local target = Vector3.new(-1837, -6, 0)
-	        root.CFrame = CFrame.new(target)
 	    until countInBackpack("Fake Designer Bag") >= 3
 	    
 	    repeat
 			sar.RequiresLineOfSight = false
-			
 	        fireproximityprompt(sar)
 	        RunService.Heartbeat:Wait()
-	
-	        local target = Vector3.new(-1837, -6, 0)
-	        root.CFrame = CFrame.new(target)
 	    until countInBackpack("Sarsaparilla") >= 4
+
+	    teleportTo(selltp)
 				
 	    repeat
-	        root.CFrame = CFrame.new(3147, -6, -184)
 			local sell = workspace:WaitForChild("Smuggling"):WaitForChild("Sell"):WaitForChild("Prompt"):WaitForChild("SmuggleSellPrompt")
-
 			sell.RequiresLineOfSight = false
-			
 			sell.HoldDuration = 0
 	        fireproximityprompt(sell)
 	        RunService.Heartbeat:Wait()
 	    until countInBackpack("Briefcase") >= 1
-	
-	    repeat
-	        root.CFrame = CFrame.new(-1834, -6, -15)
+
+	    teleportTo(washtp)
+		
+		repeat
 	        local laundering = workspace:WaitForChild("Smuggling"):WaitForChild("Laundering")
 			local fourthChild
 			repeat
@@ -142,9 +195,9 @@ while true do
 
 		if getMoney() >= 90000 then
 			local startTime = nil
+			teleportTo(containertp)
 			
 			repeat
-				root.CFrame = CFrame.new(3488, -6, -631)
 				local prompt = workspace:WaitForChild("GContaienrs"):WaitForChild("Prueba"):WaitForChild("Attachment1"):WaitForChild("Open")
 
 				prompt.RequiresLineOfSight = false
@@ -158,21 +211,21 @@ while true do
 			until getMoney() <= 90000 and (tick() - startTime) >= 4
 		end
 	end
+	
 	if getMoney() <= 5000 then
 		local amount = math.min(8, math.floor(getMoney() / 35))
+
+	    teleportTo(buytp)
 			
 		repeat
 			taco.RequiresLineOfSight = false
-			
 	        fireproximityprompt(taco)
 	        RunService.Heartbeat:Wait()
-	
-	        local target = Vector3.new(-1837, -6, 0)
-	        root.CFrame = CFrame.new(target)
 	    until countInBackpack("Taco") >= amount
-	    
+
+		teleportTo(seltp)
+		
 	    repeat
-	        root.CFrame = CFrame.new(3147, -6, -184)
 	        local sell = workspace:WaitForChild("Smuggling"):WaitForChild("Sell"):WaitForChild("Prompt"):WaitForChild("SmuggleSellPrompt")
 	        sell.HoldDuration = 0
 
@@ -181,9 +234,10 @@ while true do
 	        fireproximityprompt(sell)
 	        RunService.Heartbeat:Wait()
 	    until countInBackpack("Briefcase") >= 1
-	
+
+		teleportTo(washtp)
+
 	    repeat
-	        root.CFrame = CFrame.new(-1834, -6, -15)
 	        local laundering = workspace:WaitForChild("Smuggling"):WaitForChild("Laundering")
 			local fourthChild
 			repeat
