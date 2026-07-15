@@ -181,89 +181,6 @@ function Library:CreateWindow(title)
         Parent = TopBar,
     })
 
-    local ButtonHolder = create("Frame", {
-        Name = "TopButtons",
-        Size = UDim2.new(0, 100, 1, 0),
-        Position = UDim2.new(1, -110, 0, 0),
-        BackgroundTransparency = 1,
-        Parent = TopBar,
-    })
-
-    local ButtonLayout = create("UIListLayout", {
-        FillDirection = Enum.FillDirection.Horizontal,
-        HorizontalAlignment = Enum.HorizontalAlignment.Right,
-        VerticalAlignment = Enum.VerticalAlignment.Center,
-        Padding = UDim.new(0, 6),
-        Parent = ButtonHolder,
-    })
-
-    local function createTopButton(name, text)
-        return create("TextButton", {
-            Name = name,
-            Size = UDim2.new(0, 26, 0, 26),
-            BackgroundColor3 = Theme.Background,
-            AutoButtonColor = false,
-            Text = text,
-            TextColor3 = Theme.Text,
-            Font = Enum.Font.GothamBold,
-            TextSize = 16,
-            Parent = ButtonHolder,
-        }, { corner(6) })
-    end
-
-    local SettingsButton = createTopButton("Settings", "⚙")
-    local MinimizeButton = createTopButton("Minimize", "−")
-    local CloseButton = createTopButton("Close", "×")
-
-    for _, button in ipairs({SettingsButton, MinimizeButton, CloseButton}) do
-        button.MouseEnter:Connect(function()
-            tween(button, {
-                BackgroundColor3 = Theme.Accent
-            }, 0.12)
-        end)
-
-        button.MouseLeave:Connect(function()
-            tween(button, {
-                BackgroundColor3 = Theme.Background
-            }, 0.12)
-        end)
-    end
-
-        local minimized = false
-    local oldSize = Main.Size
-
-    MinimizeButton.MouseButton1Click:Connect(function()
-        minimized = not minimized
-
-        if minimized then
-            oldSize = Main.Size
-
-            tween(Main, {
-                Size = UDim2.new(0, oldSize.X.Offset, 0, 40)
-            }, 0.2)
-
-            TabList.Visible = false
-            SectionContainer.Visible = false
-        else
-            tween(Main, {
-                Size = oldSize
-            }, 0.2)
-
-            task.delay(0.2, function()
-                TabList.Visible = true
-                SectionContainer.Visible = true
-            end)
-        end
-    end)
-
-    CloseButton.MouseButton1Click:Connect(function()
-        Window:Unload()
-    end)
-
-    SettingsButton.MouseButton1Click:Connect(function()
-        print("Settings clicked")
-    end)
-
     makeDraggable(Main, TopBar)
 
     local TabList = create("ScrollingFrame", {
@@ -333,6 +250,89 @@ function Library:CreateWindow(title)
         GlobalVariables = {},
         Connections = {},
     }, { __index = {} })
+
+        local ButtonHolder = create("Frame", {
+        Name = "TopButtons",
+        Size = UDim2.new(0, 100, 1, 0),
+        Position = UDim2.new(1, -110, 0, 0),
+        BackgroundTransparency = 1,
+        Parent = TopBar,
+    })
+
+    local ButtonLayout = create("UIListLayout", {
+        FillDirection = Enum.FillDirection.Horizontal,
+        HorizontalAlignment = Enum.HorizontalAlignment.Right,
+        VerticalAlignment = Enum.VerticalAlignment.Center,
+        Padding = UDim.new(0, 6),
+        Parent = ButtonHolder,
+    })
+
+    local function createTopButton(name, text)
+        return create("TextButton", {
+            Name = name,
+            Size = UDim2.new(0, 26, 0, 26),
+            BackgroundColor3 = Theme.Background,
+            AutoButtonColor = false,
+            Text = text,
+            TextColor3 = Theme.Text,
+            Font = Enum.Font.GothamBold,
+            TextSize = 16,
+            Parent = ButtonHolder,
+        }, { corner(6) })
+    end
+
+    local CloseButton = createTopButton("Close", "×")
+    local MinimizeButton = createTopButton("Minimize", "−")
+    local SettingsButton = createTopButton("Settings", "⚙")
+
+    for _, button in ipairs({SettingsButton, MinimizeButton, CloseButton}) do
+        button.MouseEnter:Connect(function()
+            tween(button, {
+                BackgroundColor3 = Theme.Accent
+            }, 0.12)
+        end)
+
+        button.MouseLeave:Connect(function()
+            tween(button, {
+                BackgroundColor3 = Theme.Background
+            }, 0.12)
+        end)
+    end
+
+        local minimized = false
+    local oldSize = Main.Size
+
+    MinimizeButton.MouseButton1Click:Connect(function()
+        minimized = not minimized
+
+        if minimized then
+            oldSize = Main.Size
+
+            tween(Main, {
+                Size = UDim2.new(0, oldSize.X.Offset, 0, 40)
+            }, 0.2)
+
+            TabList.Visible = false
+            SectionContainer.Visible = false
+        else
+            tween(Main, {
+                Size = oldSize
+            }, 0.2)
+
+            task.delay(0.2, function()
+                TabList.Visible = true
+                SectionContainer.Visible = true
+            end)
+        end
+    end)
+
+    CloseButton.MouseButton1Click:Connect(function()
+        Window:Unload()
+    end)
+
+    SettingsButton.MouseButton1Click:Connect(function()
+        print("Settings clicked")
+    end)
 
     function Window:SetGlobal(name, value)
         _G[name] = value
@@ -486,6 +486,7 @@ function Library:CreateWindow(title)
 
         function Tab:CreateButton(text, callback)
             callback = callback or function() end
+        
             local Btn = create("TextButton", {
                 Size = UDim2.new(1, 0, 0, 40),
                 BackgroundColor3 = Theme.Secondary,
@@ -494,17 +495,41 @@ function Library:CreateWindow(title)
                 TextColor3 = Theme.Text,
                 Font = Enum.Font.Gotham,
                 TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left,
                 Parent = Section,
             }, { corner(6) })
-
+        
+            create("UIPadding", {
+                PaddingLeft = UDim.new(0, 12),
+                Parent = Btn,
+            })
+        
+            Btn.MouseEnter:Connect(function()
+                tween(Btn, {
+                    BackgroundColor3 = Theme.Secondary:Lerp(Color3.new(1, 1, 1), 0.03)
+                }, 0.08)
+            end)
+        
+            Btn.MouseLeave:Connect(function()
+                tween(Btn, {
+                    BackgroundColor3 = Theme.Secondary
+                }, 0.08)
+            end)
+        
             Btn.MouseButton1Click:Connect(function()
-                tween(Btn, { BackgroundColor3 = Theme.Accent }, 0.1)
+                tween(Btn, {
+                    BackgroundColor3 = Theme.Accent
+                }, 0.1)
+        
                 task.delay(0.1, function()
-                    tween(Btn, { BackgroundColor3 = Theme.Secondary }, 0.15)
+                    tween(Btn, {
+                        BackgroundColor3 = Theme.Secondary
+                    }, 0.15)
                 end)
+        
                 callback()
             end)
-
+        
             return Btn
         end
 
