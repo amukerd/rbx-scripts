@@ -285,7 +285,7 @@ function Library:CreateWindow(title)
     local MinimizeButton = createTopButton("Minimize", "−")
     local SettingsButton = createTopButton("Settings", "⚙")
 
-    for _, button in ipairs({SettingsButton, MinimizeButton, CloseButton}) do
+    for _, button in ipairs({CloseButton, MinimizeButton, SettingsButton}) do
         button.MouseEnter:Connect(function()
             tween(button, {
                 BackgroundColor3 = Theme.Accent
