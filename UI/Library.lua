@@ -275,6 +275,12 @@ function Library:CreateWindow(title)
             ClipsDescendants = true,
             Parent = SectionContainer,
         })
+
+        create("UIPadding", {
+            PaddingRight = UDim.new(0, 8),
+            PaddingBottom = UDim.new(0, 12),
+            Parent = Section,
+        })
         
         local Layout = create("UIListLayout", {
             Padding = UDim.new(0, 10),
@@ -585,16 +591,20 @@ function Library:CreateWindow(title)
                 end
 
                 if opt == selected then
-                    OptBtn.BackgroundColor3 = Theme.Secondary
-                    OptBtn.TextColor3 = Theme.Accent
+                    OptBtn.BackgroundColor3 = Theme.Accent
+                    OptBtn.TextColor3 = Theme.Text
                 end
         
                 OptBtn.MouseEnter:Connect(function()
-                    tween(OptBtn, { BackgroundColor3 = Theme.Secondary, TextColor3 = Theme.Accent }, 0.08)
+                    if opt ~= selected then
+                        tween(OptBtn, { BackgroundColor3 = Theme.Secondary, TextColor3 = Theme.Accent }, 0.08)
+                    end
                 end)
-        
+                
                 OptBtn.MouseLeave:Connect(function()
-                    tween(OptBtn, { BackgroundColor3 = Theme.Background, TextColor3 = Theme.Text }, 0.08)
+                    if opt ~= selected then
+                        tween(OptBtn, { BackgroundColor3 = Theme.Background, TextColor3 = Theme.Text }, 0.08)
+                    end
                 end)
         
                 OptBtn.MouseButton1Click:Connect(function()
@@ -602,8 +612,8 @@ function Library:CreateWindow(title)
                     for _, child in ipairs(OptionList:GetChildren()) do
                         if child:IsA("TextButton") then
                             local isSelected = child.Text:match("^%s*(.*)$") == tostring(selected)
-                            child.BackgroundColor3 = isSelected and Theme.Secondary or Theme.Background
-                            child.TextColor3 = isSelected and Theme.Accent or Theme.Text
+                            child.BackgroundColor3 = isSelected and Theme.Accent or Theme.Background
+                            child.TextColor3 = Theme.Text
                         end
                     end
                     SelectedLabel.Text = tostring(opt)
