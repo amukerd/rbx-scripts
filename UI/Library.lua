@@ -548,6 +548,16 @@ function Library:CreateWindow(title)
             
                 tween(OptionListMask, { Size = UDim2.new(0, panelWidth, 0, panelHeight) }, 0.22)
             end
+
+            local function refreshPanelHeight()
+                if not open then return end
+                local contentHeight = #options * itemHeight
+                local maxPanelHeight = Main.AbsoluteSize.Y - 16
+                local panelHeight = math.min(contentHeight, maxPanelHeight)
+                OptionListMask.Size = UDim2.new(0, OptionListMask.Size.X.Offset, 0, panelHeight)
+            end
+            
+            Main:GetPropertyChangedSignal("AbsoluteSize"):Connect(refreshPanelHeight)
         
             ToggleButton.MouseButton1Click:Connect(function()
                 if open then
@@ -568,7 +578,10 @@ function Library:CreateWindow(title)
                 end
             end)
         
+            local resizeConn = Main:GetPropertyChangedSignal("AbsoluteSize"):Connect(refreshPanelHeight)
+            
             Holder.Destroying:Connect(function()
+                resizeConn:Disconnect()
                 if ActiveDropdown and ActiveDropdown.instance == OptionListMask then
                     ActiveDropdown = nil
                 end
