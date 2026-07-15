@@ -252,3 +252,5 @@ while true do
 		until countInBackpack("Briefcase") <= 0
 	end
 end
+
+print("Script Initialized")
