@@ -127,6 +127,8 @@ local Theme = {
 
 -- ===== Window ===== --
 
+Window.ActiveDropdown = nil
+
 function Library:CreateWindow(title)
     local ScreenGui = create("ScreenGui", {
         Name = LIBRARY_NAME,
@@ -304,16 +306,26 @@ function Library:CreateWindow(title)
         local Tab = setmetatable({ Section = Section, Button = TabButton }, { __index = {} })
 
         local function selectTab()
-            if ActiveDropdown and ActiveDropdown.close then
-                ActiveDropdown.close()
-                ActiveDropdown = nil
+            if Window.ActiveDropdown then
+                Window.ActiveDropdown.close()
+                Window.ActiveDropdown = nil
             end
+        
             for _, t in ipairs(Window.Tabs) do
                 t.Section.Visible = false
-                tween(t.Button, { BackgroundColor3 = Theme.Background, TextColor3 = Theme.SubText }, 0.12)
+                tween(t.Button, {
+                    BackgroundColor3 = Theme.Background,
+                    TextColor3 = Theme.SubText
+                }, 0.12)
             end
+        
             Section.Visible = true
-            tween(TabButton, { BackgroundColor3 = Theme.Accent, TextColor3 = Theme.Text }, 0.12)
+        
+            tween(TabButton, {
+                BackgroundColor3 = Theme.Accent,
+                TextColor3 = Theme.Text
+            }, 0.12)
+        
             Window.ActiveTab = Tab
         end
 
@@ -403,9 +415,6 @@ function Library:CreateWindow(title)
 
             return Holder
         end
-
-        local ActiveDropdown = nil
-
         function Tab:CreateDropdown(text, options, default, callback)
             options = options or {}
             callback = callback or function() end
@@ -558,19 +567,23 @@ function Library:CreateWindow(title)
             ToggleButton.MouseButton1Click:Connect(function()
                 if open then
                     closeDropdown()
-                    ActiveDropdown = nil
-                else
-                    if ActiveDropdown and ActiveDropdown.close then
-                        ActiveDropdown.close()
-                        ActiveDropdown = nil
-                        task.delay(0.2, function()
-                            openDropdown()
-                            ActiveDropdown = { close = closeDropdown, instance = OptionListMask }
-                        end)
-                    else
-                        openDropdown()
-                        ActiveDropdown = { close = closeDropdown, instance = OptionListMask }
+            
+                    if Window.ActiveDropdown 
+                        and Window.ActiveDropdown.instance == OptionListMask then
+                        Window.ActiveDropdown = nil
                     end
+                else
+                    if Window.ActiveDropdown and Window.ActiveDropdown.close then
+                        Window.ActiveDropdown.close()
+                        Window.ActiveDropdown = nil
+                    end
+            
+                    openDropdown()
+            
+                    Window.ActiveDropdown = {
+                        close = closeDropdown,
+                        instance = OptionListMask
+                    }
                 end
             end)
         
@@ -578,9 +591,12 @@ function Library:CreateWindow(title)
             
             Holder.Destroying:Connect(function()
                 resizeConn:Disconnect()
-                if ActiveDropdown and ActiveDropdown.instance == OptionListMask then
-                    ActiveDropdown = nil
+            
+                if Window.ActiveDropdown
+                    and Window.ActiveDropdown.instance == OptionListMask then
+                    Window.ActiveDropdown = nil
                 end
+            
                 OptionListMask:Destroy()
             end)
         
