@@ -454,13 +454,13 @@ function Library:CreateWindow(title)
             })
         
             local ArrowIcon = create("ImageLabel", {
-                Size = UDim2.new(0, 14, 0, 14),
-                Position = UDim2.new(1, -22, 0.5, 0),
+                Size = UDim2.new(0, 18, 0, 18),
+                Position = UDim2.new(1, -24, 0.5, 0),
                 AnchorPoint = Vector2.new(1, 0.5),
                 BackgroundTransparency = 1,
                 Image = "rbxassetid://6031091004",
                 ImageColor3 = Theme.SubText,
-                Rotation = 180,
+                Rotation = 90,
                 ZIndex = 5,
                 Parent = ComboContainer,
             })
@@ -520,7 +520,7 @@ function Library:CreateWindow(title)
         
             local function closeDropdown()
                 open = false
-                tween(ArrowIcon, { Rotation = 180 }, 0.15)
+                tween(ArrowIcon, { Rotation = 90 }, 0.15)
                 local t = tween(OptionListMask, { Size = UDim2.new(0, 0, 1, 0) }, 0.2)
                 t.Completed:Connect(function()
                     if not open then
@@ -532,7 +532,7 @@ function Library:CreateWindow(title)
             local function openDropdown()
                 open = true
                 OptionListMask.Visible = true
-                tween(ArrowIcon, { Rotation = 0 }, 0.15)
+                tween(ArrowIcon, { Rotation = -90 }, 0.15)
                 tween(OptionListMask, { Size = UDim2.new(0, panelWidth, 1, 0) }, 0.22)
             end
         
