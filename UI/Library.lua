@@ -286,7 +286,7 @@ function Library:CreateWindow(title)
             Name = "BottomSpacer",
             Size = UDim2.new(1, 0, 0, 12),
             BackgroundTransparency = 1,
-            LayoutOrder = 999999,
+            LayoutOrder = 99999999,
             Parent = Section,
         })
         
@@ -468,10 +468,10 @@ function Library:CreateWindow(title)
                 Position = UDim2.new(1, -24, 0, 0),
                 BackgroundTransparency = 1,
                 Text = "▶",
-                Rotation = 0,
+                Rotation = 180,
                 TextColor3 = Theme.SubText,
                 Font = Enum.Font.Gotham,
-                TextSize = 10,
+                TextSize = 20,
                 TextYAlignment = Enum.TextYAlignment.Center,
                 TextXAlignment = Enum.TextXAlignment.Center,
                 ZIndex = 5,
@@ -484,20 +484,27 @@ function Library:CreateWindow(title)
             local maxVisibleItems = 7
             local itemHeight = 30
             local listHeight = math.min(#options, maxVisibleItems) * itemHeight
-            
-            local OptionList = create("ScrollingFrame", {
+
+            local OptionListMask = create("CanvasGroup", {
                 AnchorPoint = Vector2.new(0, 0),
                 Size = UDim2.new(0, 0, 0, 0),
                 BackgroundColor3 = Theme.Background,
                 BorderSizePixel = 0,
-                ScrollBarThickness = 4,
-                ScrollBarImageColor3 = Theme.Accent,
-                CanvasSize = UDim2.new(0, 0, 0, #options * itemHeight),
                 ClipsDescendants = true,
                 Visible = false,
                 ZIndex = 99999,
                 Parent = Main,
             }, { corner(6) })
+            
+            local OptionList = create("ScrollingFrame", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                BorderSizePixel = 0,
+                ScrollBarThickness = 4,
+                ScrollBarImageColor3 = Theme.Accent,
+                CanvasSize = UDim2.new(0, 0, 0, #options * itemHeight),
+                Parent = OptionListMask,
+            })
         
             create("UIStroke", {
                 Color = Theme.Border,
@@ -525,17 +532,17 @@ function Library:CreateWindow(title)
                 local absPos = ComboContainer.AbsolutePosition
                 local absSize = ComboContainer.AbsoluteSize
                 local mainPos = Main.AbsolutePosition
-                OptionList.Position = UDim2.new(0, absPos.X - mainPos.X, 0, (absPos.Y - mainPos.Y) + absSize.Y + 4)
-                OptionList.Size = UDim2.new(0, absSize.X, 0, OptionList.Size.Y.Offset)
+                OptionListMask.Position = UDim2.new(0, absPos.X - mainPos.X, 0, (absPos.Y - mainPos.Y) + absSize.Y + 2)
+                OptionListMask.Size = UDim2.new(0, absSize.X, 0, OptionListMask.Size.Y.Offset)
             end
         
             local function closeDropdown()
                 open = false
                 tween(ArrowIcon, { Rotation = 0 }, 0.15)
-                local t = tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, 0) }, 0.15)
+                local t = tween(OptionListMask, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, 0) }, 0.15)
                 t.Completed:Connect(function()
                     if not open then
-                        OptionList.Visible = false
+                        OptionListMask.Visible = false
                         CornerFlattener.Visible = false
                     end
                 end)
@@ -544,10 +551,10 @@ function Library:CreateWindow(title)
             local function openDropdown()
                 open = true
                 updateDropdownPosition()
-                OptionList.Visible = true
+                OptionListMask.Visible = true
                 CornerFlattener.Visible = true
-                tween(ArrowIcon, { Rotation = 90 }, 0.15)
-                tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, targetHeight) }, 0.18)
+                tween(ArrowIcon, { Rotation = -90 }, 0.15)
+                tween(OptionListMask, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, targetHeight) }, 0.18)
             end
         
             ToggleButton.MouseButton1Click:Connect(function()
@@ -575,7 +582,7 @@ function Library:CreateWindow(title)
                            and mPos.Y >= pos.Y and mPos.Y <= pos.Y + size.Y
                     end
         
-                    if not isInside(ComboContainer) and not isInside(OptionList) then
+                    if not isInside(ComboContainer) and not isInside(OptionListMask) then
                         closeDropdown()
                     end
                 end
@@ -600,10 +607,6 @@ function Library:CreateWindow(title)
                     LayoutOrder = i,
                     Parent = OptionList,
                 })
-
-                if i == 1 or i == #options then
-                    create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = OptBtn })
-                end
 
                 if opt == selected then
                     OptBtn.BackgroundColor3 = Theme.Accent
