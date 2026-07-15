@@ -281,6 +281,14 @@ function Library:CreateWindow(title)
             PaddingBottom = UDim.new(0, 12),
             Parent = Section,
         })
+
+        create("Frame", {
+            Name = "BottomSpacer",
+            Size = UDim2.new(1, 0, 0, 12),
+            BackgroundTransparency = 1,
+            LayoutOrder = 999999,
+            Parent = Section,
+        })
         
         local Layout = create("UIListLayout", {
             Padding = UDim.new(0, 10),
@@ -473,11 +481,18 @@ function Library:CreateWindow(title)
             -- Option list — parented to ScreenGui so it can float above other rows.
             -- AnchorPoint stays (0,0) and only Size.Y animates, so it always grows
             -- downward from a fixed top position instead of drifting upward.
-            local OptionList = create("Frame", {
+            local maxVisibleItems = 7
+            local itemHeight = 30
+            local listHeight = math.min(#options, maxVisibleItems) * itemHeight
+            
+            local OptionList = create("ScrollingFrame", {
                 AnchorPoint = Vector2.new(0, 0),
                 Size = UDim2.new(0, 0, 0, 0),
                 BackgroundColor3 = Theme.Background,
                 BorderSizePixel = 0,
+                ScrollBarThickness = 4,
+                ScrollBarImageColor3 = Theme.Accent,
+                CanvasSize = UDim2.new(0, 0, 0, #options * itemHeight),
                 ClipsDescendants = true,
                 Visible = false,
                 ZIndex = 99999,
@@ -504,7 +519,7 @@ function Library:CreateWindow(title)
                 Parent = ComboContainer,
             })
         
-            local targetHeight = #options * 30
+            local targetHeight = listHeight
         
             local function updateDropdownPosition()
                 local absPos = ComboContainer.AbsolutePosition
