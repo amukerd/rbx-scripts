@@ -137,8 +137,8 @@ function Library:CreateWindow(title)
 
     local Main = create("Frame", {
         Name = "Main",
-        Size = UDim2.new(0, 560, 0, 400),
-        Position = UDim2.new(0.5, -280, 0.5, -200),
+        Size = UDim2.new(0, 680, 0, 480),
+        Position = UDim2.new(0.5, -340, 0.5, -240),
         BackgroundColor3 = Theme.Background,
         BorderSizePixel = 0,
         ClipsDescendants = true,
@@ -183,13 +183,16 @@ function Library:CreateWindow(title)
 
     makeDraggable(Main, TopBar)
 
-    -- Tab list (left side)
-    local TabList = create("Frame", {
+    local TabList = create("ScrollingFrame", {
         Name = "TabList",
         Size = UDim2.new(0, 140, 1, -40),
         Position = UDim2.new(0, 0, 0, 40),
         BackgroundColor3 = Theme.Secondary,
         BorderSizePixel = 0,
+        ScrollBarThickness = 0,
+        ScrollingDirection = Enum.ScrollingDirection.Y,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
         Parent = Main,
     })
 
@@ -286,7 +289,7 @@ function Library:CreateWindow(title)
         local Tab = setmetatable({ Section = Section, Button = TabButton }, { __index = {} })
 
         local function selectTab()
-            for _, t in pairs(Window.Tabs) do
+            for _, t in ipairs(Window.Tabs) do
                 t.Section.Visible = false
                 tween(t.Button, { BackgroundColor3 = Theme.Background, TextColor3 = Theme.SubText }, 0.12)
             end
@@ -297,7 +300,7 @@ function Library:CreateWindow(title)
 
         TabButton.MouseButton1Click:Connect(selectTab)
 
-        Window.Tabs[name] = Tab
+        table.insert(Window.Tabs, Tab)
 
         if not Window.ActiveTab then
             selectTab()
@@ -449,7 +452,8 @@ function Library:CreateWindow(title)
                 Size = UDim2.new(0, 20, 1, 0),
                 Position = UDim2.new(1, -24, 0, 0),
                 BackgroundTransparency = 1,
-                Text = "◄",
+                Text = "▶",
+                Rotation = 0,
                 TextColor3 = Theme.SubText,
                 Font = Enum.Font.Gotham,
                 TextSize = 10,
@@ -505,7 +509,7 @@ function Library:CreateWindow(title)
         
             local function closeDropdown()
                 open = false
-                ArrowIcon.Text = "◄"
+                tween(ArrowIcon, { Rotation = 0 }, 0.15)
                 local t = tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, 0) }, 0.15)
                 t.Completed:Connect(function()
                     if not open then
@@ -520,7 +524,7 @@ function Library:CreateWindow(title)
                 updateDropdownPosition()
                 OptionList.Visible = true
                 CornerFlattener.Visible = true
-                ArrowIcon.Text = "▼"
+                tween(ArrowIcon, { Rotation = 90 }, 0.15)
                 tween(OptionList, { Size = UDim2.new(0, ComboContainer.AbsoluteSize.X, 0, targetHeight) }, 0.18)
             end
         
@@ -574,6 +578,11 @@ function Library:CreateWindow(title)
                     LayoutOrder = i,
                     Parent = OptionList,
                 })
+
+                if opt == selected then
+                    OptBtn.BackgroundColor3 = Theme.Secondary
+                    OptBtn.TextColor3 = Theme.Accent
+                end
         
                 OptBtn.MouseEnter:Connect(function()
                     tween(OptBtn, { BackgroundColor3 = Theme.Secondary, TextColor3 = Theme.Accent }, 0.08)
@@ -585,6 +594,13 @@ function Library:CreateWindow(title)
         
                 OptBtn.MouseButton1Click:Connect(function()
                     selected = opt
+                    for _, child in ipairs(OptionList:GetChildren()) do
+                        if child:IsA("TextButton") then
+                            local isSelected = child.Text:match("^%s*(.*)$") == tostring(selected)
+                            child.BackgroundColor3 = isSelected and Theme.Secondary or Theme.Background
+                            child.TextColor3 = isSelected and Theme.Accent or Theme.Text
+                        end
+                    end
                     SelectedLabel.Text = tostring(opt)
                     closeDropdown()
                     callback(selected)
