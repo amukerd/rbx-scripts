@@ -727,7 +727,7 @@ function Library:CreateWindow(title)
             local function refreshPanelHeight()
                 if not open then return end
                 local contentHeight = #options * itemHeight
-                local maxPanelHeight = Main.AbsoluteSize.Y - 16
+                local maxPanelHeight = Main.AbsoluteSize.Y
                 local panelHeight = math.min(contentHeight, maxPanelHeight)
                 OptionListMask.Size = UDim2.new(0, OptionListMask.Size.X.Offset, 0, panelHeight)
             end
