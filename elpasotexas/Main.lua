@@ -142,7 +142,7 @@ bag.HoldDuration = 0
 sar.HoldDuration = 0
 
 while true do
-	char.Anchored = true
+	char.HumanoidRootPart.Anchored = true
 	
 	if getMoney() >= 5000 then
 	    teleportTo(buytp)
