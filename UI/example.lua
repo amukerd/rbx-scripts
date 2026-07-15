@@ -1,13 +1,13 @@
 local Library = loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/UI/Library.lua"))()
 
-local Window = Library:CreateWindow("My Window")
+local Window = Library:CreateWindow("KerdHub")
 local Tab1 = Window:CreateTab("Main")
 
-Tab1:CreateButton("Do thing", function()
+Tab1:CreateButton("Button", function()
     print("clicked")
 end)
 
-Tab1:CreateToggle("Enable X", false, function(state)
+Tab1:CreateToggle("Enable", false, function(state)
     print(state)
 end)
 
@@ -17,25 +17,22 @@ Tab1:CreateDropdown("Mode", {"A","B","C"}, "A", function(choice)
     print(choice) 
 end)
 
-Tab1:CreateTextbox("Name", "Type here...", function(text)
+Tab1:CreateTextbox("Number", "Type here...", function(text)
     print(text)
 end)
 
 
+local Tab2 = Window:CreateTab("Settings")
 
-
-
-local Tab2 = Window:CreateTab("Main")
-
-Tab2:CreateButton("Do thing", function()
+Tab2:CreateButton("Button 2", function()
     print("clicked")
 end)
 
-Tab2:CreateToggle("Enable X", false, function(state)
+Tab2:CreateToggle("Enable B", false, function(state)
     print(state)
 end)
 
-Tab2:CreateSpacer("Spacer")
+Tab2:CreateSpacer("Spacer 2")
 
 Tab2:CreateDropdown("Mode", {"A","B","C"}, "A", function(choice)
     print(choice) 
@@ -44,10 +41,6 @@ end)
 Tab2:CreateTextbox("Name", "Type here...", function(text)
     print(text)
 end)
-
-
-
-
 
 
 local Tab3 = Window:CreateTab("Main")
