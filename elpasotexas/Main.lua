@@ -142,16 +142,17 @@ bag.HoldDuration = 0
 sar.HoldDuration = 0
 
 while true do
-	char.HumanoidRootPart.Anchored = true
+	--char.HumanoidRootPart.Anchored = true
 	
 	if getMoney() >= 5000 then
-	    teleportTo(buytp)
+	    --teleportTo(buytp)
 		
-	    repeat
-			watch.RequiresLineOfSight = false
-	        fireproximityprompt(watch)
-	        RunService.Heartbeat:Wait()
-	    until countInBackpack("Fake Watch") >= 3
+		repeat
+		    watch.RequiresLineOfSight = false
+		    watch.MaxActivationDistance = 999999
+		    fireproximityprompt(watch)
+		    RunService.Heartbeat:Wait()
+		until countInBackpack("Fake Watch") >= 3
 	    
 	    repeat
 			bag.RequiresLineOfSight = false
