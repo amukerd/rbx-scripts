@@ -80,6 +80,8 @@ while true do
 		root.CFrame = CFrame.new(-1837, -6, 0)
 	    
 	    repeat
+			watch.RequiresLineOfSight = false
+			
 	        fireproximityprompt(watch)
 	        RunService.Heartbeat:Wait()
 	
@@ -88,6 +90,8 @@ while true do
 	    until countInBackpack("Fake Watch") >= 3
 	    
 	    repeat
+			bag.RequiresLineOfSight = false
+			
 	        fireproximityprompt(bag)
 	        RunService.Heartbeat:Wait()
 	
@@ -96,6 +100,8 @@ while true do
 	    until countInBackpack("Fake Designer Bag") >= 3
 	    
 	    repeat
+			sar.RequiresLineOfSight = false
+			
 	        fireproximityprompt(sar)
 	        RunService.Heartbeat:Wait()
 	
@@ -106,6 +112,9 @@ while true do
 	    repeat
 	        root.CFrame = CFrame.new(3147, -6, -184)
 			local sell = workspace:WaitForChild("Smuggling"):WaitForChild("Sell"):WaitForChild("Prompt"):WaitForChild("SmuggleSellPrompt")
+
+			sell.RequiresLineOfSight = false
+			
 			sell.HoldDuration = 0
 	        fireproximityprompt(sell)
 	        RunService.Heartbeat:Wait()
@@ -121,6 +130,9 @@ while true do
 			until fourthChild
 			local wash = fourthChild:WaitForChild("SmuggleLaundryPrompt")
 	        wash.HoldDuration = 0
+
+			wash.RequiresLineOfSight = false
+			
 	        fireproximityprompt(wash)
 	        RunService.Heartbeat:Wait()
 	    until countInBackpack("Briefcase") <= 0
@@ -131,6 +143,9 @@ while true do
 			repeat
 				root.CFrame = CFrame.new(3488, -6, -631)
 				local prompt = workspace:WaitForChild("GContaienrs"):WaitForChild("Prueba"):WaitForChild("Attachment1"):WaitForChild("Open")
+
+				prompt.RequiresLineOfSight = false
+				
 				fireproximityprompt(prompt)
 	     	    RunService.Heartbeat:Wait()
 
@@ -144,6 +159,8 @@ while true do
 		local amount = math.min(8, math.floor(getMoney() / 35))
 			
 		repeat
+			taco.RequiresLineOfSight = false
+			
 	        fireproximityprompt(taco)
 	        RunService.Heartbeat:Wait()
 	
@@ -155,6 +172,9 @@ while true do
 	        root.CFrame = CFrame.new(3147, -6, -184)
 	        local sell = workspace:WaitForChild("Smuggling"):WaitForChild("Sell"):WaitForChild("Prompt"):WaitForChild("SmuggleSellPrompt")
 	        sell.HoldDuration = 0
+
+			sell.RequiresLineOfSight = false
+			
 	        fireproximityprompt(sell)
 	        RunService.Heartbeat:Wait()
 	    until countInBackpack("Briefcase") >= 1
@@ -169,6 +189,9 @@ while true do
 			until fourthChild
 			local wash = fourthChild:WaitForChild("SmuggleLaundryPrompt")
 	        wash.HoldDuration = 0
+
+			wash.RequiresLineOfSight = false
+			
 	        fireproximityprompt(wash)
 	        RunService.Heartbeat:Wait()
 	    until countInBackpack("Briefcase") <= 0
