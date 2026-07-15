@@ -455,9 +455,11 @@ function Library:CreateWindow(title)
         
             local ArrowIcon = create("TextLabel", {
                 Size = UDim2.new(0, 24, 1, 0),
-                Position = UDim2.new(1, -28, 0, 0),
+                Position = UDim2.new(1, -16, 0.5, 0),
+                AnchorPoint = Vector2.new(1, 0.5),
                 BackgroundTransparency = 1,
                 Text = "▶",
+                Rotation = 180,
                 TextColor3 = Theme.SubText,
                 Font = Enum.Font.Gotham,
                 TextSize = 20,
@@ -481,12 +483,14 @@ function Library:CreateWindow(title)
                 local size = TextService:GetTextSize(tostring(opt), 13, Enum.Font.Gotham, Vector2.new(math.huge, itemHeight))
                 if size.X > maxWidth then maxWidth = size.X end
             end
-            local panelWidth = maxWidth + 40
+            
+            local defaultPanelWidth = 160
+            local panelWidth = math.max(defaultPanelWidth, maxWidth + 40)
         
             local OptionListMask = create("CanvasGroup", {
                 AnchorPoint = Vector2.new(0, 0),
                 Size = UDim2.new(0, 0, 1, 0),
-                Position = UDim2.new(1, 0, 0, 0),
+                Position = UDim2.new(1, 8, 0, 0),
                 BackgroundColor3 = Theme.Background,
                 BorderSizePixel = 0,
                 ClipsDescendants = true,
@@ -520,7 +524,7 @@ function Library:CreateWindow(title)
         
             local function closeDropdown()
                 open = false
-                tween(ArrowIcon, { Rotation = 0 }, 0.15)
+                tween(ArrowIcon, { Rotation = 180 }, 0.15)
                 local t = tween(OptionListMask, { Size = UDim2.new(0, 0, 1, 0) }, 0.2)
                 t.Completed:Connect(function()
                     if not open then
@@ -532,7 +536,7 @@ function Library:CreateWindow(title)
             local function openDropdown()
                 open = true
                 OptionListMask.Visible = true
-                tween(ArrowIcon, { Rotation = 90 }, 0.15)
+                tween(ArrowIcon, { Rotation = 0 }, 0.15)
                 tween(OptionListMask, { Size = UDim2.new(0, panelWidth, 1, 0) }, 0.22)
             end
         
@@ -543,9 +547,15 @@ function Library:CreateWindow(title)
                 else
                     if ActiveDropdown and ActiveDropdown.close then
                         ActiveDropdown.close()
+                        ActiveDropdown = nil
+                        task.delay(0.2, function()
+                            openDropdown()
+                            ActiveDropdown = { close = closeDropdown, instance = OptionListMask }
+                        end)
+                    else
+                        openDropdown()
+                        ActiveDropdown = { close = closeDropdown, instance = OptionListMask }
                     end
-                    openDropdown()
-                    ActiveDropdown = { close = closeDropdown, instance = OptionListMask }
                 end
             end)
         
