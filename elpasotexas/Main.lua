@@ -1,3 +1,6 @@
+loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/General/adonis.lua"))()
+loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/General/antiafk.lua"))()
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local lplr = Players.LocalPlayer
