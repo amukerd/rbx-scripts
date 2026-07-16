@@ -45,6 +45,42 @@ Tab1:CreateTextbox("Number", "Type here...", function(text)
     print(text)
 end)
 
+Tab1:CreateTextbox("Number", "Type here...", function(text)
+    print(text)
+end)
+
+Tab1:CreateTextbox("Number", "Type here...", function(text)
+    print(text)
+end)
+
+Tab1:CreateTextbox("Number", "Type here...", function(text)
+    print(text)
+end)
+
+Tab1:CreateTextbox("Number", "Type here...", function(text)
+    print(text)
+end)
+
+Tab1:CreateTextbox("Number", "Type here...", function(text)
+    print(text)
+end)
+
+Tab1:CreateTextbox("Number", "Type here...", function(text)
+    print(text)
+end)
+
+Tab1:CreateTextbox("Number", "Type here...", function(text)
+    print(text)
+end)
+
+Tab1:CreateTextbox("Number", "Type here...", function(text)
+    print(text)
+end)
+
+Tab1:CreateTextbox("Number", "Type here...", function(text)
+    print(text)
+end)
+
 
 local Tab2 = Window:CreateTab("Settings")
 
