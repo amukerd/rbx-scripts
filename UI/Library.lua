@@ -740,6 +740,18 @@ function Library:CreateWindow(title)
             end
 
             ToggleButton.MouseButton1Click:Connect(function()
+                print("Dropdown clicked")
+            
+                if open then
+                    print("closing")
+                    closeDropdown()
+                else
+                    print("opening")
+                    openDropdown()
+                end
+            end)
+[[
+            ToggleButton.MouseButton1Click:Connect(function()
                 if open then
                     closeDropdown()
             
@@ -761,7 +773,7 @@ function Library:CreateWindow(title)
                     }
                 end
             end)
-        
+]]
             local resizeConn = Main:GetPropertyChangedSignal("AbsoluteSize"):Connect(refreshPanelHeight)
             
             Holder.Destroying:Connect(function()
