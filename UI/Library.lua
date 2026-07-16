@@ -447,20 +447,6 @@ function Library:CreateWindow(title)
         KeyButton.Text = "Press a key..."
         waitingForKey = true
     end)
-    
-    UserInputService.InputBegan:Connect(function(input)
-        if waitingForKey and input.KeyCode ~= Enum.KeyCode.Unknown then
-            Settings.HideKey = input.KeyCode
-            KeyButton.Text = "Hide Key: " .. Settings.HideKey.Name
-            waitingForKey = false
-            saveConfig()
-            return
-        end
-    
-        if input.KeyCode == Settings.HideKey then
-            ScreenGui.Enabled = not ScreenGui.Enabled
-        end
-    end)
 
     local Credits = create("Frame", {
         Size = UDim2.new(1, 0, 0, 120),
@@ -533,8 +519,14 @@ function Library:CreateWindow(title)
         end
     end)
 
-    Window:Connect(UserInputService.InputBegan, function(input, processed)
-        if processed then return end
+    Window:Connect(UserInputService.InputBegan, function(input)
+        if waitingForKey and input.KeyCode ~= Enum.KeyCode.Unknown then
+            Settings.HideKey = input.KeyCode
+            KeyButton.Text = "Hide Key: " .. Settings.HideKey.Name
+            waitingForKey = false
+            saveConfig()
+            return
+        end
     
         if input.KeyCode == Settings.HideKey then
             ScreenGui.Enabled = not ScreenGui.Enabled
