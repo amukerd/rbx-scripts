@@ -242,14 +242,6 @@ function Library:CreateWindow(title)
         Connections = {},
     }, { __index = {} })
 
-    UserInputService.InputBegan:Connect(function(input, processed)
-        if processed then return end
-    
-        if input.KeyCode == Settings.HideKey then
-            ScreenGui.Enabled = not ScreenGui.Enabled
-        end
-    end)
-
     local ButtonHolder = create("Frame", {
         Name = "TopButtons",
         Size = UDim2.new(0, 100, 1, 0),
@@ -333,75 +325,63 @@ function Library:CreateWindow(title)
     
     loadConfig()
 
-    local minimized = false
-    local oldSize = Main.Size
+    local SettingsSection = create("Frame", {
+        Name = "SettingsSection",
+        Size = UDim2.new(1, -140, 1, -40),
+        Position = UDim2.new(0, 140, 0, 40),
+        BackgroundColor3 = Theme.Background,
+        Visible = false,
+        Parent = Main,
+    }, { corner(10) })
+
+    local settingsOpen = false
+    local lastTab
 
     SettingsButton.MouseButton1Click:Connect(function()
-        local SettingsFrame = create("Frame", {
-            Name = "Settings",
-            Size = UDim2.new(0, 300, 0, 220),
-            Position = UDim2.new(0.5, -150, 0.5, -110),
-            BackgroundColor3 = Theme.Secondary,
-            ZIndex = 50,
-            Parent = ScreenGui,
-        }, {corner(8)})
+        if Window.ActiveDropdown and Window.ActiveDropdown.close then
+            Window.ActiveDropdown.close()
+            Window.ActiveDropdown = nil
+        end
+            
+        settingsOpen = not settingsOpen
     
+        if settingsOpen then
+            lastTab = Window.ActiveTab
     
-        create("TextLabel", {
-            Size = UDim2.new(1, 0, 0, 40),
-            BackgroundTransparency = 1,
-            Text = "Settings",
-            TextColor3 = Theme.Text,
-            Font = Enum.Font.GothamBold,
-            TextSize = 16,
-            Parent = SettingsFrame,
-        })
+            TabList.Visible = false
+            SectionContainer.Visible = false
+            SettingsSection.Visible = true
     
+            tween(SettingsButton, {
+                BackgroundColor3 = Theme.Accent
+            }, 0.12)
     
-        local KeyButton = create("TextButton", {
-            Size = UDim2.new(1, -20, 0, 35),
-            Position = UDim2.new(0, 10, 0, 50),
-            BackgroundColor3 = Theme.Background,
-            Text = "Hide Key: "..Settings.HideKey.Name,
-            TextColor3 = Theme.Text,
-            Font = Enum.Font.Gotham,
-            TextSize = 14,
-            Parent = SettingsFrame,
-        }, {corner(6)})
+        else
+            SettingsSection.Visible = false
     
+            TabList.Visible = true
+            SectionContainer.Visible = true
     
-        KeyButton.MouseButton1Click:Connect(function()
-            KeyButton.Text = "Press a key..."
+            if lastTab then
+                lastTab.Section.Visible = true
+            end
     
-            local conn
-            conn = UserInputService.InputBegan:Connect(function(input)
-    
-                if input.KeyCode ~= Enum.KeyCode.Unknown then
-                    Settings.HideKey = input.KeyCode
-    
-                    KeyButton.Text = "Hide Key: "..input.KeyCode.Name
-    
-                    saveConfig()
-    
-                    conn:Disconnect()
-                end
-    
-            end)
-        end)
-    
-    
-        create("TextLabel", {
-            Size = UDim2.new(1, -20, 0, 80),
-            Position = UDim2.new(0, 10, 0, 100),
-            BackgroundTransparency = 1,
-            Text = "KerdUI\n\nCreated by Amukerd",
-            TextColor3 = Theme.SubText,
-            Font = Enum.Font.Gotham,
-            TextSize = 13,
-            Parent = SettingsFrame,
-        })
-    
+            tween(SettingsButton, {
+                BackgroundColor3 = Theme.Background
+            }, 0.12)
+        end
     end)
+
+    UserInputService.InputBegan:Connect(function(input, processed)
+        if processed then return end
+    
+        if input.KeyCode == Settings.HideKey then
+            ScreenGui.Enabled = not ScreenGui.Enabled
+        end
+    end)
+
+    local minimized = false
+    local oldSize = Main.Size
 
     MinimizeButton.MouseButton1Click:Connect(function()
         ScreenGui.Enabled = false
