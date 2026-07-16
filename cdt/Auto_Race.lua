@@ -1,353 +1,290 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+task.wait(10)
 
-local RaceData = ReplicatedStorage:WaitForChild("Data"):WaitForChild("Races")
-
-local function GetRaceLocations()
-    local races = {}
-
-    for _, raceFolder in ipairs(RaceData:GetChildren()) do
-        local flagPos = raceFolder:FindFirstChild("FlagPosition")
-
-        if flagPos and flagPos.Value then
-            table.insert(races, {
-                Name = raceFolder.Name,
-                Position = flagPos.Value,
-            })
-        end
-    end
-
-    return races
-end
-
-local raceLocations = GetRaceLocations()
-
-for _, race in ipairs(raceLocations) do
-    print(race.Name, race.Position)
-end
-
-
-
-
-
-
-
-
-
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local ModuleScript = require(ReplicatedStorage:WaitForChild("ModuleScript"))
-
-local LocalPlayer = Players.LocalPlayer
-local RaceData = ReplicatedStorage:WaitForChild("Data"):WaitForChild("Races")
-
-local RACE_NAME = "YourRaceName"
-
-local function TeleportToRace(raceName)
-    local raceFolder = RaceData:FindFirstChild(raceName)
-
-    if not raceFolder then
-        warn(("Race '%s' not found."):format(raceName))
-        return false
-    end
-
-    local flagPos = raceFolder:FindFirstChild("FlagPosition")
-
-    if not flagPos or not flagPos.Value then
-        warn(("Race '%s' has no FlagPosition."):format(raceName))
-        return false
-    end
-
-    ModuleScript.resetGravity()
-    ModuleScript.teleportPlayerToPosition(LocalPlayer, CFrame.new(flagPos.Value))
-
-    return true
-end
-
-TeleportToRace(RACE_NAME)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+print("[AutoRace] Script started")
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RacesGui = LocalPlayer.PlayerGui:WaitForChild("Races")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RaceData = ReplicatedStorage:WaitForChild("Data"):WaitForChild("Races")
 
-_G.AutoRace = _G.AutoRace or false
-
-local Running = false
+_G.AutoRace = true
+print("[AutoRace] Enabled")
 
 local function TeleportToRace(raceName)
-    local raceFolder = RaceData:FindFirstChild(raceName)
+    print("[Teleport] Requested:", raceName)
 
+    local raceFolder = RaceData:FindFirstChild(raceName)
     if not raceFolder then
+        print("[Teleport] Race folder not found")
         return
     end
 
     local flagPos = raceFolder:FindFirstChild("FlagPosition")
-
-    if not flagPos or not flagPos.Value then
+    if not flagPos then
+        print("[Teleport] FlagPosition not found")
         return
     end
 
     local playerCar
 
-    for _, v in pairs(workspace.Cars:GetChildren()) do
-        if v:FindFirstChild("Stats") and v.Stats:FindFirstChild("Owner") then
-            if v.Stats.Owner.Value == LocalPlayer.Name then
-                playerCar = v
+    repeat
+        print("[Teleport] Looking for player car...")
+
+        for _, car in ipairs(workspace.Cars:GetChildren()) do
+            local stats = car:FindFirstChild("Stats")
+            local owner = stats and stats:FindFirstChild("Owner")
+
+            if owner and owner.Value == LocalPlayer.Name and car.PrimaryPart then
+                playerCar = car
+                print("[Teleport] Found car:", car.Name)
                 break
             end
         end
-    end
 
-    print(flagPos.Value)
+        if not playerCar then
+            task.wait(0.2)
+        end
+    until playerCar or not _G.AutoRace
 
-    if playerCar and playerCar.PrimaryPart then
+    if playerCar then
+        print("[Teleport] Teleporting")
         playerCar:SetPrimaryPartCFrame(CFrame.new(flagPos.Value))
+        task.wait(1)
     end
-
-    task.wait(1)
 end
 
 local function FindRaceGuiFromVariant(variantName)
+    print("[FindRaceGui] Searching:", variantName)
+
     for _, raceGui in ipairs(RacesGui:GetChildren()) do
         if raceGui:IsA("BillboardGui") then
             local lobby = raceGui:FindFirstChild("Frame") and raceGui.Frame:FindFirstChild("Lobby")
 
             if lobby and lobby:FindFirstChild("VoteLaps" .. variantName) then
+                print("[FindRaceGui] Found:", raceGui.Name)
                 return raceGui, "VoteLaps" .. variantName
             end
         end
     end
 
     if RacesGui:FindFirstChild(variantName) then
+        print("[FindRaceGui] Found direct:", variantName)
         return RacesGui[variantName], "Vote"
     end
+
+    print("[FindRaceGui] Not found")
 end
 
 local function WaitForValue(value, expected)
+    print("[WaitForValue]", value.Name, value.Value, "->", expected)
+
     repeat
         task.wait(0.1)
     until value.Value == expected or not _G.AutoRace
+
+    print("[WaitForValue] Done:", value.Name, value.Value)
 end
 
-local function WaitForVisible(guiObject)
+local function WaitForVisible(gui)
+    print("[WaitForVisible]", gui.Name)
+
     repeat
         task.wait(0.1)
-    until guiObject.Visible or not _G.AutoRace
+    until gui.Visible or not _G.AutoRace
+
+    print("[WaitForVisible] Visible:", gui.Name)
 end
 
 local function IsRaceActive()
-    local RaceValues = LocalPlayer.PlayerGui.Menu.RaceValues
-
-    return RaceValues.Racing.Value ~= ""
+    return LocalPlayer.PlayerGui.Menu.RaceValues.Racing.Value ~= ""
 end
 
 local function AutoCompleteRace()
-    local RaceValues = LocalPlayer.PlayerGui.Menu.RaceValues
+    print("[AutoComplete] Waiting for race")
 
-    local activeRaceName = RaceValues.Racing.Value
+    local RaceValues = LocalPlayer.PlayerGui.Menu.RaceValues
 
     repeat
         task.wait(0.1)
-        activeRaceName = RaceValues.Racing.Value
-    until activeRaceName ~= "" or not _G.AutoRace
+    until RaceValues.Racing.Value ~= "" or not _G.AutoRace
 
-    if not _G.AutoRace then
-        return
-    end
+    if not _G.AutoRace then return end
+
+    local raceName = RaceValues.Racing.Value
+    print("[AutoComplete] Race:", raceName)
 
     local activeRace
 
     for _, race in ipairs(workspace.Races:GetChildren()) do
-        if race.Name == activeRaceName then
-            activeRace = race
-            break
-        end
-
-        if race:FindFirstChild(activeRaceName) then
+        if race.Name == raceName or race:FindFirstChild(raceName) then
             activeRace = race
             break
         end
     end
 
     if not activeRace then
+        print("[AutoComplete] Active race not found")
         return
     end
 
-    local scriptFolder = activeRace:WaitForChild("Script")
+    local scriptFolder = activeRace.Script
+    local checkpointRemote = scriptFolder.Checkpoint
+    local finishRemote = scriptFolder.Finish
 
-    local checkpointRemote = scriptFolder:WaitForChild("Checkpoint")
-    local finishRemote = scriptFolder:WaitForChild("Finish")
+    local checkpoints = activeRace:FindFirstChild("Checkpoints")
 
-    local checkpointsFolder = activeRace:FindFirstChild("Checkpoints")
+    if not checkpoints then
+        local variant = activeRace:FindFirstChild(raceName)
 
-    if not checkpointsFolder then
-        local variantFolder = activeRace:FindFirstChild(activeRaceName)
-
-        if variantFolder then
-            checkpointsFolder = variantFolder:FindFirstChild("Checkpoints")
+        if variant then
+            checkpoints = variant:FindFirstChild("Checkpoints")
         end
     end
 
-    if not checkpointsFolder then
+    if not checkpoints then
+        print("[AutoComplete] No checkpoints")
         return
     end
 
-    local checkpointCount = #checkpointsFolder:GetChildren()
-    local laps = scriptFolder.Laps.Value
+    local checkpointCount = #checkpoints:GetChildren()
 
-    for checkpoint = 1, checkpointCount do
-        if not _G.AutoRace then
-            return
-        end
+    print("[AutoComplete] Checkpoints:", checkpointCount)
+    print("[AutoComplete] Laps:", scriptFolder.Laps.Value)
 
-        checkpointRemote:FireServer(checkpoint)
+    for i = 1, checkpointCount do
+        if not _G.AutoRace then return end
 
-        print(checkpoint)
-
+        print("[AutoComplete] Checkpoint", i)
+        checkpointRemote:FireServer(i)
         task.wait(0.1)
     end
 
-    for lap = 2, laps do
-        if not _G.AutoRace then
-            return
-        end
-
+    for lap = 2, scriptFolder.Laps.Value do
         checkpointRemote:FireServer(0)
-
-        print("0")
-
         task.wait(0.1)
 
-        for checkpoint = 1, checkpointCount do
-            if not _G.AutoRace then
-                return
-            end
-
-            checkpointRemote:FireServer(checkpoint)
-
-            print(checkpoint)
-
+        for i = 1, checkpointCount do
+            checkpointRemote:FireServer(i)
             task.wait(0.1)
         end
     end
 
+    print("[AutoComplete] Finish")
     finishRemote:FireServer()
-
-    print("finish")
 end
 
 local function StartRace(variantName)
-    local raceGui, voteLapsName = FindRaceGuiFromVariant(variantName)
+    while _G.AutoRace do
+        print("[StartRace] New loop")
 
-    if not raceGui then
-        return
-    end
+        local raceGui, voteName = FindRaceGuiFromVariant(variantName)
 
-    local raceName = raceGui.Name
+        if not raceGui then
+            print("[StartRace] No race GUI")
+            task.wait(1)
+            continue
+        end
 
-    if IsRaceActive() then
+        local raceName = raceGui.Name
+        print("[StartRace] Race:", raceName)
+
+        if IsRaceActive() then
+            print("[StartRace] Already racing")
+
+            TeleportToRace(raceName)
+
+            repeat
+                task.wait(1)
+            until not IsRaceActive() or not _G.AutoRace
+
+            print("[StartRace] Previous race finished")
+        end
+
+        if not _G.AutoRace then break end
 
         TeleportToRace(raceName)
 
-        repeat
+        local race = workspace.Races:FindFirstChild(raceName)
+
+        if not race then
+            print("[StartRace] Workspace race missing")
             task.wait(1)
-        until not IsRaceActive() or not _G.AutoRace
+            continue
+        end
 
-    end
+        print("[StartRace] Race found")
 
-    if not _G.AutoRace then
-        return
-    end
+        local scriptFolder = race.Script
+        local voteRemote = scriptFolder.Vote
 
-    TeleportToRace(raceName)
+        task.wait(1)
 
-    local race = workspace.Races:FindFirstChild(raceName)
+        print("[StartRace] LobbyProgress:", scriptFolder.LobbyProgress.Value)
 
-    if not race then
-        return
-    end
+        if not scriptFolder.LobbyProgress.Value then
+            print("[StartRace] Starting lobby")
+            workspace.Races.RaceHandler.StartLobby:FireServer(raceName)
+        end
 
-    local scriptFolder = race:WaitForChild("Script")
-    local voteRemote = scriptFolder:WaitForChild("Vote")
+        WaitForValue(scriptFolder.LobbyProgress, true)
 
-    local raceHandler = workspace.Races.RaceHandler
+        local lobby = raceGui.Frame.Lobby
 
-    if scriptFolder.LobbyProgress.Value == false then
-        raceHandler.StartLobby:FireServer(raceName)
-    end
+        if lobby:FindFirstChild("VoteRace") and lobby.VoteRace.Visible then
+            print("[StartRace] Voting race")
+            voteRemote:FireServer("5", "VoteRace")
+            task.wait(0.2)
+        end
 
-    WaitForValue(scriptFolder:WaitForChild("LobbyProgress"), true)
+        local lapsButton = lobby:WaitForChild(voteName)
 
-    local lobby = raceGui.Frame.Lobby
+        if not lapsButton.Visible then
+            WaitForVisible(lapsButton)
+        end
 
-    local voteRace = lobby:FindFirstChild("VoteRace")
+        if not _G.AutoRace then return end
 
-    if voteRace and voteRace.Visible then
-        voteRemote:FireServer("5", "VoteRace")
+        print("[StartRace] Voting laps")
+        voteRemote:FireServer("5", voteName)
 
-        task.wait(0.2)
-    end
+        print("[StartRace] Waiting for race start")
+        WaitForValue(scriptFolder.RaceProgress, true)
 
-    local lapsButton = lobby:WaitForChild(voteLapsName)
+        print("[StartRace] Race started")
 
-    if not lapsButton.Visible then
-        WaitForVisible(lapsButton)
-    end
-
-    if not _G.AutoRace then
-        return
-    end
-
-    voteRemote:FireServer("5", voteLapsName)
-
-    WaitForValue(scriptFolder:WaitForChild("RaceProgress"), true)
-
-    if _G.AutoRace then
         AutoCompleteRace()
+
+        print("[StartRace] Race finished")
     end
 end
 
-local function Loop()
-    if Running then
-        return
-    end
+print("[Intro] Choosing dealership")
+local chooseButton = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("Intro"):WaitForChild("ChooseDealership"):WaitForChild("ScrollingFrame"):WaitForChild("Dealership1"):WaitForChild("Choose")
+firesignal(chooseButton.Activated)
 
-    Running = true
+task.wait(1)
 
-    while _G.AutoRace do
-        StartRace("Highway")
+print("[Intro] Waiting for load")
+local loadButton = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("Intro"):WaitForChild("SelectScreen"):WaitForChild("Claim")
 
-        task.wait(2)
-    end
-
-    Running = false
+while loadButton.Parent.Visible do
+    print("[Intro] Clicking Claim")
+    firesignal(loadButton.Activated)
+    task.wait(1)
 end
 
-_G.StartAutoRace = function()
-    _G.AutoRace = true
+print("[Intro] Loaded")
 
-    Loop()
-end
+print("[Spawn] Getting Fiat ID")
+local fiatId = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("Menu"):WaitForChild("Inventory"):WaitForChild("Cars"):WaitForChild("Frame"):WaitForChild("Frame"):WaitForChild("Fiat"):GetAttribute("Id")
 
-_G.StopAutoRace = function()
-    _G.AutoRace = false
-end
+print("[Spawn] Fiat ID:", fiatId)
+print("[Spawn] Spawning Fiat")
 
-_G.StartAutoRace()
+ReplicatedStorage.Remotes.Spawn:FireServer("Fiat", fiatId, "Desktop")
+
+print("[AutoRace] Starting")
+
+_G.AutoRace = true
+StartRace("Highway")
