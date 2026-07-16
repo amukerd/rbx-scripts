@@ -299,11 +299,100 @@ function Library:CreateWindow(title)
         end)
     end
 
+    local Settings = {
+        HideKey = Enum.KeyCode.RightShift
+    }
+    
+    local ConfigFile = "KerdUI_Config.json"
+    
+    local function saveConfig()
+        if writefile then
+            writefile(ConfigFile, game:GetService("HttpService"):JSONEncode({
+                HideKey = Settings.HideKey.Name
+            }))
+        end
+    end
+    
+    local function loadConfig()
+        if readfile and isfile and isfile(ConfigFile) then
+            local data = game:GetService("HttpService"):JSONDecode(readfile(ConfigFile))
+    
+            if data.HideKey and Enum.KeyCode[data.HideKey] then
+                Settings.HideKey = Enum.KeyCode[data.HideKey]
+            end
+        end
+    end
+    
+    loadConfig()
+
     local minimized = false
     local oldSize = Main.Size
 
     SettingsButton.MouseButton1Click:Connect(function()
-        print("Settings clicked")
+        local SettingsFrame = create("Frame", {
+            Name = "Settings",
+            Size = UDim2.new(0, 300, 0, 220),
+            Position = UDim2.new(0.5, -150, 0.5, -110),
+            BackgroundColor3 = Theme.Secondary,
+            ZIndex = 50,
+            Parent = ScreenGui,
+        }, {corner(8)})
+    
+    
+        create("TextLabel", {
+            Size = UDim2.new(1, 0, 0, 40),
+            BackgroundTransparency = 1,
+            Text = "Settings",
+            TextColor3 = Theme.Text,
+            Font = Enum.Font.GothamBold,
+            TextSize = 16,
+            Parent = SettingsFrame,
+        })
+    
+    
+        local KeyButton = create("TextButton", {
+            Size = UDim2.new(1, -20, 0, 35),
+            Position = UDim2.new(0, 10, 0, 50),
+            BackgroundColor3 = Theme.Background,
+            Text = "Hide Key: "..Settings.HideKey.Name,
+            TextColor3 = Theme.Text,
+            Font = Enum.Font.Gotham,
+            TextSize = 14,
+            Parent = SettingsFrame,
+        }, {corner(6)})
+    
+    
+        KeyButton.MouseButton1Click:Connect(function()
+            KeyButton.Text = "Press a key..."
+    
+            local conn
+            conn = UserInputService.InputBegan:Connect(function(input)
+    
+                if input.KeyCode ~= Enum.KeyCode.Unknown then
+                    Settings.HideKey = input.KeyCode
+    
+                    KeyButton.Text = "Hide Key: "..input.KeyCode.Name
+    
+                    saveConfig()
+    
+                    conn:Disconnect()
+                end
+    
+            end)
+        end)
+    
+    
+        create("TextLabel", {
+            Size = UDim2.new(1, -20, 0, 80),
+            Position = UDim2.new(0, 10, 0, 100),
+            BackgroundTransparency = 1,
+            Text = "KerdUI\n\nCreated by Amukerd",
+            TextColor3 = Theme.SubText,
+            Font = Enum.Font.Gotham,
+            TextSize = 13,
+            Parent = SettingsFrame,
+        })
+    
     end)
 
     MinimizeButton.MouseButton1Click:Connect(function()
@@ -1058,6 +1147,14 @@ function Library:CreateWindow(title)
     end
 
     return Window
+
+    UserInputService.InputBegan:Connect(function(input, processed)
+        if processed then return end
+    
+        if input.KeyCode == Settings.HideKey then
+            ScreenGui.Enabled = not ScreenGui.Enabled
+        end
+    end)
 end
 
 return Library
