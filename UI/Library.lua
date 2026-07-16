@@ -141,7 +141,7 @@ function Library:CreateWindow(title)
         Position = UDim2.new(0.5, -340, 0.5, -240),
         BackgroundColor3 = Theme.Background,
         BorderSizePixel = 0,
-        ClipsDescendants = true,
+        ClipsDescendants = false,
         Parent = ScreenGui,
     }, { corner(10) })
 
@@ -740,18 +740,6 @@ function Library:CreateWindow(title)
             end
 
             ToggleButton.MouseButton1Click:Connect(function()
-                print("Dropdown clicked")
-            
-                if open then
-                    print("closing")
-                    closeDropdown()
-                else
-                    print("opening")
-                    openDropdown()
-                end
-            end)
-[[
-            ToggleButton.MouseButton1Click:Connect(function()
                 if open then
                     closeDropdown()
             
@@ -773,7 +761,7 @@ function Library:CreateWindow(title)
                     }
                 end
             end)
-]]
+
             local resizeConn = Main:GetPropertyChangedSignal("AbsoluteSize"):Connect(refreshPanelHeight)
             
             Holder.Destroying:Connect(function()
