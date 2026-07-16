@@ -242,6 +242,68 @@ function Library:CreateWindow(title)
         Connections = {},
     }, { __index = {} })
 
+    function Window:SetGlobal(name, value)
+        _G[name] = value
+    
+        self.GlobalVariables[name] = true
+    
+        return value
+    end
+
+    function Window:Connect(signal, callback)
+        local connection = signal:Connect(callback)
+    
+        table.insert(self.Connections, connection)
+    
+        return connection
+    end
+
+    function Window:CreateTask(name, callback)
+        local running = true
+    
+        task.spawn(function()
+            callback(function()
+                return running
+            end)
+        end)
+    
+        self:AddUnloadCallback(function()
+            running = false
+        end)
+    
+        return function()
+            running = false
+        end
+    end
+
+    function Window:Unload()
+        for _, callback in ipairs(self.UnloadCallbacks) do
+            pcall(callback)
+        end
+    
+        self.UnloadCallbacks = {}
+    
+        for name in pairs(self.GlobalVariables) do
+            _G[name] = nil
+        end
+    
+        self.GlobalVariables = {}
+    
+        for _, connection in ipairs(self.Connections) do
+            if connection.Connected then
+                connection:Disconnect()
+            end
+        end
+    
+        self.Connections = {}
+    
+        if self.ScreenGui then
+            self.ScreenGui:Destroy()
+        end
+    end
+
+    -- ===== Tab creation ===== --
+    
     local ButtonHolder = create("Frame", {
         Name = "TopButtons",
         Size = UDim2.new(0, 100, 1, 0),
@@ -516,68 +578,7 @@ function Library:CreateWindow(title)
     CloseButton.MouseButton1Click:Connect(function()
         Window:Unload()
     end)
-
-    function Window:SetGlobal(name, value)
-        _G[name] = value
     
-        self.GlobalVariables[name] = true
-    
-        return value
-    end
-
-    function Window:Connect(signal, callback)
-        local connection = signal:Connect(callback)
-    
-        table.insert(self.Connections, connection)
-    
-        return connection
-    end
-
-    function Window:CreateTask(name, callback)
-        local running = true
-    
-        task.spawn(function()
-            callback(function()
-                return running
-            end)
-        end)
-    
-        self:AddUnloadCallback(function()
-            running = false
-        end)
-    
-        return function()
-            running = false
-        end
-    end
-
-    function Window:Unload()
-        for _, callback in ipairs(self.UnloadCallbacks) do
-            pcall(callback)
-        end
-    
-        self.UnloadCallbacks = {}
-    
-        for name in pairs(self.GlobalVariables) do
-            _G[name] = nil
-        end
-    
-        self.GlobalVariables = {}
-    
-        for _, connection in ipairs(self.Connections) do
-            if connection.Connected then
-                connection:Disconnect()
-            end
-        end
-    
-        self.Connections = {}
-    
-        if self.ScreenGui then
-            self.ScreenGui:Destroy()
-        end
-    end
-
-    -- ===== Tab creation ===== --
     function Window:CreateTab(name)
         local TabButton = create("TextButton", {
             Name = name .. "TabButton",
