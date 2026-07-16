@@ -325,6 +325,8 @@ function Library:CreateWindow(title)
     
     loadConfig()
 
+    -- ===== Settings UI ===== --
+
     local SettingsSection = create("Frame", {
         Name = "SettingsSection",
         Size = UDim2.new(1, -140, 1, -40),
@@ -333,6 +335,81 @@ function Library:CreateWindow(title)
         Visible = false,
         Parent = Main,
     }, { corner(10) })
+    
+    local SettingsLayout = create("UIListLayout", {
+        Padding = UDim.new(0, 10),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Parent = SettingsSection,
+    })
+    
+    create("UIPadding", {
+        PaddingTop = UDim.new(0, 15),
+        PaddingLeft = UDim.new(0, 15),
+        PaddingRight = UDim.new(0, 15),
+        Parent = SettingsSection,
+    })
+    
+    
+    local function createSettingsButton(text)
+        local Button = create("TextButton", {
+            Size = UDim2.new(1, 0, 0, 40),
+            BackgroundColor3 = Theme.Secondary,
+            AutoButtonColor = false,
+            Text = text,
+            TextColor3 = Theme.Text,
+            Font = Enum.Font.Gotham,
+            TextSize = 14,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = SettingsSection,
+        }, { corner(6) })
+    
+        create("UIPadding", {
+            PaddingLeft = UDim.new(0, 12),
+            Parent = Button,
+        })
+    
+        return Button
+    end
+        
+    local KeyButton = createSettingsButton(
+        "Hide Key: " .. Settings.HideKey.Name
+    )
+    
+    
+    KeyButton.MouseButton1Click:Connect(function()
+        Settings.HideKey = Enum.KeyCode.RightShift
+        KeyButton.Text = "Hide Key: " .. Settings.HideKey.Name
+        saveConfig()
+    end)
+
+    local Credits = create("Frame", {
+        Size = UDim2.new(1, 0, 0, 120),
+        BackgroundColor3 = Theme.Background,
+        Parent = SettingsSection,
+    }, { corner(8) })
+    
+    
+    create("UIStroke", {
+        Color = Theme.Border,
+        Thickness = 1,
+        Parent = Credits,
+    })
+    
+    create("TextLabel", {
+        Size = UDim2.new(1, -20, 1, -20),
+        Position = UDim2.new(0, 10, 0, 10),
+        BackgroundTransparency = 1,
+        Text =
+            "KerdHub\n\n" ..
+            "Created by Kerd"
+        TextColor3 = Theme.Text,
+        Font = Enum.Font.Gotham,
+        TextSize = 14,
+        TextWrapped = true,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Top,
+        Parent = Credits,
+    })
 
     local settingsOpen = false
     local lastTab
