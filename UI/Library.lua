@@ -242,7 +242,15 @@ function Library:CreateWindow(title)
         Connections = {},
     }, { __index = {} })
 
-        local ButtonHolder = create("Frame", {
+    UserInputService.InputBegan:Connect(function(input, processed)
+        if processed then return end
+    
+        if input.KeyCode == Settings.HideKey then
+            ScreenGui.Enabled = not ScreenGui.Enabled
+        end
+    end)
+
+    local ButtonHolder = create("Frame", {
         Name = "TopButtons",
         Size = UDim2.new(0, 100, 1, 0),
         Position = UDim2.new(1, -110, 0, 0),
@@ -1148,13 +1156,6 @@ function Library:CreateWindow(title)
 
     return Window
 
-    UserInputService.InputBegan:Connect(function(input, processed)
-        if processed then return end
-    
-        if input.KeyCode == Settings.HideKey then
-            ScreenGui.Enabled = not ScreenGui.Enabled
-        end
-    end)
 end
 
 return Library
