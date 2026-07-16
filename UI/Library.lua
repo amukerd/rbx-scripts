@@ -315,10 +315,14 @@ function Library:CreateWindow(title)
     
     local function loadConfig()
         if readfile and isfile and isfile(ConfigFile) then
-            local data = game:GetService("HttpService"):JSONDecode(readfile(ConfigFile))
+            local success, data = pcall(function()
+                return game:GetService("HttpService"):JSONDecode(readfile(ConfigFile))
+            end)
     
-            if data.HideKey and Enum.KeyCode[data.HideKey] then
-                Settings.HideKey = Enum.KeyCode[data.HideKey]
+            if success and data then
+                if data.HideKey and Enum.KeyCode[data.HideKey] then
+                    Settings.HideKey = Enum.KeyCode[data.HideKey]
+                end
             end
         end
     end
@@ -375,11 +379,25 @@ function Library:CreateWindow(title)
         "Hide Key: " .. Settings.HideKey.Name
     )
     
+    local waitingForKey = false
     
     KeyButton.MouseButton1Click:Connect(function()
-        Settings.HideKey = Enum.KeyCode.RightShift
-        KeyButton.Text = "Hide Key: " .. Settings.HideKey.Name
-        saveConfig()
+        KeyButton.Text = "Press a key..."
+        waitingForKey = true
+    end)
+    
+    UserInputService.InputBegan:Connect(function(input)
+        if waitingForKey and input.KeyCode ~= Enum.KeyCode.Unknown then
+            Settings.HideKey = input.KeyCode
+            KeyButton.Text = "Hide Key: " .. Settings.HideKey.Name
+            waitingForKey = false
+            saveConfig()
+            return
+        end
+    
+        if input.KeyCode == Settings.HideKey then
+            ScreenGui.Enabled = not ScreenGui.Enabled
+        end
     end)
 
     local Credits = create("Frame", {
@@ -401,7 +419,7 @@ function Library:CreateWindow(title)
         BackgroundTransparency = 1,
         Text =
             "KerdHub\n\n" ..
-            "Created by Kerd"
+            "Created by Kerd",
         TextColor3 = Theme.Text,
         Font = Enum.Font.Gotham,
         TextSize = 14,
@@ -441,6 +459,10 @@ function Library:CreateWindow(title)
     
             if lastTab then
                 lastTab.Section.Visible = true
+                tween(lastTab.Button, {
+                    BackgroundColor3 = Theme.Accent,
+                    TextColor3 = Theme.Text
+                }, 0.12)
             end
     
             tween(SettingsButton, {
@@ -449,7 +471,7 @@ function Library:CreateWindow(title)
         end
     end)
 
-    UserInputService.InputBegan:Connect(function(input, processed)
+    Window:Connect(UserInputService.InputBegan, function(input, processed)
         if processed then return end
     
         if input.KeyCode == Settings.HideKey then
