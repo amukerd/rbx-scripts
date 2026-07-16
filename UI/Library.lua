@@ -279,7 +279,7 @@ function Library:CreateWindow(title)
     local MinimizeButton = createTopButton("Minimize", "−")
     MinimizeButton.LayoutOrder = 2
 
-    local HideButton = createTopButton("Hide", "_")
+    local HideButton = createTopButton("Hide", "☐")
     HideButton.LayoutOrder = 3
     
     local CloseButton = createTopButton("Close", "×")
