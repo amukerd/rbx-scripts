@@ -53,6 +53,8 @@ ws.OnMessage:Connect(
 if game.PlaceId == LOBBY_ID then
     task.wait(2)
 
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Buy"):FireServer("Hennessey6")
+
     send(
         {
             type = "requestServer",
