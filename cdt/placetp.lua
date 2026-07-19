@@ -87,3 +87,7 @@ if game.PlaceId == GAME_ID then
 
     loadstring(game:HttpGet("https://amukerd.github.io/rbx-scripts/cdt/Main.lua"))()
 end
+
+local gameSettings = UserSettings():GetService("UserGameSettings")
+gameSettings.MasterVolume = 0
+settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
