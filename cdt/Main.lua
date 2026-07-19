@@ -91,7 +91,7 @@ aVars.SoundService:ClearAllChildren()
 aVars.Lighting:ClearAllChildren()
 aVars.Lighting.GlobalShadows = false
 aVars.RunService:Set3dRenderingEnabled(false)
-setfpscap(15)
+setfpscap(10)
 
 task.spawn(function()
     while true do
