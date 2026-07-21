@@ -362,6 +362,7 @@ aVars.OnOfferAddedEvent.OnClientEvent:Connect(function(player, offerData)
 end)
 
 aVars.OnOfferRemovedEvent.OnClientEvent:Connect(function(player, offerId)
+    print("Offer Sold: " .. offerId)
     if player ~= aVars.LocalPlayer then
         return
     end
