@@ -310,31 +310,33 @@ aVars.OnOfferAddedEvent.OnClientEvent:Connect(function(targetPlayer, offerTable)
 end)
 
 --- auto sell function ---
-for _, car in ipairs(aVars.GetOwnedCarsRemote:InvokeServer()) do
-    if aVars.BlacklistedCars[car.Name] then
-        print("Skipped " .. car.Name)
-        continue
-    end
-
-    if aVars.TradingUtil.CanTradeCar(aVars.LocalPlayer, car) then
-        local success, rap = pcall(function()
-            return aVars.GetRapRemote:InvokeServer(car.Name)
-        end)
-
-        if success and rap then
-            rap = tonumber(rap) or 0
-
-            if rap > aVars.AutoSell.MinRap and rap < aVars.AutoSell.MaxRap then
-                local listed, err = pcall(function()
-                    return aVars.OfferAddRemote:InvokeServer({
-                        Type = "Car",
-                        Name = car.Name,
-                        Id = car.Id
-                    }, rap)
-                end)
-
-                if listed then
-                    print("Listed", car.Name)
+local function listCars()
+    for _, car in ipairs(aVars.GetOwnedCarsRemote:InvokeServer()) do
+        if aVars.BlacklistedCars[car.Name] then
+            print("Skipped " .. car.Name)
+            continue
+        end
+    
+        if aVars.TradingUtil.CanTradeCar(aVars.LocalPlayer, car) then
+            local success, rap = pcall(function()
+                return aVars.GetRapRemote:InvokeServer(car.Name)
+            end)
+    
+            if success and rap then
+                rap = tonumber(rap) or 0
+    
+                if rap > aVars.AutoSell.MinRap and rap < aVars.AutoSell.MaxRap then
+                    local listed, err = pcall(function()
+                        return aVars.OfferAddRemote:InvokeServer({
+                            Type = "Car",
+                            Name = car.Name,
+                            Id = car.Id
+                        }, rap)
+                    end)
+    
+                    if listed then
+                        print("Listed", car.Name)
+                    end
                 end
             end
         end
