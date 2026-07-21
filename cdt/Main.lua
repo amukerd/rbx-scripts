@@ -310,7 +310,7 @@ aVars.OnOfferAddedEvent.OnClientEvent:Connect(function(targetPlayer, offerTable)
 end)
 
 --- auto sell function ---
-for _, car in ipairs(ownedCars) do
+for _, car in ipairs(aVars.GetOwnedCarsRemote:InvokeServer()) do
     if aVars.BlacklistedCars[car.Name] then
         print("Skipped " .. car.Name)
         continue
