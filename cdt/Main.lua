@@ -342,6 +342,7 @@ local function listCars()
         end
     end
 end
+listCars()
 
 --- auto sell client events ---
 
@@ -390,8 +391,6 @@ end)
 --- auto sell main loop ---
 
 task.spawn(function()
-    listCars()
-
     while true do
         task.wait(aVars.AutoSell.RefreshingListingsTime)
         print("Refreshing cars")
