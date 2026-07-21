@@ -312,6 +312,7 @@ end)
 --- auto sell function ---
 for _, car in ipairs(ownedCars) do
     if aVars.BlacklistedCars[car.Name] then
+        print("Skipped " .. car.Name)
         continue
     end
 
