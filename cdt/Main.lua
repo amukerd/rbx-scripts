@@ -17,6 +17,7 @@ aVars.TeleportService = game:GetService("TeleportService")
 aVars.SoundService = game:GetService("SoundService")
 aVars.Lighting = game:GetService("Lighting")
 aVars.Workspace = game:GetService("Workspace")
+aVars.GameSettings = UserSettings():GetService("UserGameSettings")
 aVars.WebhookURL = "https://discord.com/api/webhooks/1480676513668923627/c-7JOdimxEYnh3Ol2DNcCuzHyPaCrZ015TTlDnGL3aM7Rg42zRJZhFSAc3qmqNK8t51I"
 aVars.CheckInWebhookURL = "https://discord.com/api/webhooks/1524550847269310494/i8Y0VpiV3caDcLSMOBBGtBpF6RB2RjorTIAXBnn9_MRsZDf40vvbTF0ER5itdEUFfUBT"
 aVars.requestFunc = http_request or request or (http and http.request) or HttpPost
@@ -59,6 +60,9 @@ aVars.BoughtItems = {}
 aVars.PendingBuys = {}
 aVars.ProcessedBuyOffers = {}
 aVars.ListedOffers = {}
+aVars.BlacklistedCars = {
+    KTMOfficial1 = true,
+}
 
 --- antiafk ---
 aVars.LocalPlayer.Idled:Connect(function()
@@ -87,6 +91,8 @@ end
 task.wait(1)
 
 --- fps boosting ---
+aVars.GameSettings.MasterVolume = 0
+settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
 aVars.SoundService:ClearAllChildren()
 aVars.Lighting:ClearAllChildren()
 aVars.Lighting.GlobalShadows = false
@@ -304,29 +310,30 @@ aVars.OnOfferAddedEvent.OnClientEvent:Connect(function(targetPlayer, offerTable)
 end)
 
 --- auto sell function ---
-local function listCars()
-    local ownedCars = aVars.GetOwnedCarsRemote:InvokeServer()
+for _, car in ipairs(ownedCars) do
+    if aVars.BlacklistedCars[car.Name] then
+        continue
+    end
 
-    for _, car in ipairs(ownedCars) do
-        if aVars.TradingUtil.CanTradeCar(aVars.LocalPlayer, car) then
-            local success, rap = pcall(function()
-                return aVars.GetRapRemote:InvokeServer(car.Name)
-            end)
+    if aVars.TradingUtil.CanTradeCar(aVars.LocalPlayer, car) then
+        local success, rap = pcall(function()
+            return aVars.GetRapRemote:InvokeServer(car.Name)
+        end)
 
-            if success and rap then
-                rap = tonumber(rap) or 0
+        if success and rap then
+            rap = tonumber(rap) or 0
 
-                if rap > aVars.AutoSell.MinRap and rap < aVars.AutoSell.MaxRap then
-                    local listed, err = pcall(function()
-                        return aVars.OfferAddRemote:InvokeServer({
-                            Type = "Car",
-                            Name = car.Name,
-                            Id = car.Id
-                        }, rap)
-                    end)
-                    if listed then
-                        print("Listed", car.Name)
-                    end
+            if rap > aVars.AutoSell.MinRap and rap < aVars.AutoSell.MaxRap then
+                local listed, err = pcall(function()
+                    return aVars.OfferAddRemote:InvokeServer({
+                        Type = "Car",
+                        Name = car.Name,
+                        Id = car.Id
+                    }, rap)
+                end)
+
+                if listed then
+                    print("Listed", car.Name)
                 end
             end
         end
