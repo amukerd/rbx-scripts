@@ -61,7 +61,7 @@ aVars.PendingBuys = {}
 aVars.ProcessedBuyOffers = {}
 aVars.ListedOffers = {}
 aVars.BlacklistedCars = {
-    KTMOfficial1 = true,
+--  KTMOfficial1 = true,
 }
 
 --- antiafk ---
